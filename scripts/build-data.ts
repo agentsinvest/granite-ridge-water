@@ -114,7 +114,7 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
     } else if ((m = rel.match(/^bills\/(meter-\d+)\/(\d{4}-\d{2})\.md$/))) {
       const bill = check(S.billSchema, fm, file, text)
       if (bill.meter !== m[1]) fail(file, keyLine(text, 'meter'), 'meter does not match folder')
-      if (bill.period_end.slice(0, 7) !== m[2]) fail(file, keyLine(text, 'period_end'), 'file name must be the month the period ends')
+      if (bill.period_end && bill.period_end.slice(0, 7) !== m[2]) fail(file, keyLine(text, 'period_end'), 'file name must be the month the period ends')
       const items = rows(firstTable(p, ['Line item', 'Amount'], file), S.billLineSchema, file)
       const notes = p.body.match(/^Notes:\s*(.*)$/m)?.[1] ?? ''
       out.bills.push({ id: rel.slice(0, -3), ...bill, lineItems: items.map((i) => ({ name: i['Line item'], amount: i.Amount })), notes })

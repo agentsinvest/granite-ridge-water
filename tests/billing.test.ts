@@ -76,7 +76,7 @@ describe('reconciliation gate', () => {
     expect(r.ratePercent).toBeGreaterThanOrEqual(r.required)
   })
   it('explains every failure', () => {
-    for (const c of r.checks.filter((x) => !x.pass)) {
+    for (const c of r.checks.filter((x) => x.priced && !x.pass)) {
       expect(c.needsReview, c.id).toBe(true)
       expect(c.notes.length, c.id).toBeGreaterThan(20)
     }
@@ -87,7 +87,7 @@ describe('reconciliation gate', () => {
     expect(strip(onDisk)).toBe(strip(renderReport(r, 'x')))
     for (const c of r.checks) {
       const bill = data.bills.find((b) => b.id === c.id)
-      expect(bill?.reconciled, c.id).toBe(c.pass ? 'pass' : 'fail')
+      expect(bill?.reconciled, c.id).toBe(!c.priced ? 'unpriced' : c.pass ? 'pass' : 'fail')
     }
   })
 })

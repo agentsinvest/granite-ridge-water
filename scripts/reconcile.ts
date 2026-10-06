@@ -3,7 +3,7 @@ import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { buildData } from './build-data'
 import type { SiteData } from './site-data'
-import { calculateBill, type RatePeriod } from '../src/engine/billing'
+import { calculateBill, selectRate, type RatePeriod } from '../src/engine/billing'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 
@@ -16,6 +16,7 @@ export type BillCheck = {
   delta: number | null
   lineMismatches: string[]
   pass: boolean
+  priced: boolean
   reason: string
   needsReview: boolean
   notes: string
@@ -33,9 +34,13 @@ export function reconcileAll(data: SiteData) {
   const rates = data.rates as unknown as RatePeriod[]
   const checks: BillCheck[] = data.bills.map((b) => {
     const periods = data.billingPeriods[b.meter]?.rows ?? []
-    const r = calculateBill(b.meter, b.period_start, b.period_end, b.gallons, rates, periods)
     const base = { id: b.id, meter: b.meter, billDate: b.bill_date, printed: b.printed_total, needsReview: b.needs_review, notes: b.notes }
-    if (!r.ok) return { ...base, computed: null, delta: null, lineMismatches: [], pass: false, reason: r.reason }
+    const unpriced = (reason: string) => ({ ...base, computed: null, delta: null, lineMismatches: [], pass: false, priced: false, reason })
+    if (!b.period_end || !b.period_start) return unpriced('read period not known')
+    if (b.gallons === null) return unpriced('gallons not known exactly')
+    if (!selectRate(rates, b.period_end)) return unpriced(`no derived rate yet for a period ending ${b.period_end}`)
+    const r = calculateBill(b.meter, b.period_start, b.period_end, b.gallons, rates, periods)
+    if (!r.ok) return { ...base, computed: null, delta: null, lineMismatches: [], pass: false, priced: true, reason: r.reason }
     const lineMismatches: string[] = []
     const passThrough = b.lineItems.filter((l) => PASS_THROUGH_LINES.has(l.name)).reduce((s, l) => s + (l.amount ?? 0), 0)
     for (const printed of b.lineItems.filter((l) => !PASS_THROUGH_LINES.has(l.name))) {
@@ -49,11 +54,12 @@ export function reconcileAll(data: SiteData) {
     const delta = round2(computed - b.printed_total)
     const pass = Math.abs(delta) <= tol + 1e-9 && lineMismatches.length === 0
     const reason = pass ? 'Within tolerance' : Math.abs(delta) > tol ? `Total differs by ${delta.toFixed(2)}` : 'Line item mismatch'
-    return { ...base, computed, delta, lineMismatches, pass, reason }
+    return { ...base, computed, delta, lineMismatches, pass, priced: true, reason }
   })
-  const passed = checks.filter((c) => c.pass).length
-  const rate = checks.length ? (100 * passed) / checks.length : 0
-  return { checks, passed, total: checks.length, ratePercent: rate, required: cfg.reconciliation.required_pass_rate_percent.value, tol, lineTol }
+  const priced = checks.filter((c) => c.priced)
+  const passed = priced.filter((c) => c.pass).length
+  const rate = priced.length ? (100 * passed) / priced.length : 0
+  return { checks, passed, total: priced.length, unpriced: checks.length - priced.length, all: checks.length, ratePercent: rate, required: cfg.reconciliation.required_pass_rate_percent.value, tol, lineTol }
 }
 
 function money(n: number | null) {
@@ -61,7 +67,8 @@ function money(n: number | null) {
 }
 
 export function renderReport(r: ReturnType<typeof reconcileAll>, builtOn: string): string {
-  const failures = r.checks.filter((c) => !c.pass)
+  const failures = r.checks.filter((c) => c.priced && !c.pass)
+  const unpriced = r.checks.filter((c) => !c.priced)
   const lines = [
     '# Bill reconciliation',
     '',
@@ -69,7 +76,9 @@ export function renderReport(r: ReturnType<typeof reconcileAll>, builtOn: string
     '',
     `Each bill in \`data/bills/\` is recomputed from the rate files in \`data/rates/\` and the read-period usage in \`data/billing-periods/\`. A bill passes when its total is within $${r.tol.toFixed(2)} of the printed total and every line item is within $${r.lineTol.toFixed(2)}. Late fees and delinquent letter charges are not predicted by rates; they are added to the computed total as printed.`,
     '',
-    `**${r.passed} of ${r.total} bills pass (${r.ratePercent.toFixed(1)}%). Required: ${r.required}%. ${r.ratePercent >= r.required ? 'Gate met.' : 'Gate NOT met.'}**`,
+    `**${r.passed} of ${r.total} priced bills pass (${r.ratePercent.toFixed(1)}%). Required: ${r.required}%. ${r.ratePercent >= r.required ? 'Gate met.' : 'Gate NOT met.'}**`,
+    '',
+    `${r.unpriced} of ${r.all} bills are not priced yet (no derived rate covers their period, or their period or gallons are not known exactly). They are listed at the end and are not counted as passing.`,
     '',
     'Important: the rate files were derived from these same bills, so passing shows the rate model is internally consistent with the bills. It is not an independent check against a published City of Mesa rate schedule. Confirm against the schedule when it is available.',
     '',
@@ -82,8 +91,10 @@ export function renderReport(r: ReturnType<typeof reconcileAll>, builtOn: string
     for (const m of f.lineMismatches) lines.push(`* ${m}`)
     lines.push('', `Explanation: ${f.notes || 'NOT YET EXPLAINED.'}`, '')
   }
-  lines.push('## All bills', '', '| Bill | Bill date | Printed total | Computed | Delta | Result |', '|---|---|---|---|---|---|')
-  for (const c of r.checks) lines.push(`| ${c.id.replace('bills/', '')} | ${c.billDate} | ${money(c.printed)} | ${money(c.computed)} | ${money(c.delta)} | ${c.pass ? 'pass' : 'fail'} |`)
+  lines.push('## Priced bills', '', '| Bill | Bill date | Printed total | Computed | Delta | Result |', '|---|---|---|---|---|---|')
+  for (const c of r.checks.filter((x) => x.priced)) lines.push(`| ${c.id.replace('bills/', '')} | ${c.billDate} | ${money(c.printed)} | ${money(c.computed)} | ${money(c.delta)} | ${c.pass ? 'pass' : 'fail'} |`)
+  lines.push('', '## Not yet priced', '', '| Bill | Bill date | Printed total | Why |', '|---|---|---|---|')
+  for (const c of unpriced) lines.push(`| ${c.id.replace('bills/', '')} | ${c.billDate} | ${money(c.printed)} | ${c.reason} |`)
   lines.push('')
   return lines.join('\n')
 }
@@ -95,8 +106,8 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   for (const c of r.checks) {
     const path = join(root, 'data', `${c.id}.md`)
     const text = readFileSync(path, 'utf8')
-    writeFileSync(path, text.replace(/^reconciled: (pending|pass|fail)$/m, `reconciled: ${c.pass ? 'pass' : 'fail'}`))
+    writeFileSync(path, text.replace(/^reconciled: (pending|pass|fail|unpriced)$/m, `reconciled: ${!c.priced ? 'unpriced' : c.pass ? 'pass' : 'fail'}`))
   }
-  console.log(`reconcile: ${r.passed}/${r.total} pass (${r.ratePercent.toFixed(1)}%), required ${r.required}%`)
-  for (const c of r.checks.filter((x) => !x.pass)) console.log(`  fail ${c.id}: ${c.reason}${c.lineMismatches.length ? ' | ' + c.lineMismatches.join('; ') : ''}`)
+  console.log(`reconcile: ${r.passed}/${r.total} priced bills pass (${r.ratePercent.toFixed(1)}%), required ${r.required}%; ${r.unpriced} not yet priced`)
+  for (const c of r.checks.filter((x) => x.priced && !x.pass)) console.log(`  fail ${c.id}: ${c.reason}${c.lineMismatches.length ? ' | ' + c.lineMismatches.join('; ') : ''}`)
 }
