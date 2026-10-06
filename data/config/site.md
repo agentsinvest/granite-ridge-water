@@ -42,6 +42,23 @@ post_2027_rate_assumption:
   label: "Years after 2027 assume 2027 City of Mesa rates stay the same. This is an assumption, not a published rate."
   source: "Build spec default, Phase 5"
   confidence: low
+experiment_check:
+  min_days_each_side:
+    value: 7
+    source: "Site setting chosen 2026-10-06: at least one full week of complete days before and after a change, so a single watering cycle cannot decide the result"
+    confidence: medium
+  min_hours_per_day:
+    value: 20
+    source: "Site setting chosen 2026-10-06: a day counts only when Waterfluence reported at least 20 of 24 hours (see data/usage/README.md on missing hours)"
+    confidence: medium
+  share_of_target_for_success:
+    value: 0.75
+    source: "Site setting chosen 2026-10-06: a change counts as working as expected when it delivers at least three-quarters of the expected cut, because weather is not yet adjusted for"
+    confidence: low
+  noise_percent:
+    value: 5
+    source: "Site setting chosen 2026-10-06: changes in average daily use smaller than 5% are treated as no clear change"
+    confidence: low
 ---
 
 # Site settings

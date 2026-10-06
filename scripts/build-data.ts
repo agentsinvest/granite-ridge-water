@@ -65,6 +65,10 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
     annualRainfall: [],
     investments: [],
     config: { site: {}, plantFactors: {} },
+    experiments: [],
+    options: [],
+    dataNeeds: [],
+    budgetCheck: null,
     openTodos: [],
   }
   for (const abs of walk(dataDir).sort()) {
@@ -130,6 +134,26 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
       }))
     } else if (rel.match(/^investments\/[^/]+\.md$/)) {
       out.investments.push({ id: rel.slice('investments/'.length, -3), ...check(S.investmentSchema, fm, file, text) })
+    } else if (rel.match(/^experiments\/[^/]+\.md$/)) {
+      const x = check(S.experimentSchema, fm, file, text)
+      if (`experiments/${x.id}.md` !== rel) fail(file, keyLine(text, 'id'), 'id does not match file name')
+      if (x.start && x.end && x.start > x.end) fail(file, keyLine(text, 'end'), 'ends before it starts')
+      if (x.status !== 'planned' && !x.start) fail(file, keyLine(text, 'start'), `a ${x.status} experiment needs a start date`)
+      out.experiments.push(x)
+    } else if (rel.match(/^options\/[^/]+\.md$/)) {
+      const o = check(S.optionSchema, fm, file, text)
+      if (`options/${o.id}.md` !== rel) fail(file, keyLine(text, 'id'), 'id does not match file name')
+      if (o.change.kind === 'turn_down' && o.change.percent === null) fail(file, keyLine(text, 'change'), 'turn_down needs a percent')
+      out.options.push(o)
+    } else if (rel === 'data-needs.md') {
+      check(S.dataNeedsFrontmatterSchema, fm, file, text)
+      out.dataNeeds = rows(firstTable(p, ['Priority', 'Need'], file), S.dataNeedRowSchema, file).map((r) => ({
+        priority: Number(r.Priority), need: r.Need, why: r['Why it matters'], unlocks: r['What it unlocks'], who: r['Who has it'], status: r.Status,
+      }))
+    } else if (rel === 'budget/annual-check.md') {
+      const f = check(S.budgetCheckFrontmatterSchema, fm, file, text)
+      const r = rows(firstTable(p, ['Scope', 'Measure'], file), S.budgetCheckRowSchema, file)
+      out.budgetCheck = { period: f.period, source: f.source, note: f.note, rows: r.map((x) => ({ scope: x.Scope, measure: x.Measure, low: x['Low kgal'], high: x['High kgal'], source: x.Source, confidence: x.Confidence })) }
     } else if (rel === 'config/site.md') {
       out.config.site = check(S.siteConfigSchema, fm, file, text)
     } else if (rel === 'config/plant-factors.md') {
@@ -147,6 +171,13 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
   if (!areaIds.has(out.map.streets.area)) fail('data/map.md', null, `unknown streets area "${out.map.streets.area}"`)
   for (const b of out.bills) if (!meterIds.has(b.meter)) fail(`data/${b.id}.md`, null, `unknown meter "${b.meter}"`)
   for (const f of out.flags) if (!meterIds.has(f.meter)) fail(`data/flags/${f.id}.md`, null, `unknown meter "${f.meter}"`)
+  const flagIds = new Set(out.flags.map((f) => f.id))
+  for (const x of out.experiments) {
+    if (!meterIds.has(x.meter)) fail(`data/experiments/${x.id}.md`, null, `unknown meter "${x.meter}"`)
+    for (const id of x.linked_flags ?? []) if (!flagIds.has(id)) fail(`data/experiments/${x.id}.md`, null, `unknown flag "${id}"`)
+  }
+  for (const o of out.options) for (const mid of o.meters) if (!meterIds.has(mid)) fail(`data/options/${o.id}.md`, null, `unknown meter "${mid}"`)
+  out.dataNeeds.sort((a, b) => a.priority - b.priority)
   out.rates.sort((a, b) => a.id.localeCompare(b.id))
   out.bills.sort((a, b) => a.id.localeCompare(b.id))
   out.meters.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }))

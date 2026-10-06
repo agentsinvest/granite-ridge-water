@@ -2,6 +2,8 @@
 // Money is computed in whole cents with half-up rounding, the way bills round each line.
 
 export type RatePeriod = {
+  source?: string
+  confidence?: string
   applies_from_period_end: string
   applies_to_period_end: string | null
   fixed_charges: { meters: string[]; amount: number }[]
@@ -56,6 +58,8 @@ export function calculateBill(
   gallons: number,
   rates: RatePeriod[],
   readPeriods: ReadPeriod[],
+  /** Use this block 1 allowance (thousand gallons above the included amount) instead of the meter's winter history. */
+  allowanceOverrideKgal?: number,
 ): BillResult {
   if (periodStart > periodEnd) return { ok: false, reason: 'period starts after it ends' }
   const rate = selectRate(rates, periodEnd)
@@ -63,7 +67,7 @@ export function calculateBill(
   const fixed = rate.fixed_charges.find((f) => f.meters.includes(meter))
   if (!fixed) return { ok: false, reason: `no service charge for ${meter}` }
   const included = rate.included_kgal_per_bill.value
-  const allowance = winterAllowanceKgal(readPeriods, periodEnd, included)
+  const allowance = allowanceOverrideKgal ?? winterAllowanceKgal(readPeriods, periodEnd, included)
   if (allowance === null) return { ok: false, reason: 'winter usage needed for the allowance is missing' }
 
   const kgal = gallons / 1000

@@ -2,6 +2,8 @@ import type { ReactNode } from 'react'
 import type { SiteData } from '../../scripts/site-data'
 import { SiteMap } from '../components/SiteMap'
 import { LeakFlags, costFlags, dollarRange } from '../components/LeakFlags'
+import { Bars, METER_COLOR } from '../components/charts'
+import { TableView } from '../components/ui'
 import { fmt, meterNumber } from '../lib/data'
 import { recentUsage, shares } from '../engine/usage'
 
@@ -46,7 +48,7 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
 
   return (
     <article>
-      <h1 className="text-2xl font-bold md:text-3xl">Meters and areas</h1>
+      <h1 className="text-2xl font-bold md:text-3xl">Meters, areas, and leaks</h1>
       <p className="mt-2 max-w-prose text-ink-2">
         Where the HOA's four City of Mesa water meters are, and what landscape the common areas hold.
       </p>
@@ -196,13 +198,14 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
                   <Row term="Mesa account">{m.account_last4 ? `ending ${m.account_last4}` : <Missing what="Account" />}</Row>
                   <Row term="Meter size">{m.size_inches ? `${m.size_inches} inch` : <Missing what="Size" />}</Row>
                 </dl>
+                <DailyDetail meter={m.id} days={Object.values(data.usage[m.id] ?? {}).flat()} />
                 {flags.length > 0 && (
                   <ul className="mt-4 space-y-2 text-sm">
                     {flags.map(({ flag, cost }) => (
                       <li key={flag.id} className="flex gap-2 rounded-lg border-2 border-serious px-3 py-2">
                         <span aria-hidden="true" className="font-extrabold">!</span>
                         <span>
-                          <a href={`#${flag.id}`} className="font-semibold underline underline-offset-4">
+                          <a href={`#meters/${flag.id}`} className="font-semibold underline underline-offset-4">
                             {flag.title.replace(/^Meter \d+: (.)/, (_, c: string) => c.toUpperCase())}
                           </a>
                           {cost?.low != null && cost.high != null && <span className="text-ink-2"> (about {dollarRange(cost.low, cost.high)})</span>}
@@ -262,5 +265,23 @@ function Row({ term, children }: { term: string; children: ReactNode }) {
       <dt className="text-ink-2">{term}</dt>
       <dd>{children}</dd>
     </div>
+  )
+}
+
+function DailyDetail({ meter, days }: { meter: string; days: SiteData['usage'][string][string] }) {
+  const recent = [...days].sort((a, b) => a.date.localeCompare(b.date)).slice(-60)
+  if (recent.length === 0) return <p className="mt-4 text-sm"><Missing what="Daily use" /></p>
+  const rows = recent.map((d) => ({
+    day: new Date(`${d.date}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    gallons: d.gallons === null ? null : Math.round(d.gallons),
+    partial: d.hours !== null && d.hours < 20,
+  }))
+  return (
+    <details className="mt-4 text-sm">
+      <summary className="cursor-pointer font-semibold">Daily use, last {recent.length} days</summary>
+      <Bars data={rows.map(({ day, gallons }) => ({ day, gallons }))} x="day" series={[{ key: 'gallons', name: 'Gallons', color: METER_COLOR[meter] ?? 'var(--s1)' }]} label={`Daily gallons, meter ${meterNumber(meter)}`} height={200} />
+      <TableView caption="Daily gallons" head={['Day', 'Gallons', 'Complete day']} rows={rows.map((r) => [r.day, r.gallons === null ? 'No reads' : fmt.int(r.gallons), r.partial ? 'No' : 'Yes'])} />
+      <p className="mt-1 text-ink-2">From Waterfluence hourly reads. Some late-night hours are missing, so daily totals can run low.</p>
+    </details>
   )
 }

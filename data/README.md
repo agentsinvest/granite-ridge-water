@@ -28,6 +28,10 @@ Every number the app shows comes from a file in this folder. Git history is the 
 | `flags/<flag-id>.md` | Leak and anomaly flags with status | `flags/README.md` |
 | `investments/<slug>.md` | Catalog of changes and investments that can be modeled | `investments/README.md` |
 | `scenarios/<slug>.md` | Saved scenarios | `scenarios/README.md` |
+| `options/<slug>.md` | Watering changes the Recommended moves screen ranks (priced by the engine) | `options/README.md` |
+| `experiments/<slug>.md` | Changes the HOA tries on purpose, with what we expect, so the site can check the result | `experiments/README.md` |
+| `budget/annual-check.md` | Site-level water use vs estimated need, until the daily budget exists | `budget/README.md` |
+| `data-needs.md` | Ranked list of data that would make the site more accurate | in the file |
 | `config/site.md` | Target, thresholds, weather station, post-2027 rate assumption | in the file |
 | `config/plant-factors.md` | Plant factors and irrigation efficiencies with sources | in the file |
 | `INVENTORY.md` | Source files in hand and open questions | |
