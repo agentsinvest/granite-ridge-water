@@ -73,7 +73,7 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
         />
         <Stat
           value={String(activeFlags.length)}
-          label={activeFlags.length === 1 ? 'possible leak flagged' : 'possible leaks flagged'}
+          label={activeFlags.length === 1 ? 'possible leak flagged' : 'possible leaks flagged, across all meters'}
           flag={activeFlags.length > 0}
         />
       </dl>
@@ -186,16 +186,20 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
                   <Row term="Meter size">{m.size_inches ? `${m.size_inches} inch` : <Missing what="Size" />}</Row>
                 </dl>
                 {flags.length > 0 && (
-                  <div className="mt-4 rounded-lg border-2 border-serious p-3 text-sm" role="note">
-                    <p className="flex items-center gap-2 font-semibold">
-                      <span aria-hidden="true" className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-serious text-xs font-extrabold text-[#0b0b0b]">
-                        !
-                      </span>
-                      Possible leak: {FLAG_STATUS_TEXT[flags[0].status]}
-                    </p>
-                    <p className="mt-2">{flags[0].evidence}</p>
-                    {flags[0].likely_cause && <p className="mt-2 text-ink-2">Likely cause: {flags[0].likely_cause}</p>}
-                  </div>
+                  <ul className="mt-4 space-y-3">
+                    {flags.map((f) => (
+                      <li key={f.id} className="rounded-lg border-2 border-serious p-3 text-sm" role="note">
+                        <p className="flex items-center gap-2 font-semibold">
+                          <span aria-hidden="true" className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-serious text-xs font-extrabold text-[#0b0b0b]">
+                            !
+                          </span>
+                          Possible leak: {FLAG_STATUS_TEXT[f.status]}
+                        </p>
+                        <p className="mt-2">{f.evidence}</p>
+                        {f.likely_cause && <p className="mt-2 text-ink-2">Likely cause: {f.likely_cause}</p>}
+                      </li>
+                    ))}
+                  </ul>
                 )}
               </li>
             )

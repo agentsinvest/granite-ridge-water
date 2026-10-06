@@ -21,3 +21,7 @@ exported_on: 2025-01-15
 | 2024-01-01 | 0 | 24 | 0 | |
 | 2024-01-02 | | 0 | | |
 ```
+
+## Missing hours are not random
+
+Checked 2026-10-06 against the City bills for the read period 2026-07-16 to 08-12: the hourly AMI sums to 63% of billed gallons on meter-1, 96% on meter-2, 55% on meter-3, and 22% on meter-4. The missing hours on meters 1 and 4 are the late-night hours (10 PM to midnight) on about half the nights, which are watering hours. So daily totals here undercount, and the City bills and `billing-periods/` are the reliable volumes. Hourly data is still useful for patterns in the hours it does report (trickles, valves left running), and repeated identical values across hours are filled-in reads.

@@ -71,6 +71,8 @@ HOA water spend (account 50110, Water - Irrigation, all 4 meters combined):
 * Block 1 price per thousand gallons (from low-use bills): about $3.47 (2019 to 2020), $3.55 (2021 to 2022), $4.01 (from about April 2023), $4.31 (from about April 2024), $4.76 (from about February 2025), $5.71 (February 2026), $5.95 (May 2026).
 * Meter-4 used about 46,000 to 61,000 gallons every month through 2023 and 2024, summer and winter, until its meter was replaced in October 2024: the never-zero pattern of continuous flow.
 * Bill totals by calendar year do not yet reconcile with the P&L (missing bills, and 2022 bills sum $7,138 above the P&L). To be resolved once the remaining bills are read.
+* Leak and anomaly review (2026-10-06), flags in `data/flags/`: meter-4 ran 45,000 to 61,000 gallons a month year round from 2023 to November 2024, then dropped about 20,000 a month; meter-4 winter use is still close to summer; meter-1 has an intermittent trickle of 3 to 5 gallons an hour (July and late September 2026); meter-1's late-summer 2026 period was up 27% on 2025. Meter-2 shows no leak pattern.
+* Waterfluence's hourly data drops late-night watering hours on meters 1 and 4 (it sums to 63% and 22% of billed gallons for one read period). Use billed gallons for volumes; see `usage/README.md`.
 * These are P&L totals, not bills. They may follow payment dates rather than service periods, and they cannot split cost into price, volume, and fees. Bills are still required.
 
 ## Coverage by meter
@@ -127,6 +129,7 @@ Ranked by what unblocks the most.
 24. Did someone shut off meter-4 on 2026-09-18 (about 7 PM), 09-22 (about 10 AM), and 10-04 (about 4 PM)? Which valve runs at 2 AM on meter-4, and has it been inspected?
 25. What were the $120.51 extra on meter-1's 2025-09-26 bill and the $3.25 extra on its 2025-10-24 bill? (Answered from the City bills: a late fee of $111.27 plus $9.24 tax, and a $3.00 delinquent letter charge plus $0.25 tax.)
 26. What are Waterfluence's "Lost $" ($3.6k) and "Score" (98)?
+27. Was a leak fixed or a zone changed on meter-4 in late 2024 (its year-round flow stopped then)?
 
 ## Unknown values in /data/ right now
 
