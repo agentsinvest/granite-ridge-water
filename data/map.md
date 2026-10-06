@@ -47,11 +47,13 @@ meters:
     at: [165, 179]
   - meter: meter-4
     at: [750, 362]
-labels:
-  - text: "McKellips Road"
-    at: [520, 40]
-  - text: "Crismon Road"
-    at: [1000, 450]
+boundary_roads:
+  - name: "McKellips Road"
+    line: [[0, 36], [1050, 36]]
+    label_at: [600, 44]
+  - name: "Crismon Road"
+    line: [[1000, 60], [1000, 1020]]
+    label_at: [1008, 520]
     rotate: 90
 slope:
   text: "Ground slopes about 2% from north to south. The park is the lowest point."

@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+/* Color tokens. Light values, then dark values for the OS setting and for an explicit data-theme. */
+:root {
+  color-scheme: light;
+  --page: #f9f9f7;
+  --surface: #fcfcfb;
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --line: #e1e0d9;
+  --axis: #c3c2b7;
+  --shrub: #eda100;
+  --turf: #008300;
+  --turf-hatch: #005c00;
+  --street: #c3c2b7;
+  --pin: #0b0b0b;
+  --pin-ink: #ffffff;
+  --serious: #ec835a;
+  --focus: #2a78d6;
+  --ring: rgba(11, 11, 11, 0.1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d;
+    --surface: #1a1a19;
+    --ink: #ffffff;
+    --ink-2: #c3c2b7;
+    --line: #2c2c2a;
+    --axis: #383835;
+    --shrub: #c98500;
+    --turf: #008300;
+    --turf-hatch: #00b000;
+    --street: #4a4a46;
+    --pin: #ffffff;
+    --pin-ink: #0b0b0b;
+    --serious: #ec835a;
+    --focus: #3987e5;
+    --ring: rgba(255, 255, 255, 0.1);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d;
+  --surface: #1a1a19;
+  --ink: #ffffff;
+  --ink-2: #c3c2b7;
+  --line: #2c2c2a;
+  --axis: #383835;
+  --shrub: #c98500;
+  --turf: #008300;
+  --turf-hatch: #00b000;
+  --street: #4a4a46;
+  --pin: #ffffff;
+  --pin-ink: #0b0b0b;
+  --serious: #ec835a;
+  --focus: #3987e5;
+  --ring: rgba(255, 255, 255, 0.1);
+}
+
+@theme inline {
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-line: var(--line);
+  --color-shrub: var(--shrub);
+  --color-turf: var(--turf);
+  --color-street: var(--street);
+  --color-serious: var(--serious);
+  --color-focus: var(--focus);
+  --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+body {
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--font-sans);
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Map pins: show focus and hover on the pin itself (outlines do not draw well on SVG). */
+svg a:focus-visible {
+  outline: none;
+}
+svg a:focus-visible .pin-ring,
+svg a:hover .pin-ring {
+  stroke: var(--focus);
+  stroke-width: 7;
+}

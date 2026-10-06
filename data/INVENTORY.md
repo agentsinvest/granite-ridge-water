@@ -68,7 +68,7 @@ HOA water spend (account 50110, Water - Irrigation, all 4 meters combined):
 | meter-3 (...4706) | 0 bills; usage for 35 read periods | 2026-07-03 to 2026-09-30 hourly, 22 days missing | meter number only | none |
 | meter-4 (...5793) | 0 bills; usage for 35 read periods | 2026-07-03 to 2026-09-30 hourly | meter number only | none |
 
-Meter labels meter-1 to meter-4 are assigned by usage, largest first. They are labels only until Jennifer confirms which meter serves which area.
+Meter labels meter-1 to meter-4 are labels only. Meter-1 and meter-2 are the two largest users; meter-4 uses slightly more than meter-3 (1,622 vs 1,431 thousand gallons, 2023-09 to 2026-09), despite the numbering. An earlier note said all four were numbered largest first; that was wrong for 3 and 4.
 
 ## What we need from Jennifer
 
