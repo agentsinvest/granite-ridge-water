@@ -23,6 +23,8 @@ Full transcriptions of every file below are in `/sources/` (see `sources/README.
 | (3 screenshots in chat) | Waterfluence Monthly 1000 Gallons 2021 to 2026, Daily Water Cost, Daily Inches Applied | all 4 | 2021-01 to 2026-10 | `sources/waterfluence/monthly-chart-2021-2026.md`, `daily-cost-chart-2026-10-06.md`, `daily-inches-chart-2026-10-06.md` | Monthly chart matches the export where they overlap; other values read by eye |
 | `waterfluence/ami-report-outdoor-2026-10-06.csv` | Hourly AMI gallons, 4 meters | all 4 | 2026-07-08 to 2026-10-06 | merged into `usage/meter-*/2026.md` and `sources/waterfluence/ami-hourly-*` | Agrees with the 2026-09-30 export on all 6,594 overlapping hours; adds 439 new hours |
 | (3 screenshots in chat) | Waterfluence Hourly Cubic Feet, Hourly Gallons, Tree & Shrub Environmental Benefits | all | 2026-07 to 2026-10 | `sources/waterfluence/hourly-charts-2026-10-06.md`, `tree-shrub-benefits.md` | Benefits table cites a site Budget Table with tree and shrub area (728,295 ft2 times density factor) |
+| `waterfluence/energy-star-report-2026-10-06.csv` | Usage per Mesa read period, 4 meters | all 4 | 2023-09-15 to 2026-09-14 (36 periods per meter) | `billing-periods/meter-*.md` | Supersedes the 2026-09-30 export; identical on all shared rows |
+| (9 screenshots in chat) | Waterfluence Landscape Map, 4 Controller Maps, Water Budget, Default Budget Factors, Agency, Water Meters | all 4 | map updated about late 2024 | `sources/waterfluence/landscape-and-controller-maps.md`, `water-budget-and-site-settings.md`; `meters/*.md`, `areas.md`, `config/plant-factors.md`, `config/site.md`, `map.md` | Account numbers last 4 only; service addresses kept out of `/data/` |
 | `maps/areas-aerial.webp` | Aerial with 5 named areas (A to E), square footages, slope note | n/a | n/a | `areas.md` | Gross common-area square footage (no homeowner lots, confirmed by Jennifer 2026-10-06); not irrigated area |
 
 The P&Ls also contain bank account digits and owner names (construction deposits). Those were not copied into `/data/`.
@@ -52,6 +54,8 @@ HOA water spend (account 50110, Water - Irrigation, all 4 meters combined):
 * Some AMI hours repeat an identical value across several hours. These are filled-in hours, so hourly timing on those days is approximate. Daily totals are unaffected.
 * Waterfluence's 2021 to 2026 monthly chart (read by eye) shows summers 2021 to 2023 well below its water budget, with summer 2023 the lowest. From 2024, summer use rose to the budget level (about 1,100 to 1,200 thousand gallons at peak vs about 900 in 2021 and 2022 and about 630 in 2023). Every fall has a spike above budget, the largest in November 2024 (1,249). So the 2023 to 2024 cost jump is mostly more water, before any rate change. Needs the 2021 to 2023 export to confirm.
 * Waterfluence also calculates daily cost and inches applied, so it already holds a rate assumption and an irrigated area for each meter.
+* Meter locations (Waterfluence Controller Map): meter-1 (...8300) and meter-2 (...4031), the two largest users, sit at the northeast and northwest corners of the park; meter-3 (...4706) is at the entry gate; meter-4 (...5793) is on the east side at the end of the interior strip. Which areas each meter waters is still unknown.
+* Waterfluence's budget uses AZMET Encanto weather, shrub 728,295 ft2 at 12% of ETo and turf 86,354 ft2 at 86% of ETo (20% overall), and prices water at a flat $8.35 per thousand gallons.
 * These are P&L totals, not bills. They may follow payment dates rather than service periods, and they cannot split cost into price, volume, and fees. Bills are still required.
 
 ## Coverage by meter
@@ -82,13 +86,13 @@ Ranked by what unblocks the most. Items 1 and 2 are required before any engine w
 ## Open questions
 
 1. Is each meter billed monthly, and on what read cycle? Does it differ by meter?
-2. Do the 4 meters share one Mesa account or have separate accounts?
+2. Do the 4 meters share one Mesa account or have separate accounts? (Answered: separate, consecutive accounts ending 865-1 to 868-1.)
 3. Were all 4 meters in service for the full 5 years, or was any meter added (the spec mentions "new meters and fees" as a possible cost driver)?
 4. Does Mesa bill irrigation meters on a flat volumetric rate, tiers, or seasonal rates? (Answer from the rate documents, not assumed.)
 5. How does Mesa bill a period that crosses a rate change: prorated or at the rate in effect at period end? (If the documents are silent, we test both against real bills.)
 6. Which taxes and fees appear on the bills, and which charges are they applied to?
-7. Does Waterfluence calculate its own water budget, and which weather source does it use?
-8. Which AZMET station is closest and representative for Granite Ridge? (To confirm against the AZMET station list before backfilling weather.)
+7. Does Waterfluence calculate its own water budget, and which weather source does it use? (Answered: yes, Landscape Coefficient Method with AZMET Encanto weather. See `config/plant-factors.md`.)
+8. Which AZMET station is closest and representative for Granite Ridge? (Partly answered: Waterfluence uses Encanto, in central Phoenix. Check for a closer station once azmet.arizona.edu is reachable.)
 9. The P&Ls show overseeding every year ($2,520.00 to $4,137.00). Is the turf Bermuda overseeded with winter rye, and in which months does overseed watering run?
 10. Who is the landscaper, and do they have a zone map with square footage? (Name stays out of `/data/`; we only need the map.)
 11. Which plant factor and efficiency source does the HOA want to treat as authoritative (for example WUCOLS, ADWR, AMWUA, or the landscaper)?
@@ -97,7 +101,7 @@ Ranked by what unblocks the most. Items 1 and 2 are required before any engine w
 14. Why were 2022 irrigation repairs $7,402.00 against a $2,000.00 budget? Was that the start of the leak chasing?
 15. Which map areas are irrigated at all, and on what (drip to trees and shrubs, spray, none)? (Answered: the areas include no homeowner lot area.)
 16. Is the drywell (2023 reserve budget, $14,000) at the park green low point, and does irrigation runoff collect there?
-17. Which meter feeds the park green turf?
+17. Which meter feeds the park green turf? (Meters 1 and 2 sit at the park corners, which suggests they do, but that is not confirmed.)
 18. What was the 2024 reserve landscape/irrigation project ($15,522.41), and when was it done? Did water use change before or after it?
 19. Was the 2024 drywell maintenance ($10,800.00) related to irrigation water pooling at the park green?
 20. Why did the water budget drop to $24,006.00 for 2025 after a $44,708.39 actual in 2024?
@@ -113,6 +117,5 @@ Every field below is `null` with a `todo` note until a source is in hand.
 * `meters/meter-1.md` to `meter-4.md`: all facts.
 * `areas.md`: zone membership and irrigated square footage for all 5 areas.
 * `events.md`: all events except the 2022 rebate (date known to the year only).
-* `config/site.md`: AZMET station.
-* `config/plant-factors.md`: all plant factors, minimums, efficiencies, and the effective rainfall method.
+* `config/plant-factors.md`: minimum plant factors, tree allowance, and our own effective rainfall method (site factors now from Waterfluence).
 * `investments/*.md`: all effect values, ranges, costs, and lifespans (7 entries).

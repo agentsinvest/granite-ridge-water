@@ -1,16 +1,20 @@
 ---
 document: "Waterfluence ENERGY STAR report, site MESA-437"
-original_file: "energy-star-report-MESA-437-Wed_Sep_30_2026.csv"
-exported_on: 2026-09-30
-transcription: "Every row of the CSV, in original order. Meter numbers shortened to the last 4 digits; meter labels added."
+original_file: "energy-star-report-MESA-437-Tue_Oct_06_2026.csv"
+exported_on: 2026-10-06
+transcription: "Every row of the CSV, in original order. Meter numbers shortened to the last 4 digits; meter labels added. Supersedes the 2026-09-30 export: identical on all 140 shared rows, plus the 2026-08-13 to 2026-09-14 period."
 ---
 
-# Waterfluence ENERGY STAR report (usage per Mesa read period)
+# Waterfluence ENERGY STAR report (usage per Mesa read period), 2026-10-06 export
 
-Usage is in thousand gallons (confirmed by the Waterfluence monthly chart, see `monthly-chart-2026-09-30.md`). The same data, split by meter, is in `data/billing-periods/`.
+Usage is in thousand gallons. The same data, split by meter, is in `data/billing-periods/`.
 
 | Start date | End date | Usage | Meter number (last 4) | Meter label |
 |---|---|---|---|---|
+| 2026-08-13 | 2026-09-14 | 399 | 8300 | meter-1 |
+| 2026-08-13 | 2026-09-14 | 32 | 5793 | meter-4 |
+| 2026-08-13 | 2026-09-14 | 221 | 4031 | meter-2 |
+| 2026-08-13 | 2026-09-14 | 42 | 4706 | meter-3 |
 | 2026-07-16 | 2026-08-12 | 374 | 8300 | meter-1 |
 | 2026-07-16 | 2026-08-12 | 26 | 5793 | meter-4 |
 | 2026-07-16 | 2026-08-12 | 229 | 4031 | meter-2 |

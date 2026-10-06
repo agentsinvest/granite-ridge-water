@@ -4,7 +4,7 @@ meter_number_last4: "5793"
 unit: thousand_gallons
 unit_source: "Waterfluence monthly chart is titled Monthly 1000 Gallons and its points match the 4-meter sums of this export (sources/waterfluence/monthly-chart-2026-09-30.md). Also consistent with AMI hourly gallons and P&L dollars."
 unit_confidence: high
-source: "Waterfluence ENERGY STAR report, exported 2026-09-30 (raw/waterfluence/energy-star-report-2026-09-30.csv)"
+source: "Waterfluence ENERGY STAR report, exported 2026-09-30 and 2026-10-06 (sources/waterfluence/energy-star-report-2026-10-06.md)"
 todo: "Waterfluence has history back to 2021; export it."
 ---
 
@@ -47,3 +47,4 @@ Usage per City of Mesa billing period, as reported by Waterfluence. One row per 
 | 2026-05-14 | 2026-06-14 | 43 |
 | 2026-06-15 | 2026-07-15 | 36 |
 | 2026-07-16 | 2026-08-12 | 26 |
+| 2026-08-13 | 2026-09-14 | 32 |

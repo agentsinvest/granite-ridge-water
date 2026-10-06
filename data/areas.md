@@ -8,7 +8,16 @@ lot_area_included:
   value: false
   source: "Jennifer, 2026-10-06"
   confidence: high
-todo: "Square footages are gross common-area map areas, not irrigated areas. Need irrigated square footage per zone."
+waterfluence_landscape:
+  shrub_sq_ft: 728295
+  turf_overseed_sq_ft: 86354
+  turf_no_overseed_sq_ft: 0
+  pool_sq_ft: 0
+  total_sq_ft: 814649
+  source: "Waterfluence Landscape Map and Water Budget panel, site MESA-437; map updated about late 2024 (sources/waterfluence/landscape-and-controller-maps.md)"
+  confidence: medium
+  note: "Waterfluence's irrigated area by landscape type, not split by named area. Turf is about 13% above the ~76,600 on Jennifer's map; total is about 6% above areas B to E."
+todo: "Square footages in the table are gross common-area map areas, not irrigated areas. Need irrigated square footage per zone, and which meter waters each area."
 ---
 
 # Areas

@@ -23,8 +23,16 @@ waterfluence_budget_disagreement_percent:
   value: 15
   source: "Build spec, Phase 2"
 weather:
-  azmet_station: null
-  todo: "Pick the nearest AZMET station to Granite Ridge and record its name and ID; confirm it reports ETo for the full 5 years"
+  azmet_station: "Encanto"
+  source: "Waterfluence Agency panel, site MESA-437 (sources/waterfluence/water-budget-and-site-settings.md)"
+  confidence: medium
+  todo: "Encanto is the station Waterfluence uses, so our budget matches theirs. It is in central Phoenix, far from east Mesa; check whether a closer AZMET station has 5 years of ETo once azmet.arizona.edu is reachable."
+waterfluence_unit_cost:
+  value: 8.35
+  unit: "dollars per thousand gallons"
+  source: "Waterfluence Agency panel, site MESA-437"
+  confidence: low
+  note: "Waterfluence's flat cost assumption for its $ Cost charts. Not a City of Mesa rate; never used to price bills."
 post_2027_rate_assumption:
   method: hold_2027_flat
   label: "Years after 2027 assume 2027 City of Mesa rates stay the same. This is an assumption, not a published rate."
