@@ -4,7 +4,11 @@ site_slope:
   value: "North to south, about 2%. The park green is the lowest point."
   source: "Jennifer's annotated aerial map"
   confidence: medium
-todo: "Square footages are gross map areas, not irrigated areas. Need irrigated square footage per zone, and confirmation of whether the polygons include any homeowner lot area."
+lot_area_included:
+  value: false
+  source: "Jennifer, 2026-10-06"
+  confidence: high
+todo: "Square footages are gross common-area map areas, not irrigated areas. Need irrigated square footage per zone."
 ---
 
 # Areas

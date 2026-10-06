@@ -11,3 +11,10 @@
 ## Why it matters
 
 Water spend fell from $36,340.05 (2020) to $26,016.31 (2023). The cost increase the project is meant to explain must be in 2024 to 2026, so those bills and P&Ls are now the top data request.
+
+## Update: 2024 and 2025 P&Ls
+
+* Added `financials/2024.md` and `2025.md`. Both were checked by script against the PDF text, line by line. No 2026 P&L exists yet.
+* Water spend went from $26,016.31 (2023) to $44,708.39 (2024) and $45,239.28 (2025). The "how we got here" story is that step, not a steady 5-year climb. Bills from 2023 onward are now the top data request.
+* Jennifer confirmed the map areas contain no homeowner lot area. Recorded in `areas.md` as `lot_area_included: false`.
+* Owner names and bank account digits in the 2024 deposit summary and balance sheets were not copied.
