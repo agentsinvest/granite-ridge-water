@@ -107,6 +107,7 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
     } else if (rel.match(/^flags\/[^/]+\.md$/)) {
       const flag = check(S.flagSchema, fm, file, text)
       if (`flags/${flag.id}.md` !== rel) fail(file, keyLine(text, 'id'), 'id does not match file name')
+      for (const e of flag.excess_water?.episodes ?? []) if (e.from > e.to) fail(file, keyLine(text, 'excess_water'), `episode ${e.from} to ${e.to} ends before it starts`)
       out.flags.push(flag)
     } else if ((m = rel.match(/^rates\/(\d{4}-\d{2}-\d{2})\.md$/))) {
       const rate = check(S.rateSchema, fm, file, text)

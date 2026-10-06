@@ -138,6 +138,8 @@ export const financialsRowSchema = z.object({
 
 export const flagSchema = z.object({
   id: z.string(),
+  title: z.string().min(1),
+  summary: z.string().min(1),
   meter: z.string(),
   zones: z.array(z.string()),
   rule: z.enum(['over_budget', 'step_change', 'off_schedule', 'never_zero', 'winter_summer_ratio', 'meter_vs_meter', 'manual']),
@@ -146,6 +148,15 @@ export const flagSchema = z.object({
   fixed_on: z.union([date, z.date()]).nullable(),
   evidence: z.string(),
   likely_cause: z.string().optional(),
+  excess_water: z
+    .object({
+      episodes: z.array(z.object({ from: date, to: date, gallons: z.number().positive() })),
+      ongoing_gallons_per_year: z.number().positive().nullable(),
+      method: z.string().min(1),
+      source: z.string().min(1),
+      confidence,
+    })
+    .nullable(),
   related_events: z.array(z.string()),
   source: z.string().optional(),
   todo: z.string().optional(),

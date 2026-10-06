@@ -1,18 +1,11 @@
 import type { ReactNode } from 'react'
 import type { SiteData } from '../../scripts/site-data'
 import { SiteMap } from '../components/SiteMap'
+import { LeakFlags, costFlags, dollarRange } from '../components/LeakFlags'
 import { fmt, meterNumber } from '../lib/data'
 import { recentUsage, shares } from '../engine/usage'
 
 const RECENT_PERIODS = 12
-
-const FLAG_STATUS_TEXT: Record<string, string> = {
-  suggested: 'Suggested, not yet reviewed',
-  open: 'Open',
-  investigating: 'Being investigated',
-  fixed: 'Fixed',
-  'false-alarm': 'False alarm',
-}
 
 function Missing({ what }: { what: string }) {
   return <span className="italic text-ink-2">{what} not recorded yet</span>
@@ -23,7 +16,11 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
     | { shrub_sq_ft: number; turf_overseed_sq_ft: number; turf_no_overseed_sq_ft: number; total_sq_ft: number; source: string }
     | undefined
   const areaNames = Object.fromEntries(data.areas.rows.map((r) => [r['Area id'], { label: r['Map label'], name: r.Name }]))
-  const activeFlags = data.flags.filter((f) => f.status !== 'fixed' && f.status !== 'false-alarm')
+  const costed = costFlags(data)
+  const activeFlags = costed.map((c) => c.flag)
+  const priced = costed.filter((c) => c.cost?.low != null && c.cost.high != null)
+  const leakLow = priced.reduce((s, c) => s + c.cost!.low!, 0)
+  const leakHigh = priced.reduce((s, c) => s + c.cost!.high!, 0)
   const flaggedMeters = new Set(activeFlags.map((f) => f.meter))
 
   const summaries = data.meters.map((m) => recentUsage(m.id, data.billingPeriods[m.id]?.rows ?? [], RECENT_PERIODS))
@@ -73,10 +70,24 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
         />
         <Stat
           value={String(activeFlags.length)}
-          label={activeFlags.length === 1 ? 'possible leak flagged' : 'possible leaks flagged, across all meters'}
+          label={
+            (activeFlags.length === 1 ? 'possible leak flagged' : 'possible leaks flagged') +
+            (priced.length ? `, about ${dollarRange(leakLow, leakHigh)} in extra charges so far` : '')
+          }
           flag={activeFlags.length > 0}
         />
       </dl>
+
+      <section aria-labelledby="leaks-heading" className="mt-10">
+        <h2 id="leaks-heading" className="text-xl font-bold">
+          Possible leaks
+        </h2>
+        <p className="mt-1 max-w-prose text-sm text-ink-2">
+          Water use that does not look right, most expensive first. Each one says what we saw, roughly what it cost, and what to
+          check next. None are confirmed leaks yet. Costs are estimates; City bills are the official record.
+        </p>
+        <LeakFlags flags={costed} />
+      </section>
 
       <section aria-labelledby="map-heading" className="mt-10">
         <h2 id="map-heading" className="text-xl font-bold">
@@ -163,7 +174,7 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
           {data.meters.map((m) => {
             const s = summaries.find((x) => x.meter === m.id)
             const sh = share[m.id]
-            const flags = activeFlags.filter((f) => f.meter === m.id)
+            const flags = costed.filter((c) => c.flag.meter === m.id)
             return (
               <li key={m.id} id={m.id} className="scroll-mt-6 rounded-xl bg-surface p-5 ring-1 ring-[var(--ring)]">
                 <h3 className="flex items-baseline gap-3">
@@ -186,17 +197,16 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
                   <Row term="Meter size">{m.size_inches ? `${m.size_inches} inch` : <Missing what="Size" />}</Row>
                 </dl>
                 {flags.length > 0 && (
-                  <ul className="mt-4 space-y-3">
-                    {flags.map((f) => (
-                      <li key={f.id} className="rounded-lg border-2 border-serious p-3 text-sm" role="note">
-                        <p className="flex items-center gap-2 font-semibold">
-                          <span aria-hidden="true" className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-serious text-xs font-extrabold text-[#0b0b0b]">
-                            !
-                          </span>
-                          Possible leak: {FLAG_STATUS_TEXT[f.status]}
-                        </p>
-                        <p className="mt-2">{f.evidence}</p>
-                        {f.likely_cause && <p className="mt-2 text-ink-2">Likely cause: {f.likely_cause}</p>}
+                  <ul className="mt-4 space-y-2 text-sm">
+                    {flags.map(({ flag, cost }) => (
+                      <li key={flag.id} className="flex gap-2 rounded-lg border-2 border-serious px-3 py-2">
+                        <span aria-hidden="true" className="font-extrabold">!</span>
+                        <span>
+                          <a href={`#${flag.id}`} className="font-semibold underline underline-offset-4">
+                            {flag.title.replace(/^Meter \d+: (.)/, (_, c: string) => c.toUpperCase())}
+                          </a>
+                          {cost?.low != null && cost.high != null && <span className="text-ink-2"> (about {dollarRange(cost.low, cost.high)})</span>}
+                        </span>
                       </li>
                     ))}
                   </ul>
