@@ -2,12 +2,12 @@
 id: meter-4
 name: null
 account_last4: null
-meter_number_last4: null
+meter_number_last4: "5793"
 size_inches: null
 service_type: null
 waterfluence_id: null
 active_from: null
 active_to: null
-source: null
-todo: "Need name, last 4 of account, meter size, service type, Waterfluence ID, and zones served (see INVENTORY.md)"
+source: "Meter numbers from Waterfluence exports, 2026-09-30. Assignment of meter-1 to meter-4 is by usage, largest first, and is a label only."
+todo: "Confirm which part of the neighborhood this meter serves. Need name, last 4 of account, meter size, service type, Waterfluence ID, and zones served (see INVENTORY.md)"
 ---

@@ -44,6 +44,7 @@ Each folder has a `README.md` describing its format with one complete example.
   areas.md                                named parts of the neighborhood and which zones are in each
   bills/<meter>/<YYYY-MM>.md              one file per bill
   rates/<effective-start>.md              one file per City of Mesa rate period
+  billing-periods/<meter>.md              usage per Mesa read period (Waterfluence ENERGY STAR report)
   usage/<meter>/<YYYY>.md                 Waterfluence daily totals, one table per year
   weather/<YYYY>.md                       AZMET daily ETo and rain, one table per year
   events.md                               dated log: repairs, leaks, controller and landscape changes

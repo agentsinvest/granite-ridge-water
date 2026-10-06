@@ -20,6 +20,7 @@ Every number the app shows comes from a file in this folder. Git history is the 
 | `areas.md` | Named parts of the neighborhood and which zones are in each | in the file |
 | `bills/<meter>/<YYYY-MM>.md` | One file per bill, line items copied exactly | `bills/README.md` |
 | `rates/<effective-start>.md` | One file per City of Mesa rate period | `rates/README.md` |
+| `billing-periods/<meter>.md` | Usage per Mesa read period from Waterfluence | `billing-periods/README.md` |
 | `usage/<meter>/<YYYY>.md` | Waterfluence daily totals, one table per year | `usage/README.md` |
 | `weather/<YYYY>.md` | AZMET daily ETo and rain | `weather/README.md` |
 | `financials/<YYYY>.md` | HOA year-end P&L water and landscape lines, a cross-check against bills | `financials/README.md` |
