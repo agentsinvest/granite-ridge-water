@@ -1,11 +1,11 @@
 ---
 document: "Waterfluence AMI outdoor report, hourly reads, site MESA-437"
-original_file: "ami-report-MESA-437-outdoor-Wed_Sep_30_2026.csv"
-exported_on: 2026-09-30
+original_files: ["ami-report-MESA-437-outdoor-Wed_Sep_30_2026.csv", "ami-report-MESA-437-outdoor-Tue_Oct_06_2026.csv"]
+exported_on: [2026-09-30, 2026-10-06]
 meter: meter-3
 meter_number_last4: "4706"
-rows: 1118
-transcription: "Every row for this meter from the CSV, sorted oldest first. Missing hours are absent in the original too."
+rows: 1134
+transcription: "Every row for this meter from both exports, merged and sorted oldest first. The exports agree on every overlapping hour. Missing hours are absent in the originals too."
 ---
 
 # Hourly water use, meter-3 (...4706)
@@ -1132,3 +1132,19 @@ Gallons per hourly read. Daily totals are in `data/usage/meter-3/2026.md`.
 | 2026-09-29 14:00 | 0 |
 | 2026-09-29 15:00 | 0 |
 | 2026-09-29 16:00 | 0 |
+| 2026-10-01 01:00 | 0 |
+| 2026-10-01 02:00 | 0 |
+| 2026-10-01 03:00 | 0 |
+| 2026-10-01 04:00 | 0 |
+| 2026-10-01 05:00 | 0 |
+| 2026-10-01 06:00 | 0 |
+| 2026-10-01 07:00 | 0 |
+| 2026-10-01 08:00 | 0 |
+| 2026-10-01 09:00 | 0 |
+| 2026-10-01 10:00 | 0 |
+| 2026-10-01 11:00 | 0 |
+| 2026-10-01 12:00 | 0 |
+| 2026-10-01 13:00 | 0 |
+| 2026-10-01 14:00 | 0 |
+| 2026-10-01 15:00 | 0 |
+| 2026-10-01 16:00 | 0 |

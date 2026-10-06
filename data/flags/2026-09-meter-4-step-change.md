@@ -6,14 +6,15 @@ rule: manual
 first_seen: 2026-09-18
 status: suggested
 fixed_on: null
-evidence: "Meter-4 median daily use was 75 gallons from 2026-07-03 to 2026-09-07. It used 12,626 gallons on 2026-09-18 (flow from 2 AM to 7 PM, including about 335 gallons an hour through the daytime) and 8,759 gallons on 2026-09-22 (2 AM to 10 AM). The Waterfluence daily chart shows about 4,800 to 6,800 gallons a day on 2026-10-02 to 10-04. Its normal pattern is one cycle of about 385 gallons around 1 AM."
+evidence: "Meter-4 normally runs one cycle of about 250 to 385 gallons around 1 to 2 AM (median daily use 75 gallons, 2026-07-03 to 09-07). Three times since then the 2 AM cycle did not shut off: 2026-09-18 (flow until about 7 PM, 12,626 gallons that day), 2026-09-22 (flow until about 10 AM, 8,759 gallons), and 2026-10-02 2 AM to 10-04 about 4 PM (about 62 hours at a steady 300 to 311 gallons an hour, 18,164 gallons). Together about 39,500 gallons. Flow stopped abruptly each time and was zero all day on 2026-10-05."
+likely_cause: "A valve on meter-4 that does not fully close after the 2 AM cycle (stuck or failing valve or solenoid), shut off by hand or by the controller later. Not confirmed."
 related_events: []
-source: "data/usage/meter-4/2026.md; sources/waterfluence/ami-hourly-meter-4-2026.md; sources/waterfluence/daily-chart-2026-10-06.md"
-todo: "Ask the landscaper whether a schedule changed, a manual run happened, or overseed watering started on the zones meter-4 feeds around 2026-09-18. If none, check for a valve stuck open. Export AMI after 2026-09-30 to confirm October daily totals."
+source: "data/usage/meter-4/2026.md; sources/waterfluence/ami-hourly-meter-4-2026.md (exports of 2026-09-30 and 2026-10-06); sources/waterfluence/daily-chart-2026-10-06.md"
+todo: "Ask the landscaper whether they shut water off on meter-4 on 2026-09-18, 09-22, and 10-04 (about 4 PM), and which valve runs at 2 AM. Have that valve inspected. Confirm which area meter-4 serves."
 ---
 
-Raised by hand from the September 2026 AMI data and the Waterfluence daily chart, ahead of the Phase 3 leak engine.
+Raised by hand from the September and October 2026 AMI data, ahead of the Phase 3 leak engine.
 
-Fall 2024 had a similar jump on this meter (130 thousand gallons for the 2024-11-13 to 2024-12-12 read period against a usual 30 to 50), so this may be seasonal overseed watering. Which area meter-4 serves is not yet known.
+The 2026-10-02 to 10-04 event is hourly reads that vary slightly hour to hour (300 to 311 gallons), so it is real flow, not filled-in hours. On 2026-09-18 and 09-22 several hours repeat one identical value, which means Waterfluence filled in missed reads; daily totals are still exact.
 
-Note: some hours in the AMI data repeat the exact same value (for example 1,405.34 gallons for each of 7 hours on 2026-09-18). Waterfluence appears to spread a block of missed reads evenly across hours, so hour-by-hour timing on those days is approximate; daily totals are not affected.
+Fall 2024 had a similar jump on this meter (130 thousand gallons for the 2024-11-13 to 2024-12-12 read period against a usual 30 to 50). That may be the same problem or overseed watering.
