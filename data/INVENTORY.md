@@ -19,6 +19,7 @@ Full transcriptions of every file below are in `/sources/` (see `sources/README.
 | `waterfluence/energy-star-report-2026-09-30.csv` | Usage per Mesa read period, 4 meters | all 4 | 2023-09-15 to 2026-08-12 (35 periods per meter) | `billing-periods/meter-*.md` | Unit is thousand gallons, confirmed by the Waterfluence monthly chart |
 | `waterfluence/ami-report-outdoor-2026-09-30.csv` | Hourly AMI gallons, 4 meters | all 4 | 2026-07-03 to 2026-09-30 | `usage/meter-*/2026.md` (daily totals) | Gaps: meter-3 has no reads on 22 of 90 days; other meters miss scattered hours |
 | (screenshot in chat) | Waterfluence dashboard, Monthly 1000 Gallons chart with budget band | all (combined) | 2023-10 to 2026-09 shown; history back to 2021 | `sources/waterfluence/monthly-chart-2026-09-30.md` | Confirms the usage unit; image not saved |
+| (screenshot in chat) | Waterfluence dashboard, Daily Gallons by meter | all 4 | 2026-09-08 to 2026-10-06 | `sources/waterfluence/daily-chart-2026-10-06.md`, flag `2026-09-meter-4-step-change` | Matches AMI export on overlapping days; October values read by eye only |
 | `maps/areas-aerial.webp` | Aerial with 5 named areas (A to E), square footages, slope note | n/a | n/a | `areas.md` | Gross common-area square footage (no homeowner lots, confirmed by Jennifer 2026-10-06); not irrigated area |
 
 The P&Ls also contain bank account digits and owner names (construction deposits). Those were not copied into `/data/`.
@@ -44,6 +45,8 @@ HOA water spend (account 50110, Water - Irrigation, all 4 meters combined):
 * Waterfluence read-period usage (thousand gallons) for read periods ending in each calendar year: 2024: 7,053; 2025: 6,356. Meter-1 is about half of all use and meter-2 about 30%. Gallons fell about 10% from 2024 to 2025 while P&L water dollars stayed flat, which points to a price increase. This is preliminary until rates and sample bills are in.
 * Read-period patterns worth checking against events: meter-1 used 28 units in the 2024-09-13 to 2024-10-11 period and then 717 the next period (largest of any period), and 0 in 2023-11-15 to 2023-12-14. Meter-2 used 0 in 2023-09-15 to 2023-10-16. These look like overseed shutoff and grow-in, but that is unconfirmed. Meter-4 used 130 in 2024-11-13 to 2024-12-12 against a usual 30 to 50.
 * Hourly AMI (July to September 2026): meter-1 shows a steady low flow of about 3 gallons per hour in 593 of 2,002 reported hours, and on 13 days with at least 20 hours of reads its flow never reached zero. That is the never-zero pattern the leak engine looks for. At 3 gallons per hour it is roughly 26,000 gallons a year, small in dollars, but it may point to a valve that does not fully close. Meters 3 and 4 also show watering during daytime hours.
+* Meter-4 jumped from a median of 75 gallons a day (July and August 2026) to 12,626 on 2026-09-18, 8,759 on 2026-09-22, and about 5,000 to 7,000 a day on 2026-10-02 to 10-04 (Waterfluence chart). Logged as a suggested flag in `data/flags/2026-09-meter-4-step-change.md`. A similar jump happened in fall 2024.
+* Some AMI hours repeat an identical value across several hours. These are filled-in hours, so hourly timing on those days is approximate. Daily totals are unaffected.
 * These are P&L totals, not bills. They may follow payment dates rather than service periods, and they cannot split cost into price, volume, and fees. Bills are still required.
 
 ## Coverage by meter
@@ -96,6 +99,7 @@ Ranked by what unblocks the most. Items 1 and 2 are required before any engine w
 21. Is the Waterfluence usage unit thousand gallons? (Answered: yes, per the Waterfluence monthly chart.)
 22. Do the AMI timestamps mark the start or the end of each hour?
 23. Was meter-1 shut off in fall 2023 and fall 2024 for overseeding, and is that what the near-zero periods are?
+24. What changed on meter-4 around 2026-09-18 (overseed watering, schedule change, manual run, or a stuck valve)?
 
 ## Unknown values in /data/ right now
 
