@@ -178,7 +178,10 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
                 </p>
                 <dl className="mt-4 space-y-2 text-sm">
                   <Row term="Where it is">{m.location ?? <Missing what="Location" />}</Row>
-                  <Row term="Waters">{m.areas_served?.length ? m.areas_served.map((a) => areaNames[a]?.name ?? a).join(', ') : <Missing what="Areas served" />}</Row>
+                  <Row term="Waters">
+                    {m.areas_served?.length ? m.areas_served.map((a) => areaNames[a]?.name ?? a).join(', ') : <Missing what="Areas served" />}
+                    {m.areas_served_note && <span className="mt-1 block text-ink-2">{m.areas_served_note}</span>}
+                  </Row>
                   <Row term="Mesa account">{m.account_last4 ? `ending ${m.account_last4}` : <Missing what="Account" />}</Row>
                   <Row term="Meter size">{m.size_inches ? `${m.size_inches} inch` : <Missing what="Size" />}</Row>
                 </dl>

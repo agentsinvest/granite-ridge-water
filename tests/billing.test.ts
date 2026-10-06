@@ -72,7 +72,7 @@ describe('calculateBill', () => {
 describe('reconciliation gate', () => {
   const r = reconcileAll(data)
   it('reconciles at least the required share of bills', () => {
-    expect(r.total).toBe(48)
+    expect(r.total).toBeGreaterThanOrEqual(52)
     expect(r.ratePercent).toBeGreaterThanOrEqual(r.required)
   })
   it('explains every failure', () => {

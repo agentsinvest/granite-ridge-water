@@ -14,3 +14,12 @@
 
 * `src/engine/billing.ts`: `calculateBill(meter, periodStart, periodEnd, gallons, rates, readPeriods)`, pure TypeScript, whole-cent arithmetic.
 * `scripts/reconcile.ts` (`npm run reconcile`): writes `data/RECONCILIATION.md` and sets each bill's `reconciled` field. The Vitest suite fails if the pass rate drops below the gate, a failure has no explanation, or the report is stale.
+
+## Update: City bill text from the 5-year PDF
+
+* The 18.6 MB PDF in Drive could not be downloaded (connector limit 10 MB; direct download blocked by network policy). Drive's text extraction returned bills dated 2024-12-27 to 2026-08-26 only.
+* Parsed meter blocks are accepted only when reads subtract to the billed gallons, the read days match the dates, five charges sum to the printed total, and the drought and Superfund rules hold. 25 of the summary bills matched line by line; their reads were added. No accepted block conflicted with the summary except meter-3 2025-09, where the City bill shows drought $2.56 and total $248.52; the summary's $2.66 and $248.62 were typos and the bill file is corrected.
+* The two failing bills were late-payment charges (late fee $111.27 + $9.24 tax; delinquent letter $3.00 + $0.25 tax). They are now line items, and reconciliation passes late-payment lines through to the computed total instead of predicting them. Result: 52 of 52 bills pass.
+* Added the four 2026-08 bills from the City text. They were not used to derive the rates, so their passing is an independent check of the rate model.
+* Bills dated December 2024 to July 2025 that parsed cleanly are kept in `sources/` but not added to `data/bills/` yet, because that range is incomplete in the extraction and needs rates before August 2025. They will be added together with the rest of the PDF.
+* Recorded Jennifer's note that the two greenspace meters (1 and 2) also water the surrounding shrubs and trees.
