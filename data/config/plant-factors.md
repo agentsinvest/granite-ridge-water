@@ -41,6 +41,17 @@ Confidence is medium because the areas and the shrub density factor (0.30) are W
 | IE | turf, cool and warm | 0.60 | 0.70 | Waterfluence Default Budget Factors |
 | IE | shrubs, trees, groundcovers, desert adapted plants | 0.75 | 0.75 | Waterfluence Default Budget Factors |
 
+## Reference plant factors (SLIDE and WUCOLS)
+
+| Landscape | Plant factor | Source | Confidence |
+|---|---|---|---|
+| warm-season turf (Bermuda), annual average | 0.60 | WUCOLS turfgrass plant factors, UC Davis (via search, page not opened directly) | medium |
+| cool-season turf (overseeded rye), annual average | 0.80 | WUCOLS turfgrass plant factors, UC Davis (via search, page not opened directly) | medium |
+| desert-adapted plants | 0.30 | SLIDE / ANSI/ASABE S623, UC ANR (via search, page not opened directly) | medium |
+| trees, shrubs, vines, groundcovers (woody) | 0.50 | SLIDE / ANSI/ASABE S623, UC ANR (via search, page not opened directly) | medium |
+
+SLIDE applies the plant factor to the planted (canopy) area and does not divide by irrigation efficiency. The QWEL audit form then multiplies by a run time multiplier, 1 / (0.4 + 0.6 x DU), to cover uneven coverage.
+
 ## Minimums and tree allowance (for turn-down risk notes)
 
 | Item | Value | Source | Confidence |
