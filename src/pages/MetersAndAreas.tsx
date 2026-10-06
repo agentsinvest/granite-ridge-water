@@ -31,6 +31,11 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
   const totalRecent = summaries.reduce((s, m) => s + m.thousandGallons, 0)
   const range = summaries.find((s) => s.from && s.to)
   const metersFor = (areaId: string) => data.meters.filter((m) => m.areas_served?.includes(areaId)).map((m) => m.id)
+  const target = (data.config.site as { annual_target_usd?: { value: number } }).annual_target_usd?.value ?? null
+  const billsFor = (meter: string) => data.bills.filter((b) => b.meter === meter).sort((a, b) => a.bill_date.localeCompare(b.bill_date)).slice(-12)
+  const recentBills = data.meters.flatMap((m) => billsFor(m.id))
+  const billTotal = recentBills.reduce((s, b) => s + b.printed_total, 0)
+  const billRange = recentBills.length ? [recentBills.map((b) => b.bill_date).sort()[0], recentBills.map((b) => b.bill_date).sort().at(-1)!] : null
   const grossTotal = data.areas.rows.reduce((s, r) => s + (r['Gross sq ft'] ?? 0), 0)
 
   if (data.meters.length === 0 && data.areas.rows.length === 0) {
@@ -50,7 +55,14 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
       </p>
 
       <dl className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Stat value={String(data.meters.length)} label="City of Mesa water meters" />
+        <Stat
+          value={billTotal > 0 ? fmt.usd(billTotal) : 'Missing'}
+          label={
+            billRange
+              ? `City water bills, all meters, ${fmt.month(billRange[0])} to ${fmt.month(billRange[1])}${target ? ` (target ${fmt.usd(target)} a year)` : ''}`
+              : 'City water bills'
+          }
+        />
         <Stat
           value={wf ? `${fmt.int(wf.total_sq_ft)} sq ft` : 'Missing'}
           label={wf ? `irrigated landscape, ${fmt.pct(wf.turf_overseed_sq_ft / wf.total_sq_ft)} of it turf (Waterfluence)` : 'irrigated landscape'}
@@ -158,6 +170,7 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
                   <span className="text-lg font-bold">Meter {meterNumber(m.id)}</span>
                   <span className="text-sm text-ink-2">meter number ending {m.meter_number_last4 ?? '????'}</span>
                 </h3>
+                <MeterBills bills={billsFor(m.id)} />
                 <p className="mt-3 text-2xl font-bold">{s && s.thousandGallons > 0 ? fmt.gallons(s.thousandGallons) : 'Missing'}</p>
                 <p className="text-sm text-ink-2">
                   {sh !== null && sh !== undefined ? `${fmt.pct(sh)} of all common-area water` : 'Share unknown'}
@@ -202,6 +215,26 @@ function Stat({ value, label, flag }: { value: string; label: string; flag?: boo
         )}
         {value}
       </dd>
+    </div>
+  )
+}
+
+function MeterBills({ bills }: { bills: SiteData['bills'] }) {
+  if (bills.length === 0) return <p className="mt-3 text-sm text-ink-2"><Missing what="Bills" /></p>
+  const total = bills.reduce((s, b) => s + b.printed_total, 0)
+  const unreconciled = bills.filter((b) => b.reconciled !== 'pass')
+  return (
+    <div className="mt-3">
+      <p className="text-2xl font-bold">{fmt.usd(total)}</p>
+      <p className="text-sm text-ink-2">
+        last {bills.length} City bills, {fmt.month(bills[0].bill_date)} to {fmt.month(bills.at(-1)!.bill_date)}
+      </p>
+      {unreconciled.length > 0 && (
+        <p className="mt-2 inline-flex items-center gap-2 rounded-md border-2 border-serious px-2 py-1 text-xs font-semibold">
+          <span aria-hidden="true">!</span>
+          {unreconciled.length} {unreconciled.length === 1 ? 'bill' : 'bills'} unreconciled
+        </p>
+      )}
     </div>
   )
 }

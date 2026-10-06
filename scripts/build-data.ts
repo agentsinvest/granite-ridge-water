@@ -59,6 +59,8 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
     usage: {},
     financials: {},
     flags: [],
+    rates: [],
+    bills: [],
     events: [],
     investments: [],
     config: { site: {}, plantFactors: {} },
@@ -105,6 +107,17 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
       const flag = check(S.flagSchema, fm, file, text)
       if (`flags/${flag.id}.md` !== rel) fail(file, keyLine(text, 'id'), 'id does not match file name')
       out.flags.push(flag)
+    } else if ((m = rel.match(/^rates\/(\d{4}-\d{2}-\d{2})\.md$/))) {
+      const rate = check(S.rateSchema, fm, file, text)
+      if (rate.applies_from_period_end !== m[1]) fail(file, keyLine(text, 'applies_from_period_end'), 'does not match file name')
+      out.rates.push({ id: m[1], ...rate })
+    } else if ((m = rel.match(/^bills\/(meter-\d+)\/(\d{4}-\d{2})\.md$/))) {
+      const bill = check(S.billSchema, fm, file, text)
+      if (bill.meter !== m[1]) fail(file, keyLine(text, 'meter'), 'meter does not match folder')
+      if (bill.period_end.slice(0, 7) !== m[2]) fail(file, keyLine(text, 'period_end'), 'file name must be the month the period ends')
+      const items = rows(firstTable(p, ['Line item', 'Amount'], file), S.billLineSchema, file)
+      const notes = p.body.match(/^Notes:\s*(.*)$/m)?.[1] ?? ''
+      out.bills.push({ id: rel.slice(0, -3), ...bill, lineItems: items.map((i) => ({ name: i['Line item'], amount: i.Amount })), notes })
     } else if (rel === 'events.md') {
       check(S.eventsFrontmatterSchema, fm, file, text)
       out.events = rows(firstTable(p, ['Date', 'Precision'], file), S.eventRowSchema, file).map((x) => ({
@@ -127,7 +140,10 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
   for (const pin of out.map.meters) if (!meterIds.has(pin.meter)) fail('data/map.md', null, `unknown meter "${pin.meter}"`)
   for (const a of out.map.areas) if (!areaIds.has(a.id)) fail('data/map.md', null, `unknown area "${a.id}"`)
   if (!areaIds.has(out.map.streets.area)) fail('data/map.md', null, `unknown streets area "${out.map.streets.area}"`)
+  for (const b of out.bills) if (!meterIds.has(b.meter)) fail(`data/${b.id}.md`, null, `unknown meter "${b.meter}"`)
   for (const f of out.flags) if (!meterIds.has(f.meter)) fail(`data/flags/${f.id}.md`, null, `unknown meter "${f.meter}"`)
+  out.rates.sort((a, b) => a.id.localeCompare(b.id))
+  out.bills.sort((a, b) => a.id.localeCompare(b.id))
   out.meters.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }))
   return out
 }

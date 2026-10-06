@@ -9,6 +9,7 @@ export function meterNumber(id: string): string {
 
 export const fmt = {
   int: (n: number) => n.toLocaleString('en-US'),
+  usd: (n: number) => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }),
   pct: (f: number) => `${Math.round(f * 100)}%`,
   /** Thousand gallons to a plain-language gallons figure. */
   gallons: (thousand: number) =>

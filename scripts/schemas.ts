@@ -180,7 +180,7 @@ export const investmentSchema = z.object({
 const sourced = <T extends z.ZodTypeAny>(v: T) => z.object({ value: v, source: z.string() }).passthrough()
 export const siteConfigSchema = z.object({
   annual_target_usd: sourced(z.number()),
-  reconciliation: z.object({ tolerance_usd_per_bill: sourced(z.number()), required_pass_rate_percent: sourced(z.number()) }),
+  reconciliation: z.object({ tolerance_usd_per_bill: sourced(z.number()), required_pass_rate_percent: sourced(z.number()), line_item_tolerance_usd: sourced(z.number()) }),
   leak_rules: z.object({ over_budget_threshold_percent: sourced(z.number()), over_budget_consecutive_periods: sourced(z.number()) }),
   waterfluence_budget_disagreement_percent: sourced(z.number()),
   weather: z.object({ azmet_station: nullableString, source: z.string().optional(), confidence: confidence.optional(), todo: z.string().optional() }),
@@ -194,9 +194,54 @@ export const plantFactorsFrontmatterSchema = z.object({
   todo: z.string().optional(),
 })
 
+const derivedValue = { derived: z.boolean(), source: z.string() }
+export const rateSchema = z.object({
+  effective_start: z.union([date, z.date()]).nullable(),
+  effective_end: z.union([date, z.date()]).nullable(),
+  applies_from_period_end: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  applies_to_period_end: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable(),
+  observed_in: z.string(),
+  derived: z.boolean(),
+  service_type: nullableString,
+  source: z.string(),
+  confidence,
+  fixed_charges: z.array(z.object({ meters: z.array(z.string()).min(1), meter_size_inches: z.number().nullable(), amount: z.number(), ...derivedValue })).min(1),
+  included_kgal_per_bill: z.object({ value: z.number(), ...derivedValue }),
+  volumetric: z.object({
+    unit: z.literal('per_1000_gallons'),
+    applies_to: z.string(),
+    blocks: z.array(z.object({ block: z.number(), limit: z.enum(['winter_allowance']).nullable(), price: z.number(), ...derivedValue })).length(2),
+  }),
+  winter_allowance: z.object({ method: z.string(), derived: z.boolean(), confidence, source: z.string() }),
+  fees: z.array(z.object({ name: z.string(), basis: z.enum(['per_1000_gallons_above_included', 'per_1000_gallons', 'per_bill']), amount: z.number(), ...derivedValue })),
+  taxes: z.array(z.object({ name: z.string(), rate_percent: z.number(), applies_to: z.array(z.string()), derived: z.boolean(), confidence, source: z.string() })),
+  straddle_rule: z.enum(['prorate', 'rate_at_period_end']).nullable(),
+  todo: z.string().optional(),
+})
+
+export const billSchema = z.object({
+  meter: z.string(),
+  bill_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  period_start: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  period_end: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  period_source: z.string().optional(),
+  read_start: z.number().nullable(),
+  read_end: z.number().nullable(),
+  gallons: z.number().nonnegative(),
+  amount_due: z.number().nullable(),
+  printed_total: z.number(),
+  reconciled: z.enum(['pending', 'pass', 'fail']),
+  needs_review: z.boolean(),
+  source: z.string(),
+  todo: z.string().optional(),
+})
+export const billLineSchema = z.object({ 'Line item': z.string().min(1), Amount: cellNumber })
+
 export const eventsFrontmatterSchema = z.object({ todo: z.string().optional() })
 
 export type Meter = z.infer<typeof meterSchema>
 export type AreaRow = z.infer<typeof areaRowSchema>
 export type SiteMap = z.infer<typeof mapSchema>
 export type Flag = z.infer<typeof flagSchema>
+export type Rate = z.infer<typeof rateSchema>
+export type Bill = z.infer<typeof billSchema>

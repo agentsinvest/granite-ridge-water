@@ -1,4 +1,4 @@
-import type { AreaRow, Flag, Meter, SiteMap } from './schemas'
+import type { AreaRow, Bill, Flag, Meter, Rate, SiteMap } from './schemas'
 
 export type BillingPeriod = { start: string; end: string; usage: number | null }
 export type DailyUsage = { date: string; gallons: number | null; hours: number | null; minHour: number | null }
@@ -14,6 +14,8 @@ export type SiteData = {
   usage: Record<string, Record<string, DailyUsage[]>>
   financials: Record<string, { lines: FinancialLine[]; needsReview: boolean }>
   flags: Flag[]
+  rates: (Rate & { id: string })[]
+  bills: (Bill & { id: string; lineItems: { name: string; amount: number | null }[]; notes: string })[]
   events: EventRow[]
   investments: Record<string, unknown>[]
   config: { site: Record<string, unknown>; plantFactors: Record<string, unknown> }

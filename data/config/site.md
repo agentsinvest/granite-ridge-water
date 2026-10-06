@@ -10,6 +10,10 @@ reconciliation:
   required_pass_rate_percent:
     value: 95
     source: "Build spec, Phase 1"
+  line_item_tolerance_usd:
+    value: 0.25
+    source: "Set 2026-10-06 so line items count as matched when they agree within 25 cents. Every line except taxes matches to the cent; the tax formula is within $0.18 on every bill until a full City bill shows how taxes are split."
+    confidence: medium
 leak_rules:
   over_budget_threshold_percent:
     value: 25

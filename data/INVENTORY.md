@@ -1,6 +1,6 @@
 # Data inventory
 
-Status as of 2026-10-06: **HOA year-end P&Ls for 2020 to 2025 and an annotated area map received. No 2026 P&L exists yet. No City of Mesa bills or rate documents yet.** Phase 1 (bill conversion and reconciliation) cannot start until the bills and rate documents below are in `/raw/`.
+Status as of 2026-10-06: **HOA year-end P&Ls for 2020 to 2025, an annotated area map, Waterfluence exports and settings, and a summary of 48 City of Mesa bills (all 4 meters, bills dated 2025-08-26 to 2026-07-28) received. No published City rate schedule yet.** Phase 1: rates were derived from the 48 bills and 46 of 48 bills reconcile (see `RECONCILIATION.md`). Bills before August 2025 and the published rate schedule are still needed.
 
 Originals go in `/raw/` (git-ignored, never deployed). Only public-safe extracts go in `/data/`.
 
@@ -25,6 +25,8 @@ Full transcriptions of every file below are in `/sources/` (see `sources/README.
 | (3 screenshots in chat) | Waterfluence Hourly Cubic Feet, Hourly Gallons, Tree & Shrub Environmental Benefits | all | 2026-07 to 2026-10 | `sources/waterfluence/hourly-charts-2026-10-06.md`, `tree-shrub-benefits.md` | Benefits table cites a site Budget Table with tree and shrub area (728,295 ft2 times density factor) |
 | `waterfluence/energy-star-report-2026-10-06.csv` | Usage per Mesa read period, 4 meters | all 4 | 2023-09-15 to 2026-09-14 (36 periods per meter) | `billing-periods/meter-*.md` | Supersedes the 2026-09-30 export; identical on all shared rows |
 | (9 screenshots in chat) | Waterfluence Landscape Map, 4 Controller Maps, Water Budget, Default Budget Factors, Agency, Water Meters | all 4 | map updated about late 2024 | `sources/waterfluence/landscape-and-controller-maps.md`, `water-budget-and-site-settings.md`; `meters/*.md`, `areas.md`, `config/plant-factors.md`, `config/site.md`, `map.md` | Account numbers last 4 only; service addresses kept out of `/data/` |
+| `bill-summary/meter-*.jpg` (4 images) | HOA water usage summary of City of Mesa bills: every charge line, total due, grand total, gallons | all 4 | bills dated 2025-08-26 to 2026-07-28 (12 per meter) | `bills/meter-*/*.md` (48 files), `rates/*.md` (3 derived rate periods); `sources/bills/water-usage-summary-2025-2026.md` | Account and meter columns redacted in saved images. 3 rows do not add up and are marked `needs_review` |
+| (screenshot in chat) | Waterfluence Summary of 1 Sites: landscape characteristics and annual performance | all | last 12 months | `sources/waterfluence/summary-landscape-and-annual-performance.md` | Applied 2.8 ft vs budget 3.0 ft (95%) |
 | `maps/areas-aerial.webp` | Aerial with 5 named areas (A to E), square footages, slope note | n/a | n/a | `areas.md` | Gross common-area square footage (no homeowner lots, confirmed by Jennifer 2026-10-06); not irrigated area |
 
 The P&Ls also contain bank account digits and owner names (construction deposits). Those were not copied into `/data/`.
@@ -56,6 +58,10 @@ HOA water spend (account 50110, Water - Irrigation, all 4 meters combined):
 * Waterfluence also calculates daily cost and inches applied, so it already holds a rate assumption and an irrigated area for each meter.
 * Meter locations (Waterfluence Controller Map): meter-1 (...8300) and meter-2 (...4031), the two largest users, sit at the northeast and northwest corners of the park; meter-3 (...4706) is at the entry gate; meter-4 (...5793) is on the east side at the end of the interior strip. Which areas each meter waters is still unknown.
 * Waterfluence's budget uses AZMET Encanto weather, shrub 728,295 ft2 at 12% of ETo and turf 86,354 ft2 at 86% of ETo (20% overall), and prices water at a flat $8.35 per thousand gallons.
+* City bills, August 2025 to July 2026: $50,269.55 for 6,496,000 gallons (meter-1 $27,738.81, meter-2 $16,328.94, meter-3 $3,165.99, meter-4 $3,035.81). That is about $20,300 above the $30,000 target.
+* Rate structure, derived from the bills: a service charge, the first 3,000 gallons included, then two price blocks split at each meter's winter allowance (its December to February average). Block prices rose from $4.76 and $7.15 per thousand gallons to $5.71 and $8.46 (read periods ending from 2026-02-12) and to $5.95 and $8.94 (from 2026-05-13): about 25% in six months. Water above the winter allowance costs about 50% more.
+* Because the allowance comes from winter use, winter watering (including overseed and leaks) raises the following year's cheaper block. The fall 2024 spike on meter-4 raised its 2025 allowance; cutting winter water lowers next year's allowance. Scenarios must model this.
+* Waterfluence rates the site at 95% of its water budget (2.8 ft applied vs 3.0 ft budget over the density-adjusted area), so on Waterfluence's own factors the landscape is not heavily overwatered overall. Reaching $30,000 means using less than Waterfluence's budget or changing the landscape factors, not only fixing leaks.
 * These are P&L totals, not bills. They may follow payment dates rather than service periods, and they cannot split cost into price, volume, and fees. Bills are still required.
 
 ## Coverage by meter
@@ -74,8 +80,8 @@ Meter labels meter-1 to meter-4 are labels only. Meter-1 and meter-2 are the two
 
 Ranked by what unblocks the most. Items 1 and 2 are required before any engine work.
 
-1. **City of Mesa bills, all 4 meters, 2021 to now.** Most urgent: 2023 through 2026 to date, since the jump is between 2023 and 2024 and we need bills on both sides of it. PDFs or exports from the Mesa utility portal. Every page, including any page with rate or fee notices. About 240 bills total if billed monthly.
-2. **City of Mesa rate schedules.** Published rates and fees for irrigation / landscape water for 2025, 2026, and 2027 (the adopted schedule and any approved future increases). Older schedules back to 2021 if available. If older ones cannot be found, we will derive them from bills and mark them "derived."
+1. **More City of Mesa bill history.** Received: August 2025 to July 2026 for all 4 meters. Most useful next: the same summary for 2023 to July 2025 (covers the 2023 to 2024 jump), and one full City bill PDF or screenshot (to confirm meter size, reads, and how taxes are split). PDFs or exports from the Mesa utility portal. Every page, including any page with rate or fee notices. About 240 bills total if billed monthly.
+2. **City of Mesa rate schedules.** Rates are now derived from bills; the published schedule would confirm them. Published rates and fees for irrigation / landscape water for 2025, 2026, and 2027 (the adopted schedule and any approved future increases). Older schedules back to 2021 if available. If older ones cannot be found, we will derive them from bills and mark them "derived."
 3. **Waterfluence settings and history.** Most useful: the site **Budget Table** (cited by the Tree & Shrub Environmental Benefits panel), plus the site or meter setup page showing irrigated square footage, plant type, and budget settings for each meter, and the rate Waterfluence uses for its $ Cost view. Also: received read-period usage from 2023-09 and hourly AMI from 2026-07-03. The dashboard shows history back to 2021, so please export: read-period usage from 2021 (covers the 2023 to 2024 jump), the monthly budget numbers behind the green band, the $ Cost view if it can be exported, and the longest AMI history available.
 4. **Meter facts.** Which area each meter (...8300, ...4031, ...4706, ...5793) serves, plus for each meter: a plain name (for example, "entry" or "north greenspace"), last 4 of the Mesa account, meter size, service type as Mesa lists it, and which controller and stations it feeds.
 5. **Zone list with schedules.** For each controller station: what it waters, plant type, irrigation type (spray, rotor, drip, bubbler), approximate square footage, whether it has trees, whether it is turf greenspace, and the current schedule (days, run minutes, start times, seasonal adjust). A landscaper's zone map or controller printout works.
@@ -85,12 +91,12 @@ Ranked by what unblocks the most. Items 1 and 2 are required before any engine w
 
 ## Open questions
 
-1. Is each meter billed monthly, and on what read cycle? Does it differ by meter?
+1. Is each meter billed monthly, and on what read cycle? Does it differ by meter? (Answered: monthly, same read cycle for all four.)
 2. Do the 4 meters share one Mesa account or have separate accounts? (Answered: separate, consecutive accounts ending 865-1 to 868-1.)
 3. Were all 4 meters in service for the full 5 years, or was any meter added (the spec mentions "new meters and fees" as a possible cost driver)?
-4. Does Mesa bill irrigation meters on a flat volumetric rate, tiers, or seasonal rates? (Answer from the rate documents, not assumed.)
+4. Does Mesa bill irrigation meters on a flat volumetric rate, tiers, or seasonal rates? (Derived from bills: two blocks split at a per-meter winter allowance. Confirm from the rate schedule.)
 5. How does Mesa bill a period that crosses a rate change: prorated or at the rate in effect at period end? (If the documents are silent, we test both against real bills.)
-6. Which taxes and fees appear on the bills, and which charges are they applied to?
+6. Which taxes and fees appear on the bills, and which charges are they applied to? (Partly answered: water drought, Superfund, $7.32 other fees, and about 8.29% taxes. The exact tax split needs one full City bill.)
 7. Does Waterfluence calculate its own water budget, and which weather source does it use? (Answered: yes, Landscape Coefficient Method with AZMET Encanto weather. See `config/plant-factors.md`.)
 8. Which AZMET station is closest and representative for Granite Ridge? (Partly answered: Waterfluence uses Encanto, in central Phoenix. Check for a closer station once azmet.arizona.edu is reachable.)
 9. The P&Ls show overseeding every year ($2,520.00 to $4,137.00). Is the turf Bermuda overseeded with winter rye, and in which months does overseed watering run?
@@ -109,6 +115,8 @@ Ranked by what unblocks the most. Items 1 and 2 are required before any engine w
 22. Do the AMI timestamps mark the start or the end of each hour?
 23. Was meter-1 shut off in fall 2023 and fall 2024 for overseeding, and is that what the near-zero periods are?
 24. Did someone shut off meter-4 on 2026-09-18 (about 7 PM), 09-22 (about 10 AM), and 10-04 (about 4 PM)? Which valve runs at 2 AM on meter-4, and has it been inspected?
+25. What were the $120.51 extra on meter-1's 2025-09-26 bill and the $3.25 extra on its 2025-10-24 bill (grand total above the listed charges in the summary)?
+26. What are Waterfluence's "Lost $" ($3.6k) and "Score" (98)?
 
 ## Unknown values in /data/ right now
 
@@ -118,4 +126,6 @@ Every field below is `null` with a `todo` note until a source is in hand.
 * `areas.md`: zone membership and irrigated square footage for all 5 areas.
 * `events.md`: all events except the 2022 rebate (date known to the year only).
 * `config/plant-factors.md`: minimum plant factors, tree allowance, and our own effective rainfall method (site factors now from Waterfluence).
+* `bills/*`: meter reads (not in the bill summary); bills before August 2025.
+* `rates/*`: City effective dates, meter sizes, service type, and the exact tax split.
 * `investments/*.md`: all effect values, ranges, costs, and lifespans (7 entries).
