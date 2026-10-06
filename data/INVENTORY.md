@@ -90,13 +90,14 @@ Meter labels meter-1 to meter-4 are labels only. Meter-1 and meter-2 are the two
 Ranked by what unblocks the most.
 
 1. **Nothing more needed for bills right now.** The full PDF is in. About 50 meter-bills did not OCR cleanly and most 2020 to 2022 bills lack readable meter reads; these can be filled by reading the scanned pages directly.
-2. **Which meter waters what.** Meters 1 and 2 water the park turf and nearby shrubs and trees; still needed: how far their zones reach, and which meter waters the west and south desert, the perimeter, and the interior strip. A controller printout or the landscaper's zone list works.
-3. **Zone list with schedules.** For each controller station: what it waters, plant type, irrigation type (spray, rotor, drip, bubbler), approximate square footage, whether it has trees, and the current schedule (days, run minutes, start times, seasonal adjust).
-4. **Meter-4 valve.** Whether the landscaper shut water off on 2026-09-18, 09-22, and 10-04, and whether the 2 AM valve has been inspected.
-5. **City of Mesa rate schedules.** Published rates and fees for landscape water (2025 to 2027). Rates are now derived from bills; the published schedule would confirm them and give the City's effective dates.
-6. **Waterfluence history and settings.** Read-period usage back to 2021, the monthly budget numbers behind the green band, and the longest AMI history available.
-7. **Event history.** Dates of leak finds and repairs, controller or schedule changes, landscape changes, and overseeding. Rough dates are fine. Also the invoice for the 2024 reserve landscape and irrigation project ($15,522.41).
-8. **Quotes.** Any quotes or proposals for controllers, flow sensors, nozzles, audits, or other investments.
+2. **Park smart controller settings.** Jennifer believes the park meters run smart controllers. Make and model, and a screenshot or printout of each zone's settings (plant type, area, precipitation rate, efficiency, seasonal adjust, run times, overseed program).
+3. **Which meter waters what.** Meters 1 and 2 water the park turf and nearby shrubs and trees; still needed: how far their zones reach, and which meter waters the west and south desert, the perimeter, and the interior strip. A controller printout or the landscaper's zone list works.
+4. **Zone list with schedules.** For each controller station: what it waters, plant type, irrigation type (spray, rotor, drip, bubbler), approximate square footage, whether it has trees, and the current schedule (days, run minutes, start times, seasonal adjust).
+5. **Meter-4 valve.** Whether the landscaper shut water off on 2026-09-18, 09-22, and 10-04, and whether the 2 AM valve has been inspected.
+6. **City of Mesa rate schedules.** Published rates and fees for landscape water (2025 to 2027). Rates are now derived from bills; the published schedule would confirm them and give the City's effective dates.
+7. **Waterfluence history and settings.** Read-period usage back to 2021, the monthly budget numbers behind the green band, and the longest AMI history available.
+8. **Event history.** Dates of leak finds and repairs, controller or schedule changes, landscape changes, and overseeding. Rough dates are fine. Also the invoice for the 2024 reserve landscape and irrigation project ($15,522.41).
+9. **Quotes.** Any quotes or proposals for controllers, flow sensors, nozzles, audits, or other investments.
 
 ## Open questions
 

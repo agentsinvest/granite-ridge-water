@@ -47,7 +47,16 @@ A 10% cut on meter 1 alone would repay $6,000 in under two years.
 1. Get the quote in writing: what the $6,000 buys (controller, stations, sensors, installation), annual subscription, and whether it includes a flow sensor and master valve.
 2. Confirm which zones meter 4 and the new controller would run.
 3. Repair or replace the sticking valve on meter 4 now regardless.
-4. Ask whether the park meters' controllers are already smart; if not, price a controller there.
+4. Jennifer believes the park meters already run smart controllers (update below). If so, check how those are set up before buying another.
 5. Check for a City of Mesa rebate; the HOA booked $1,138.60 of "Landscape Irrigation Equipment Incentives" in 2022, so it may already have a smart controller somewhere.
 
 Caveat: cutting winter water also lowers next year's cheaper-block allowance (the City sets it from December to February use), which trims savings slightly; the figures above hold the current allowance fixed.
+
+## Update: the park meters may already have smart controllers
+
+Jennifer believes the park meters (1 and 2) already run smart, weather-based controllers. If so:
+
+* The park is where the overwatering check found the most likely excess (5.65 million gallons against an estimated 3.0 to 4.4 million with typical sprinkler losses). Smart controllers alone have not prevented it, so a new smart controller on the strip should not be expected to deliver large savings by itself.
+* The useful step for the park is a settings check, not new hardware: what plant type, area, soil, slope, sprinkler precipitation rate, and efficiency each zone is set to; whether the controller is actually running in weather-based mode or on a fixed schedule; any seasonal-adjust or water-budget override above 100%; manual runs; and how overseed watering is programmed. These settings decide how much a smart controller waters.
+* It is still possible that meters 1 and 2 water more than the park (which would explain their volume). The controller setup screens would show this too.
+* The $1,138.60 irrigation equipment incentive the HOA booked in 2022 may have been for these controllers.
