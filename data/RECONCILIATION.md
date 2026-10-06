@@ -6,7 +6,7 @@ Each bill in `data/bills/` is recomputed from the rate files in `data/rates/` an
 
 **52 of 52 priced bills pass (100.0%). Required: 95%. Gate met.**
 
-0 of 52 bills are not priced yet (no derived rate covers their period, or their period or gallons are not known exactly). They are listed at the end and are not counted as passing.
+214 of 266 bills are not priced yet (no derived rate covers their period, or their period or gallons are not known exactly). They are listed at the end and are not counted as passing.
 
 Important: the rate files were derived from these same bills, so passing shows the rate model is internally consistent with the bills. It is not an independent check against a published City of Mesa rate schedule. Confirm against the schedule when it is available.
 
@@ -75,3 +75,217 @@ None.
 
 | Bill | Bill date | Printed total | Why |
 |---|---|---|---|
+| meter-1/2019-12 | 2019-12-26 | 506.69 | read period not known |
+| meter-1/2020-01 | 2020-01-28 | 514.21 | no derived rate yet for a period ending 2020-01-14 |
+| meter-1/2020-02 | 2020-03-02 | 502.94 | gallons not known exactly |
+| meter-1/2020-03 | 2020-04-02 | 491.67 | read period not known |
+| meter-1/2020-04 | 2020-04-30 | 693.27 | no derived rate yet for a period ending 2020-04-16 |
+| meter-1/2020-07 | 2020-07-28 | 2294.28 | read period not known |
+| meter-1/2020-08 | 2020-08-26 | 2456.01 | read period not known |
+| meter-1/2020-09 | 2020-09-25 | 1850.11 | read period not known |
+| meter-1/2020-10 | 2020-10-26 | 165.08 | read period not known |
+| meter-1/2020-11 | 2020-11-24 | 3697.15 | no derived rate yet for a period ending 2020-11-12 |
+| meter-1/2020-12 | 2020-12-28 | 1268.85 | gallons not known exactly |
+| meter-1/2021-01 | 2021-01-27 | 755.45 | read period not known |
+| meter-1/2021-02 | 2021-02-26 | 710.87 | read period not known |
+| meter-1/2021-06 | 2021-06-30 | 2228.81 | read period not known |
+| meter-1/2021-07 | 2021-07-28 | 2476.24 | read period not known |
+| meter-1/2021-08 | 2021-08-25 | 1775.68 | read period not known |
+| meter-1/2021-09 | 2021-09-24 | 556.79 | read period not known |
+| meter-1/2021-10 | 2021-10-25 | 152.43 | read period not known |
+| meter-1/2021-12 | 2021-12-27 | 1053.59 | read period not known |
+| meter-1/2022-02 | 2022-02-28 | 494.79 | read period not known |
+| meter-1/2022-03 | 2022-04-01 | 896.50 | gallons not known exactly |
+| meter-1/2022-04 | 2022-04-29 | 1152.05 | read period not known |
+| meter-1/2022-05 | 2022-05-31 | 3920.04 | read period not known |
+| meter-1/2022-06 | 2022-07-01 | 2433.84 | gallons not known exactly |
+| meter-1/2022-07 | 2022-07-29 | 12276.29 | read period not known |
+| meter-1/2022-09 | 2022-09-27 | 901.79 | no derived rate yet for a period ending 2022-09-15 |
+| meter-1/2022-11 | 2022-11-28 | 3807.20 | read period not known |
+| meter-1/2022-12 | 2022-12-28 | 470.45 | gallons not known exactly |
+| meter-1/2023-01 | 2023-01-27 | 316.69 | read period not known |
+| meter-1/2023-04 | 2023-04-28 | 1226.86 | read period not known |
+| meter-1/2023-06 | 2023-06-30 | 2082.74 | read period not known |
+| meter-1/2023-07 | 2023-07-28 | 1354.14 | read period not known |
+| meter-1/2023-08 | 2023-08-28 | 1376.67 | read period not known |
+| meter-1/2023-09 | 2023-09-27 | 51.00 | read period not known |
+| meter-1/2023-10 | 2023-10-27 | 2877.58 | no derived rate yet for a period ending 2023-10-16 |
+| meter-1/2023-11 | 2023-11-29 | 2681.17 | no derived rate yet for a period ending 2023-11-14 |
+| meter-1/2023-12 | 2023-12-29 | 58.32 | no derived rate yet for a period ending 2023-12-14 |
+| meter-1/2024-03 | 2024-04-01 | 1512.40 | no derived rate yet for a period ending 2024-03-15 |
+| meter-1/2024-04 | 2024-04-29 | 1294.77 | no derived rate yet for a period ending 2024-04-15 |
+| meter-1/2024-06 | 2024-06-28 | 4009.97 | no derived rate yet for a period ending 2024-06-13 |
+| meter-1/2024-07 | 2024-07-30 | 4606.79 | no derived rate yet for a period ending 2024-07-15 |
+| meter-1/2024-08 | 2024-08-28 | 3488.16 | no derived rate yet for a period ending 2024-08-13 |
+| meter-1/2024-09 | 2024-09-27 | 1980.63 | no derived rate yet for a period ending 2024-09-12 |
+| meter-1/2024-11 | 2024-11-25 | 5063.43 | no derived rate yet for a period ending 2024-11-12 |
+| meter-1/2024-12 | 2024-12-27 | 1617.96 | no derived rate yet for a period ending 2024-12-12 |
+| meter-1/2025-01 | 2025-01-27 | 814.42 | no derived rate yet for a period ending 2025-01-13 |
+| meter-1/2025-03 | 2025-03-31 | 713.54 | no derived rate yet for a period ending 2025-03-13 |
+| meter-1/2025-04 | 2025-04-25 | 1419.51 | no derived rate yet for a period ending 2025-04-14 |
+| meter-1/2025-05 | 2025-05-27 | 2208.45 | no derived rate yet for a period ending 2025-05-13 |
+| meter-1/2025-06 | 2025-06-30 | 2780.52 | no derived rate yet for a period ending 2025-06-12 |
+| meter-1/2025-07 | 2025-07-28 | 14853.10 | no derived rate yet for a period ending 2025-07-15 |
+| meter-2/2019-12 | 2019-12-26 | 318.75 | read period not known |
+| meter-2/2020-01 | 2020-01-28 | 296.25 | read period not known |
+| meter-2/2020-02 | 2020-03-02 | 284.97 | read period not known |
+| meter-2/2020-03 | 2020-04-02 | 266.20 | read period not known |
+| meter-2/2020-04 | 2020-04-30 | 404.26 | read period not known |
+| meter-2/2020-06 | 2020-06-30 | 1516.21 | read period not known |
+| meter-2/2020-07 | 2020-07-28 | 1477.66 | read period not known |
+| meter-2/2020-08 | 2020-08-26 | 1639.21 | read period not known |
+| meter-2/2020-09 | 2020-09-25 | 1279.37 | read period not known |
+| meter-2/2020-10 | 2020-10-26 | 102.72 | read period not known |
+| meter-2/2020-11 | 2020-11-24 | 2298.37 | read period not known |
+| meter-2/2020-12 | 2020-12-28 | 590.44 | read period not known |
+| meter-2/2021-01 | 2021-01-27 | 462.09 | no derived rate yet for a period ending 2021-01-13 |
+| meter-2/2021-02 | 2021-02-26 | 456.61 | read period not known |
+| meter-2/2021-03 | 2021-03-31 | 425.47 | gallons not known exactly |
+| meter-2/2021-04 | 2021-04-28 | 429.32 | no derived rate yet for a period ending 2021-04-15 |
+| meter-2/2021-05 | 2021-05-28 | 763.04 | read period not known |
+| meter-2/2021-06 | 2021-06-30 | 1457.80 | gallons not known exactly |
+| meter-2/2021-07 | 2021-07-28 | 1255.15 | read period not known |
+| meter-2/2021-08 | 2021-08-25 | 907.77 | read period not known |
+| meter-2/2021-09 | 2021-09-24 | 329.19 | read period not known |
+| meter-2/2021-10 | 2021-10-25 | 152.04 | read period not known |
+| meter-2/2021-11 | 2021-11-23 | 1108.88 | gallons not known exactly |
+| meter-2/2022-01 | 2022-01-26 | 343.26 | read period not known |
+| meter-2/2022-02 | 2022-02-28 | 298.38 | read period not known |
+| meter-2/2022-03 | 2022-04-01 | 352.33 | read period not known |
+| meter-2/2022-04 | 2022-04-29 | 606.22 | read period not known |
+| meter-2/2022-05 | 2022-05-31 | 984.65 | no derived rate yet for a period ending 2022-05-12 |
+| meter-2/2022-06 | 2022-07-01 | 1491.27 | read period not known |
+| meter-2/2022-07 | 2022-07-29 | 1497.38 | read period not known |
+| meter-2/2022-08 | 2022-08-29 | 913.84 | read period not known |
+| meter-2/2022-09 | 2022-09-27 | 392.80 | read period not known |
+| meter-2/2022-11 | 2022-11-28 | 490.25 | read period not known |
+| meter-2/2022-12 | 2022-12-28 | 290.87 | read period not known |
+| meter-2/2023-01 | 2023-01-27 | 202.63 | read period not known |
+| meter-2/2023-03 | 2023-04-03 | 173.67 | read period not known |
+| meter-2/2023-04 | 2023-04-28 | 662.18 | read period not known |
+| meter-2/2023-05 | 2023-05-30 | 1072.85 | no derived rate yet for a period ending 2023-05-15 |
+| meter-2/2023-06 | 2023-06-30 | 280.13 | no derived rate yet for a period ending 2023-06-15 |
+| meter-2/2023-07 | 2023-07-28 | 58.32 | read period not known |
+| meter-2/2023-08 | 2023-08-28 | 58.32 | read period not known |
+| meter-2/2023-09 | 2023-09-27 | 51.00 | read period not known |
+| meter-2/2023-10 | 2023-10-27 | 51.00 | no derived rate yet for a period ending 2023-10-16 |
+| meter-2/2023-12 | 2023-12-29 | 417.11 | no derived rate yet for a period ending 2023-12-14 |
+| meter-2/2024-02 | 2024-03-01 | 173.67 | no derived rate yet for a period ending 2024-02-15 |
+| meter-2/2024-03 | 2024-04-01 | 401.82 | no derived rate yet for a period ending 2024-03-15 |
+| meter-2/2024-05 | 2024-05-29 | 1061.12 | no derived rate yet for a period ending 2024-05-14 |
+| meter-2/2024-06 | 2024-06-28 | 2337.21 | no derived rate yet for a period ending 2024-06-13 |
+| meter-2/2024-07 | 2024-07-30 | 2464.35 | no derived rate yet for a period ending 2024-07-15 |
+| meter-2/2024-08 | 2024-08-28 | 1966.60 | no derived rate yet for a period ending 2024-08-13 |
+| meter-2/2024-09 | 2024-09-27 | 1106.15 | no derived rate yet for a period ending 2024-09-12 |
+| meter-2/2024-10 | 2024-10-25 | 88.44 | no derived rate yet for a period ending 2024-10-11 |
+| meter-2/2024-11 | 2024-11-25 | 3004.78 | no derived rate yet for a period ending 2024-11-12 |
+| meter-2/2024-12 | 2024-12-27 | 928.39 | no derived rate yet for a period ending 2024-12-12 |
+| meter-2/2025-01 | 2025-01-27 | 437.72 | no derived rate yet for a period ending 2025-01-13 |
+| meter-2/2025-02 | 2025-02-28 | 362.22 | no derived rate yet for a period ending 2025-02-12 |
+| meter-2/2025-03 | 2025-03-31 | 466.87 | no derived rate yet for a period ending 2025-03-13 |
+| meter-2/2025-04 | 2025-04-25 | 879.22 | no derived rate yet for a period ending 2025-04-14 |
+| meter-2/2025-06 | 2025-06-30 | 1608.64 | no derived rate yet for a period ending 2025-06-12 |
+| meter-2/2025-07 | 2025-07-28 | 2956.53 | no derived rate yet for a period ending 2025-07-15 |
+| meter-3/2019-12 | 2019-12-26 | 87.37 | gallons not known exactly |
+| meter-3/2020-02 | 2020-03-02 | 72.34 | read period not known |
+| meter-3/2020-03 | 2020-04-02 | 85.32 | read period not known |
+| meter-3/2020-04 | 2020-04-30 | 90.84 | gallons not known exactly |
+| meter-3/2020-06 | 2020-06-30 | 1332.13 | read period not known |
+| meter-3/2020-07 | 2020-07-28 | 406.77 | read period not known |
+| meter-3/2020-08 | 2020-08-26 | 1488.17 | gallons not known exactly |
+| meter-3/2020-09 | 2020-09-25 | 414.09 | read period not known |
+| meter-3/2020-10 | 2020-10-26 | 204.78 | read period not known |
+| meter-3/2020-11 | 2020-11-24 | 472.86 | read period not known |
+| meter-3/2021-01 | 2021-01-27 | 221.12 | gallons not known exactly |
+| meter-3/2021-02 | 2021-02-26 | 206.28 | read period not known |
+| meter-3/2021-03 | 2021-03-31 | 184.80 | read period not known |
+| meter-3/2021-04 | 2021-04-28 | 161.31 | read period not known |
+| meter-3/2021-06 | 2021-06-30 | 188.28 | read period not known |
+| meter-3/2021-07 | 2021-07-28 | 404.33 | read period not known |
+| meter-3/2021-08 | 2021-08-25 | 695.35 | read period not known |
+| meter-3/2021-09 | 2021-09-24 | 462.22 | read period not known |
+| meter-3/2021-11 | 2021-11-23 | 165.17 | read period not known |
+| meter-3/2021-12 | 2021-12-27 | 204.06 | read period not known |
+| meter-3/2022-03 | 2022-04-01 | 203.94 | read period not known |
+| meter-3/2022-04 | 2022-04-29 | 183.64 | read period not known |
+| meter-3/2022-05 | 2022-05-31 | 338.22 | read period not known |
+| meter-3/2022-06 | 2022-07-01 | 410.25 | read period not known |
+| meter-3/2022-07 | 2022-07-29 | 441.99 | read period not known |
+| meter-3/2022-08 | 2022-08-29 | 305.27 | read period not known |
+| meter-3/2022-09 | 2022-09-27 | 337.01 | read period not known |
+| meter-3/2022-10 | 2022-10-26 | 176.32 | read period not known |
+| meter-3/2022-11 | 2022-11-28 | 263.76 | gallons not known exactly |
+| meter-3/2022-12 | 2022-12-28 | 135.09 | read period not known |
+| meter-3/2023-03 | 2023-04-03 | 79.25 | read period not known |
+| meter-3/2023-04 | 2023-04-28 | 74.83 | no derived rate yet for a period ending 2023-04-14 |
+| meter-3/2023-05 | 2023-05-30 | 138.99 | read period not known |
+| meter-3/2023-07 | 2023-07-28 | 258.22 | read period not known |
+| meter-3/2023-08 | 2023-08-28 | 503.29 | read period not known |
+| meter-3/2023-10 | 2023-10-27 | 556.98 | no derived rate yet for a period ending 2023-10-16 |
+| meter-3/2023-12 | 2023-12-29 | 186.05 | no derived rate yet for a period ending 2023-12-14 |
+| meter-3/2024-01 | 2024-01-30 | 119.82 | no derived rate yet for a period ending 2024-01-16 |
+| meter-3/2024-02 | 2024-03-01 | 70.39 | no derived rate yet for a period ending 2024-02-15 |
+| meter-3/2024-04 | 2024-04-29 | 208.45 | no derived rate yet for a period ending 2024-04-15 |
+| meter-3/2024-06 | 2024-06-28 | 399.87 | no derived rate yet for a period ending 2024-06-13 |
+| meter-3/2024-07 | 2024-07-30 | 521.62 | no derived rate yet for a period ending 2024-07-15 |
+| meter-3/2024-08 | 2024-08-28 | 450.50 | no derived rate yet for a period ending 2024-08-13 |
+| meter-3/2024-11 | 2024-11-25 | 322.50 | no derived rate yet for a period ending 2024-11-12 |
+| meter-3/2024-12 | 2024-12-27 | 165.85 | no derived rate yet for a period ending 2024-12-12 |
+| meter-3/2025-01 | 2025-01-27 | 123.39 | no derived rate yet for a period ending 2025-01-13 |
+| meter-3/2025-02 | 2025-02-28 | 148.65 | no derived rate yet for a period ending 2025-02-12 |
+| meter-3/2025-03 | 2025-03-31 | 138.22 | no derived rate yet for a period ending 2025-03-13 |
+| meter-3/2025-04 | 2025-04-25 | 225.52 | no derived rate yet for a period ending 2025-04-14 |
+| meter-3/2025-07 | 2025-07-28 | 554.15 | no derived rate yet for a period ending 2025-07-15 |
+| meter-4/2019-12 | 2019-12-26 | 432.81 | read period not known |
+| meter-4/2020-01 | 2020-01-28 | 102.38 | read period not known |
+| meter-4/2020-02 | 2020-03-02 | 41.40 | read period not known |
+| meter-4/2020-03 | 2020-04-02 | 41.40 | read period not known |
+| meter-4/2020-04 | 2020-04-30 | 41.40 | read period not known |
+| meter-4/2020-06 | 2020-06-30 | 256.04 | read period not known |
+| meter-4/2020-08 | 2020-08-26 | 658.13 | read period not known |
+| meter-4/2020-09 | 2020-09-25 | 454.33 | read period not known |
+| meter-4/2020-10 | 2020-10-26 | 542.47 | read period not known |
+| meter-4/2020-11 | 2020-11-24 | 382.73 | read period not known |
+| meter-4/2020-12 | 2020-12-28 | 221.11 | read period not known |
+| meter-4/2021-01 | 2021-01-27 | 202.77 | read period not known |
+| meter-4/2021-02 | 2021-02-26 | 255.80 | read period not known |
+| meter-4/2021-03 | 2021-03-31 | 226.78 | read period not known |
+| meter-4/2021-04 | 2021-04-28 | 225.26 | read period not known |
+| meter-4/2021-05 | 2021-05-28 | 211.38 | read period not known |
+| meter-4/2021-06 | 2021-06-30 | 232.58 | read period not known |
+| meter-4/2021-08 | 2021-08-25 | 504.69 | read period not known |
+| meter-4/2021-09 | 2021-09-24 | 533.64 | no derived rate yet for a period ending 2021-09-13 |
+| meter-4/2021-10 | 2021-10-25 | 510.48 | read period not known |
+| meter-4/2021-11 | 2021-11-23 | 195.60 | read period not known |
+| meter-4/2022-02 | 2022-02-28 | 118.95 | read period not known |
+| meter-4/2022-03 | 2022-04-01 | 148.00 | read period not known |
+| meter-4/2022-04 | 2022-04-29 | 387.83 | gallons not known exactly |
+| meter-4/2022-05 | 2022-05-31 | 424.45 | read period not known |
+| meter-4/2022-06 | 2022-07-01 | 461.08 | read period not known |
+| meter-4/2022-07 | 2022-07-29 | 473.28 | read period not known |
+| meter-4/2022-09 | 2022-09-27 | 430.55 | no derived rate yet for a period ending 2022-09-15 |
+| meter-4/2022-11 | 2022-11-28 | 418.34 | read period not known |
+| meter-4/2022-12 | 2022-12-28 | 425.66 | read period not known |
+| meter-4/2023-01 | 2023-01-27 | 271.85 | read period not known |
+| meter-4/2023-03 | 2023-04-03 | 231.63 | read period not known |
+| meter-4/2023-05 | 2023-05-30 | 243.39 | read period not known |
+| meter-4/2023-06 | 2023-06-30 | 280.94 | read period not known |
+| meter-4/2023-09 | 2023-09-27 | 247.13 | no derived rate yet for a period ending 2023-09-14 |
+| meter-4/2023-11 | 2023-11-29 | 294.18 | no derived rate yet for a period ending 2023-11-14 |
+| meter-4/2023-12 | 2023-12-29 | 247.83 | no derived rate yet for a period ending 2023-12-14 |
+| meter-4/2024-01 | 2024-01-30 | 334.63 | no derived rate yet for a period ending 2024-01-16 |
+| meter-4/2024-02 | 2024-03-01 | 234.52 | no derived rate yet for a period ending 2024-02-15 |
+| meter-4/2024-03 | 2024-04-01 | 285.24 | no derived rate yet for a period ending 2024-03-15 |
+| meter-4/2024-04 | 2024-04-29 | 254.35 | no derived rate yet for a period ending 2024-04-15 |
+| meter-4/2024-05 | 2024-05-29 | 278.16 | no derived rate yet for a period ending 2024-05-14 |
+| meter-4/2024-06 | 2024-06-28 | 249.59 | no derived rate yet for a period ending 2024-06-13 |
+| meter-4/2024-08 | 2024-08-28 | 278.16 | no derived rate yet for a period ending 2024-08-13 |
+| meter-4/2024-09 | 2024-09-27 | 230.57 | no derived rate yet for a period ending 2024-09-12 |
+| meter-4/2024-10 | 2024-10-25 | 261.67 | no derived rate yet for a period ending 2024-10-11 |
+| meter-4/2024-11 | 2024-11-25 | 278.16 | no derived rate yet for a period ending 2024-11-12 |
+| meter-4/2024-12 | 2024-12-27 | 832.81 | no derived rate yet for a period ending 2024-12-12 |
+| meter-4/2025-02 | 2025-02-28 | 193.88 | no derived rate yet for a period ending 2025-02-12 |
+| meter-4/2025-03 | 2025-03-31 | 172.89 | no derived rate yet for a period ending 2025-03-13 |
+| meter-4/2025-04 | 2025-04-25 | 188.64 | no derived rate yet for a period ending 2025-04-14 |
+| meter-4/2025-05 | 2025-05-27 | 188.64 | no derived rate yet for a period ending 2025-05-13 |
+| meter-4/2025-06 | 2025-06-30 | 309.33 | no derived rate yet for a period ending 2025-06-12 |

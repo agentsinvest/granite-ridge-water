@@ -23,3 +23,10 @@
 * Added the four 2026-08 bills from the City text. They were not used to derive the rates, so their passing is an independent check of the rate model.
 * Bills dated December 2024 to July 2025 that parsed cleanly are kept in `sources/` but not added to `data/bills/` yet, because that range is incomplete in the extraction and needs rates before August 2025. They will be added together with the rest of the PDF.
 * Recorded Jennifer's note that the two greenspace meters (1 and 2) also water the surrounding shrubs and trees.
+
+## Update: full 5-year PDF by OCR
+
+* Downloaded the full PDF after Jennifer allowed `drive.usercontent.google.com`. It is 334 scanned pages (no text), so Tesseract was installed and every page OCR'd. Scripts are in `scripts/ocr/`.
+* A meter block is accepted only when its charge lines add exactly to the printed total. 253 meter-bills passed; 35 overlapped existing bills and all 35 matched to the cent. 214 new bills (2019-12 to 2025-07) were added. A second OCR pass at 400 dpi produced no additional valid blocks.
+* Reconciliation now separates priced bills (covered by a derived rate) from unpriced ones, so older bills do not fail the gate before their rates are derived. The report lists both.
+* The March 2026 bills are dated 2026-03-31 on the City bills; the HOA summary's 3/21/2026 was a typo.
