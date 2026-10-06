@@ -1,0 +1,12 @@
+# Originals (bills, Waterfluence exports, quotes). Never committed, never deployed.
+/raw/
+*.pdf
+
+node_modules/
+dist/
+src/generated/
+.netlify/
+.env
+.env.*
+.DS_Store
+coverage/
