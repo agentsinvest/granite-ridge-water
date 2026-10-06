@@ -30,6 +30,7 @@ Accuracy is the top priority. Simplicity for neighbors is second. Everything els
 
 * Nothing goes into `/data/` that the HOA would not be comfortable posting publicly: no full Mesa account numbers (last 4 only), no homeowner names or addresses, no bill PDFs, no contact details.
 * Raw bills and Waterfluence exports stay in `/raw/`, which is in `.gitignore` and never deployed.
+* Complete markdown transcriptions of every shared document go in `/sources/` (committed, never parsed or deployed), with homeowner names and personal IDs redacted. See `sources/README.md`.
 * Add `<meta name="robots" content="noindex, nofollow">` and a `robots.txt` disallowing all, so the site does not show up in search results.
 * Footer on every page: "Estimates are based on City of Mesa published rates and HOA records. Bills from the City are the official record."
 

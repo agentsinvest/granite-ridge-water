@@ -6,6 +6,8 @@ Originals go in `/raw/` (git-ignored, never deployed). Only public-safe extracts
 
 ## Source files in hand
 
+Full transcriptions of every file below are in `/sources/` (see `sources/README.md`).
+
 | File in /raw/ | What it is | Meter | Date range | Converted to | Notes |
 |---|---|---|---|---|---|
 | `pl/2020_PL.pdf` | HOA balance sheet and Statement of Revenues and Expenses, December 2020 with year to date | all (combined) | 2020-01-01 to 2020-12-31 | `financials/2020.md` | Text PDF; values verified against text layer |
@@ -14,8 +16,9 @@ Originals go in `/raw/` (git-ignored, never deployed). Only public-safe extracts
 | `pl/2023_PL.pdf` | Same, 2023 | all (combined) | 2023-01-01 to 2023-12-31 | `financials/2023.md` | Text PDF; values verified against text layer |
 | `pl/2024_PL.pdf` | Deposit summary, balance sheet, Statement of Revenues and Expenses, December 2024 with year to date | all (combined) | 2024-01-01 to 2024-12-31 | `financials/2024.md` | Text PDF; values verified against text layer |
 | `pl/2025_PL.pdf` | Balance sheet, Statement of Revenues and Expenses, December 2025 with year to date | all (combined) | 2025-01-01 to 2025-12-31 | `financials/2025.md` | Text PDF; values verified against text layer |
-| `waterfluence/energy-star-report-2026-09-30.csv` | Usage per Mesa read period, 4 meters | all 4 | 2023-09-15 to 2026-08-12 (35 periods per meter) | `billing-periods/meter-*.md` | Unit not printed; inferred as thousand gallons (medium confidence) |
+| `waterfluence/energy-star-report-2026-09-30.csv` | Usage per Mesa read period, 4 meters | all 4 | 2023-09-15 to 2026-08-12 (35 periods per meter) | `billing-periods/meter-*.md` | Unit is thousand gallons, confirmed by the Waterfluence monthly chart |
 | `waterfluence/ami-report-outdoor-2026-09-30.csv` | Hourly AMI gallons, 4 meters | all 4 | 2026-07-03 to 2026-09-30 | `usage/meter-*/2026.md` (daily totals) | Gaps: meter-3 has no reads on 22 of 90 days; other meters miss scattered hours |
+| (screenshot in chat) | Waterfluence dashboard, Monthly 1000 Gallons chart with budget band | all (combined) | 2023-10 to 2026-09 shown; history back to 2021 | `sources/waterfluence/monthly-chart-2026-09-30.md` | Confirms the usage unit; image not saved |
 | `maps/areas-aerial.webp` | Aerial with 5 named areas (A to E), square footages, slope note | n/a | n/a | `areas.md` | Gross common-area square footage (no homeowner lots, confirmed by Jennifer 2026-10-06); not irrigated area |
 
 The P&Ls also contain bank account digits and owner names (construction deposits). Those were not copied into `/data/`.
@@ -38,7 +41,7 @@ HOA water spend (account 50110, Water - Irrigation, all 4 meters combined):
 * In 2024 the HOA spent $15,522.41 from reserves on landscape and irrigation and $10,800.00 on drywell maintenance, the same year water spend jumped.
 * Irrigation repairs: $3,037.00 (2020), $2,251.50 (2021), $7,402.00 (2022), $4,498.30 (2023), $2,555.00 (2024), $3,214.00 (2025).
 * 2022 shows $1,138.60 of "Landscape Irrigation Equipment Incentives" income, which suggests a rebate for irrigation equipment that year.
-* Waterfluence read-period usage (thousand gallons, inferred) for read periods ending in each calendar year: 2024: 7,053; 2025: 6,356. Meter-1 is about half of all use and meter-2 about 30%. Gallons fell about 10% from 2024 to 2025 while P&L water dollars stayed flat, which points to a price increase. This is preliminary until rates and sample bills are in.
+* Waterfluence read-period usage (thousand gallons) for read periods ending in each calendar year: 2024: 7,053; 2025: 6,356. Meter-1 is about half of all use and meter-2 about 30%. Gallons fell about 10% from 2024 to 2025 while P&L water dollars stayed flat, which points to a price increase. This is preliminary until rates and sample bills are in.
 * Read-period patterns worth checking against events: meter-1 used 28 units in the 2024-09-13 to 2024-10-11 period and then 717 the next period (largest of any period), and 0 in 2023-11-15 to 2023-12-14. Meter-2 used 0 in 2023-09-15 to 2023-10-16. These look like overseed shutoff and grow-in, but that is unconfirmed. Meter-4 used 130 in 2024-11-13 to 2024-12-12 against a usual 30 to 50.
 * Hourly AMI (July to September 2026): meter-1 shows a steady low flow of about 3 gallons per hour in 593 of 2,002 reported hours, and on 13 days with at least 20 hours of reads its flow never reached zero. That is the never-zero pattern the leak engine looks for. At 3 gallons per hour it is roughly 26,000 gallons a year, small in dollars, but it may point to a valve that does not fully close. Meters 3 and 4 also show watering during daytime hours.
 * These are P&L totals, not bills. They may follow payment dates rather than service periods, and they cannot split cost into price, volume, and fees. Bills are still required.
@@ -61,7 +64,7 @@ Ranked by what unblocks the most. Items 1 and 2 are required before any engine w
 
 1. **City of Mesa bills, all 4 meters, 2021 to now.** Most urgent: 2023 through 2026 to date, since the jump is between 2023 and 2024 and we need bills on both sides of it. PDFs or exports from the Mesa utility portal. Every page, including any page with rate or fee notices. About 240 bills total if billed monthly.
 2. **City of Mesa rate schedules.** Published rates and fees for irrigation / landscape water for 2025, 2026, and 2027 (the adopted schedule and any approved future increases). Older schedules back to 2021 if available. If older ones cannot be found, we will derive them from bills and mark them "derived."
-3. **More Waterfluence history.** Received: read-period usage from 2023-09 and hourly AMI from 2026-07-03. Still useful: read-period usage before 2023-09 (to cover the 2023 to 2024 jump), the longest AMI history available, and Waterfluence's water budget per meter if it has one.
+3. **More Waterfluence history.** Received: read-period usage from 2023-09 and hourly AMI from 2026-07-03. The dashboard shows history back to 2021, so please export: read-period usage from 2021 (covers the 2023 to 2024 jump), the monthly budget numbers behind the green band, the $ Cost view if it can be exported, and the longest AMI history available.
 4. **Meter facts.** Which area each meter (...8300, ...4031, ...4706, ...5793) serves, plus for each meter: a plain name (for example, "entry" or "north greenspace"), last 4 of the Mesa account, meter size, service type as Mesa lists it, and which controller and stations it feeds.
 5. **Zone list with schedules.** For each controller station: what it waters, plant type, irrigation type (spray, rotor, drip, bubbler), approximate square footage, whether it has trees, whether it is turf greenspace, and the current schedule (days, run minutes, start times, seasonal adjust). A landscaper's zone map or controller printout works.
 6. **Neighborhood areas.** How you think about the parts of the neighborhood (entry, parkways, greenspace, and so on) and which zones belong to each.
@@ -90,7 +93,7 @@ Ranked by what unblocks the most. Items 1 and 2 are required before any engine w
 18. What was the 2024 reserve landscape/irrigation project ($15,522.41), and when was it done? Did water use change before or after it?
 19. Was the 2024 drywell maintenance ($10,800.00) related to irrigation water pooling at the park green?
 20. Why did the water budget drop to $24,006.00 for 2025 after a $44,708.39 actual in 2024?
-21. Is the Waterfluence usage unit thousand gallons? (One Mesa bill for any period in the export settles it.)
+21. Is the Waterfluence usage unit thousand gallons? (Answered: yes, per the Waterfluence monthly chart.)
 22. Do the AMI timestamps mark the start or the end of each hour?
 23. Was meter-1 shut off in fall 2023 and fall 2024 for overseeding, and is that what the near-zero periods are?
 
@@ -100,7 +103,6 @@ Every field below is `null` with a `todo` note until a source is in hand.
 
 * `meters/meter-1.md` to `meter-4.md`: all facts.
 * `areas.md`: zone membership and irrigated square footage for all 5 areas.
-* `financials/2022.md`: needs a second check against the scanned PDF.
 * `events.md`: all events except the 2022 rebate (date known to the year only).
 * `config/site.md`: AZMET station.
 * `config/plant-factors.md`: all plant factors, minimums, efficiencies, and the effective rainfall method.

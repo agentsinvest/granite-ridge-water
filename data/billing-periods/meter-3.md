@@ -2,10 +2,10 @@
 meter: meter-3
 meter_number_last4: "4706"
 unit: thousand_gallons
-unit_source: "Inferred, not printed in the export. Meter-2 (...4031) AMI hourly gallons for 2026-07-16 to 2026-08-12 (no missing hours) sum to 219,995 against 229 units; 2024 and 2025 P&L water dollars divided by total units give $6.34 and $7.12 per unit including fixed charges."
-unit_confidence: medium
+unit_source: "Waterfluence monthly chart is titled Monthly 1000 Gallons and its points match the 4-meter sums of this export (sources/waterfluence/monthly-chart-2026-09-30.md). Also consistent with AMI hourly gallons and P&L dollars."
+unit_confidence: high
 source: "Waterfluence ENERGY STAR report, exported 2026-09-30 (raw/waterfluence/energy-star-report-2026-09-30.csv)"
-todo: "Confirm the unit against one Mesa bill for the same period. Request history before 2023-09-15 if Waterfluence has it."
+todo: "Waterfluence has history back to 2021; export it."
 ---
 
 Usage per City of Mesa billing period, as reported by Waterfluence. One row per read period. No dollar amounts.
