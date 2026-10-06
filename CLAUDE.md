@@ -47,6 +47,7 @@ Each folder has a `README.md` describing its format with one complete example.
   usage/<meter>/<YYYY>.md                 Waterfluence daily totals, one table per year
   weather/<YYYY>.md                       AZMET daily ETo and rain, one table per year
   events.md                               dated log: repairs, leaks, controller and landscape changes
+  financials/<YYYY>.md                    HOA year-end P&L water and landscape lines (cross-check only; bills are the record)
   flags/<flag-id>.md                      leak flags with status
   investments/<investment-slug>.md        catalog of changes and investments that can be modeled
   scenarios/<scenario-slug>.md            saved scenarios
