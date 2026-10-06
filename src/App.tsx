@@ -2,26 +2,30 @@ import { useEffect, useState } from 'react'
 import { data } from './lib/data'
 import { MetersAndAreas } from './pages/MetersAndAreas'
 import { Bills } from './pages/Bills'
+import { WhatIf } from './pages/WhatIf'
 
 const SCREENS = [
   { name: 'Overview', route: null },
   { name: 'How we got here', route: null },
   { name: 'Meters and areas', route: 'meters' },
   { name: 'How much should we use', route: null },
-  { name: 'What if', route: null },
+  { name: 'What if', route: 'what-if' },
   { name: 'Recommended moves', route: null },
   { name: 'Bills', route: 'bills' },
   { name: 'Data freshness', route: null },
 ] as const
 
-type Route = 'meters' | 'bills'
-const readRoute = (): Route => (window.location.hash === '#bills' ? 'bills' : 'meters')
+type Route = 'meters' | 'bills' | 'what-if'
+const ROUTES: Route[] = ['meters', 'bills', 'what-if']
+/** The screen named by the hash, ignoring any ?inputs after it. Anything else is the default screen. */
+const routeOf = (hash: string): Route | null => ROUTES.find((r) => hash.slice(1).split('?')[0] === r) ?? null
+const readRoute = (): Route => routeOf(window.location.hash) ?? 'meters'
 
 export function App() {
   const [route, setRoute] = useState<Route>(readRoute)
   useEffect(() => {
     const onHash = () => {
-      if (window.location.hash === '#bills' || window.location.hash === '#meters') {
+      if (routeOf(window.location.hash)) {
         setRoute(readRoute())
         window.scrollTo(0, 0)
       }
@@ -60,7 +64,7 @@ export function App() {
       </nav>
       <div className="min-w-0 flex-1">
         <main id="main" className="mx-auto max-w-5xl px-4 py-6 md:px-8 md:py-10">
-          {route === 'bills' ? <Bills data={data} /> : <MetersAndAreas data={data} />}
+          {route === 'bills' ? <Bills data={data} /> : route === 'what-if' ? <WhatIf data={data} /> : <MetersAndAreas data={data} />}
         </main>
         <footer className="mx-auto max-w-5xl border-t border-line px-4 py-6 text-sm text-ink-2 md:px-8">
           <p>Estimates are based on City of Mesa published rates and HOA records. Bills from the City are the official record.</p>
