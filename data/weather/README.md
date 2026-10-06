@@ -19,3 +19,7 @@ retrieved_on: 2025-01-15
 |---|---|---|
 | 2024-01-01 | 0.00 | 0.00 |
 ```
+
+## Annual rainfall
+
+`annual-rainfall.md` holds yearly rainfall totals provided by the HOA (table `Year | Rain in | Complete`), separate from the AZMET daily files.

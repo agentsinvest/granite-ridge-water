@@ -249,6 +249,9 @@ export const billSchema = z.object({
 })
 export const billLineSchema = z.object({ 'Line item': z.string().min(1), Amount: cellNumber })
 
+export const annualRainFrontmatterSchema = z.object({ unit: z.literal('inches'), source: z.string(), confidence, todo: z.string().optional() })
+export const annualRainRowSchema = z.object({ Year: z.string().regex(/^\d{4}$/), 'Rain in': cellNumber, Complete: z.enum(['yes', 'no']) })
+
 export const eventsFrontmatterSchema = z.object({ todo: z.string().optional() })
 
 export type Meter = z.infer<typeof meterSchema>

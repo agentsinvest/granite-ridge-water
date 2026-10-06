@@ -17,6 +17,7 @@ export type SiteData = {
   rates: (Rate & { id: string })[]
   bills: (Bill & { id: string; lineItems: { name: string; amount: number | null }[]; notes: string })[]
   events: EventRow[]
+  annualRainfall: { year: number; inches: number | null; complete: boolean }[]
   investments: Record<string, unknown>[]
   config: { site: Record<string, unknown>; plantFactors: Record<string, unknown> }
   openTodos: { file: string; todo: string }[]

@@ -62,6 +62,7 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
     rates: [],
     bills: [],
     events: [],
+    annualRainfall: [],
     investments: [],
     config: { site: {}, plantFactors: {} },
     openTodos: [],
@@ -118,6 +119,9 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
       const items = rows(firstTable(p, ['Line item', 'Amount'], file), S.billLineSchema, file)
       const notes = p.body.match(/^Notes:\s*(.*)$/m)?.[1] ?? ''
       out.bills.push({ id: rel.slice(0, -3), ...bill, lineItems: items.map((i) => ({ name: i['Line item'], amount: i.Amount })), notes })
+    } else if (rel === 'weather/annual-rainfall.md') {
+      check(S.annualRainFrontmatterSchema, fm, file, text)
+      out.annualRainfall = rows(firstTable(p, ['Year', 'Rain in'], file), S.annualRainRowSchema, file).map((r) => ({ year: Number(r.Year), inches: r['Rain in'], complete: r.Complete === 'yes' }))
     } else if (rel === 'events.md') {
       check(S.eventsFrontmatterSchema, fm, file, text)
       out.events = rows(firstTable(p, ['Date', 'Precision'], file), S.eventRowSchema, file).map((x) => ({
