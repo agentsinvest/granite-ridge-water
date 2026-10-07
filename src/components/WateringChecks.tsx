@@ -1,5 +1,5 @@
 import type { SiteData } from '../../scripts/site-data'
-import { meterNumber } from '../lib/data'
+import { meterName } from '../lib/data'
 
 type MeterCheck = NonNullable<SiteData['meters'][number]['checks']>[number]
 
@@ -26,7 +26,7 @@ function Check({ check, meter }: { check: MeterCheck; meter: string }) {
       <p className="text-xs font-semibold uppercase tracking-wide text-ink-2">
         {action ? 'Needs action' : 'Open question'} ·{' '}
         <a href={`#water/${meter}?tab=meters`} className="underline underline-offset-4">
-          Meter {meterNumber(meter)}
+          {meterName(meter)}
         </a>
       </p>
       <p className="mt-1 font-semibold">{check.title}</p>

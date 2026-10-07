@@ -68,7 +68,7 @@ export function savingsOf(baseline: Baseline, rate: RatePeriod, changes: Change[
   return r.ok ? r.baseCost - r.newCost : null
 }
 
-/** Every candidate move with what it saves. Ranking happens on the screen so the greenspace toggle can filter. */
+/** Every candidate move with what it saves. Ranking and grouping happen on the screen. */
 export function buildMoves(data: SiteData, m: Model): Move[] {
   const moves: Move[] = []
   for (const { flag, cost } of m.flags as CostedFlag[]) {

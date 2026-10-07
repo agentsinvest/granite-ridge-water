@@ -1,7 +1,7 @@
 import type { SiteData } from '../../scripts/site-data'
 import type { RatePeriod, ReadPeriod } from '../engine/billing'
 import { leakCost, type EpisodeCost, type LeakCost } from '../engine/leakCost'
-import { fmt, meterNumber } from '../lib/data'
+import { fmt, meterName } from '../lib/data'
 
 type Flag = SiteData['flags'][number]
 export type CostedFlag = { flag: Flag; cost: LeakCost | null }
@@ -76,7 +76,7 @@ function LeakCard({ flag, cost }: CostedFlag) {
           {STATUS_TEXT[flag.status]}
         </span>
         <a href={`#water/${flag.meter}?tab=meters`} className="text-ink-2 underline underline-offset-4">
-          Meter {meterNumber(flag.meter)}
+          {meterName(flag.meter)}
         </a>
       </p>
       <h3 id={headingId} className="mt-3 text-lg font-bold">

@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import type { SiteData } from '../../scripts/site-data'
 import { Bars } from '../components/charts'
-import { Card, GridTable, PageHeader, Pill, Section, Stat, Stats, Sure } from '../components/ui'
+import { Card, GridTable, PageHeader, Pill, Section, Stat, Stats, Sure, Term } from '../components/ui'
 import { runPlan, turfNeedKgal, turfWaterKgal, type YearLevers } from '../engine/quickWins'
-import { fmt, meterNumber } from '../lib/data'
+import { fmt, meterNumber, meterName } from '../lib/data'
 import { RISK, type Model } from '../lib/model'
 import { setQuery } from '../lib/route'
 
@@ -302,7 +302,7 @@ function QuickWinsBody({ data, model, plan, rate, query }: { data: SiteData; mod
                   rows: data.meters.map((m) => {
                     const base = y1.result.ok ? y1.result.meters.find((x) => x.meter === m.id)?.baseCost : undefined
                     return {
-                      label: `Meter ${meterNumber(m.id)}${m.turf_share_percent?.value ? ` (${m.turf_share_percent.value}% turf)` : ''}`,
+                      label: `${meterName(m.id)}${m.turf_share_percent?.value ? ` (${m.turf_share_percent.value}% turf)` : ''}`,
                       cells: [
                         base === undefined ? missing : fmt.usd(base),
                         ...out.map((y) => {
@@ -461,7 +461,7 @@ function QuickWinsBody({ data, model, plan, rate, query }: { data: SiteData; mod
           )}
           <li>{(model.site as unknown as { post_2027_rate_assumption: { label: string } }).post_2027_rate_assumption.label} {plan.notes}</li>
           <li>
-            The City's winter allowance comes from December to February use, so each year is priced as if its steps had been in place all year, including last
+            The City's <Term k="allowance">lower-price allowance</Term> comes from December to February use, so each year is priced as if its steps had been in place all year, including last
             winter.
           </li>
           {turf && (

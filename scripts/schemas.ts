@@ -23,6 +23,7 @@ export const cellDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'must be YYYY-MM
 export const meterSchema = z.object({
   id: z.string().regex(/^meter-\d+$/),
   name: nullableString,
+  name_source: z.string().optional(),
   account_last4: last4,
   meter_number_last4: last4,
   size_inches: z.number().nullable(),

@@ -3,7 +3,7 @@ import type { SiteData } from '../../scripts/site-data'
 import { Bars, METER_COLOR } from '../components/charts'
 import { Empty, Stat, Stats, TableView } from '../components/ui'
 import { filterBills, summarize } from '../engine/history'
-import { fmt, meterNumber } from '../lib/data'
+import { fmt, meterNumber, meterName } from '../lib/data'
 import { setQuery } from '../lib/route'
 
 type Bill = SiteData['bills'][number]
@@ -117,7 +117,7 @@ export function Bills({ data, query }: { data: SiteData; query: URLSearchParams 
             {meters.map((m) => (
               <label key={m} className="flex items-center gap-1.5">
                 <input type="checkbox" className="h-4 w-4" checked={picked.includes(m)} onChange={(e) => setPicked(e.target.checked ? [...picked, m].sort() : picked.filter((x) => x !== m))} />
-                Meter {meterNumber(m)}
+                {meterName(m)}
               </label>
             ))}
           </div>

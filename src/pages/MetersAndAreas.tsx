@@ -3,8 +3,8 @@ import type { SiteData } from '../../scripts/site-data'
 import { SiteMap } from '../components/SiteMap'
 import { costFlags, dollarRange } from '../components/LeakFlags'
 import { Bars, METER_COLOR } from '../components/charts'
-import { TableView } from '../components/ui'
-import { fmt, meterNumber } from '../lib/data'
+import { TableView, HowCalculated } from '../components/ui'
+import { fmt, meterNumber, meterName } from '../lib/data'
 import { recentUsage, shares } from '../engine/usage'
 
 const RECENT_PERIODS = 12
@@ -167,7 +167,7 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
                     <td className="tabular px-4 py-3 text-right">{r['Gross sq ft'] === null ? <Missing what="Size" /> : fmt.int(r['Gross sq ft'])}</td>
                     <td className="tabular px-4 py-3 text-right">{r['Turf sq ft'] === null ? '' : `about ${fmt.int(r['Turf sq ft'])}`}</td>
                     <td className="px-4 py-3">
-                      {metersFor(r['Area id']).length ? metersFor(r['Area id']).map((id) => `Meter ${meterNumber(id)}`).join(', ') : <Missing what="Meter" />}
+                      {metersFor(r['Area id']).length ? metersFor(r['Area id']).map((id) => meterName(id)).join(', ') : <Missing what="Meter" />}
                     </td>
                   </tr>
                 ))}
@@ -183,11 +183,13 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
           </div>
         )}
         {wf && (
+          <HowCalculated>
           <p className="mt-3 max-w-prose text-sm text-ink-2">
             Waterfluence measures {fmt.int(wf.shrub_sq_ft)} sq ft of irrigated shrub and desert landscape and{' '}
             {fmt.int(wf.turf_overseed_sq_ft)} sq ft of overseeded turf. Those figures do not split by area and are a little higher
             than the HOA map; which set the water budget uses is still open.
           </p>
+          </HowCalculated>
         )}
       </section>
 
@@ -195,10 +197,12 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
         <h2 id="meters-heading" className="text-xl font-bold">
           Meters
         </h2>
+        <HowCalculated>
         <p className="mt-1 text-sm text-ink-2">
           Meter numbers are labels used on this site. Water use is metered usage from Waterfluence for the last{' '}
           {RECENT_PERIODS} City read periods.
         </p>
+        </HowCalculated>
         <ul className="mt-4 grid gap-4 md:grid-cols-2">
           {data.meters.map((m) => {
             const s = summaries.find((x) => x.meter === m.id)
@@ -207,7 +211,7 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
             return (
               <li key={m.id} id={m.id} className="scroll-mt-6 rounded-xl bg-surface p-5 ring-1 ring-[var(--ring)]">
                 <h3 className="flex items-baseline gap-3">
-                  <span className="text-lg font-bold">Meter {meterNumber(m.id)}</span>
+                  <span className="text-lg font-bold">{meterName(m.id)}</span>
                   <span className="text-sm text-ink-2">meter number ending {m.meter_number_last4 ?? '????'}</span>
                 </h3>
                 <MeterBills bills={billsFor(m.id)} />

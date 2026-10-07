@@ -1,6 +1,7 @@
+import { HowCalculated } from '../components/ui'
 import { useState } from 'react'
 import type { SiteData } from '../../scripts/site-data'
-import { fmt, meterNumber } from '../lib/data'
+import { fmt, meterNumber, meterName } from '../lib/data'
 import type { RatePeriod } from '../engine/billing'
 import {
   findRuns,
@@ -38,7 +39,7 @@ export function Schedule({ data }: { data: SiteData }) {
     return (
       <section role="alert">
         <h1 className="text-2xl font-bold">Watering schedule</h1>
-        <p className="mt-4 text-ink-2">The watering schedule settings are missing from data/config/site.md, so this page cannot be shown.</p>
+        <p className="mt-4 text-ink-2">The watering schedule settings are missing, so this page cannot be shown right now.</p>
       </section>
     )
   }
@@ -46,7 +47,7 @@ export function Schedule({ data }: { data: SiteData }) {
     return (
       <section>
         <h1 className="text-2xl font-bold">Watering schedule</h1>
-        <p className="mt-4 text-ink-2">No hourly meter reads have been added yet. Add Waterfluence hourly exports to data/hourly to see when each meter waters.</p>
+        <p className="mt-4 text-ink-2">No hourly meter reads are on file yet, so we cannot show when each meter waters.</p>
       </section>
     )
   }
@@ -151,7 +152,7 @@ function MeterSchedule({
   return (
     <li id={`schedule-${meterId}`} className="rounded-xl bg-surface p-5 ring-1 ring-[var(--ring)]">
       <h2 className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <span className="text-lg font-bold">Meter {meterNumber(meterId)}</span>
+        <span className="text-lg font-bold">{meterName(meterId)}</span>
         <span className="text-sm text-ink-2">{data.meters.find((m) => m.id === meterId)?.location ?? ''}</span>
       </h2>
 
@@ -198,6 +199,7 @@ function MeterSchedule({
         </>
       )}
 
+      <HowCalculated title="About these readings">
       <div className="mt-5 space-y-1 text-sm text-ink-2">
         {partial > 0 && (
           <p>
@@ -212,6 +214,7 @@ function MeterSchedule({
         ))}
         <p>Source: {hourly.source}</p>
       </div>
+      </HowCalculated>
     </li>
   )
 }
@@ -239,7 +242,7 @@ function TrimResult({
     <section aria-live="polite" className="mt-5 rounded-lg border-2 border-ink p-4">
       <h3 className="font-bold">{what}</h3>
       {estimate.method === null ? (
-        <p className="mt-1 text-sm">{estimate.reason} A percent turn-down for this meter will be in the What if screen.</p>
+        <p className="mt-1 text-sm">{estimate.reason} You can try a percent turn-down for this meter in the Savings calculator.</p>
       ) : (
         <>
           <p className="mt-1 text-2xl font-bold">about {fmt.pct(estimate.share)} less watering water</p>

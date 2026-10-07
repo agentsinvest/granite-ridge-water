@@ -13,3 +13,21 @@ describe('publicText', () => {
 
   it('leaves text alone in maintainer mode', () => expect(publicText('data/usage/x.md', true)).toBe('data/usage/x.md'))
 })
+
+import { cleanData } from '../src/lib/publicText'
+import { buildData } from '../scripts/build-data'
+
+describe('cleanData', () => {
+  const clean = cleanData(buildData())
+  const prose = JSON.stringify({ ...clean, openTodos: [], evidenceLabels: {}, actions: clean.actions.map((a) => ({ ...a, evidence: [], todo: '' })) })
+  it.each(['data/', 'sources/', 'docs/', '.md', 'INVENTORY', 'CLAUDE', 'User ET', 'winter allowance'])('leaves no %s in prose', (s) => {
+    const hits = prose.split('"').filter((x) => x.includes(s) && /\s/.test(x))
+    expect(hits).toEqual([])
+  })
+  it('keeps identifiers and numbers intact', () => {
+    const raw = buildData()
+    expect(clean.actions.map((a) => a.evidence)).toEqual(raw.actions.map((a) => a.evidence))
+    expect(clean.bills.map((b) => b.printed_total)).toEqual(raw.bills.map((b) => b.printed_total))
+    expect(clean.bills.map((b) => b.id)).toEqual(raw.bills.map((b) => b.id))
+  })
+})

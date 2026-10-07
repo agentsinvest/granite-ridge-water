@@ -1,8 +1,9 @@
+import { Term } from '../components/ui'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { SiteData } from '../../scripts/site-data'
 import { currentRate, type RatePeriod, type ReadPeriod } from '../engine/billing'
 import { breakEvenPercent, evaluate, type Effect, type Outcome } from '../engine/investment'
-import { fmt, meterNumber } from '../lib/data'
+import { fmt, meterNumber, meterName } from '../lib/data'
 import { setQuery } from '../lib/route'
 
 type Investment = {
@@ -183,7 +184,7 @@ export function InvestmentCalculator({ data }: { data: SiteData }) {
                     onChange={(e) => set({ m: e.target.checked ? [...form.m, m.id].sort() : form.m.filter((x) => x !== m.id) })}
                   />
                   <span>
-                    <span className="font-semibold">Meter {meterNumber(m.id)}</span>
+                    <span className="font-semibold">{meterName(m.id)}</span>
                     <span className="block text-sm text-ink-2">
                       {typeof b === 'object' ? `${fmt.usd(b.baselineCost)} a year at today's rate, ${fmt.gallons(b.baselineKgal)}` : b ?? 'Cannot be priced'}
                     </span>
@@ -307,7 +308,7 @@ export function InvestmentCalculator({ data }: { data: SiteData }) {
             <Table caption="By meter, last 12 read periods at today's rate" heads={['Meter', 'Water now', 'Water after', 'Bills now', 'Bills after']}>
               {expected.byMeter.map(({ baseline, after }) => (
                 <tr key={baseline.meter} className="border-b border-line last:border-0">
-                  <th scope="row" className="px-4 py-2 font-semibold">Meter {meterNumber(baseline.meter)}</th>
+                  <th scope="row" className="px-4 py-2 font-semibold">{meterName(baseline.meter)}</th>
                   <td className="tabular px-4 py-2 text-right">{fmt.gallons(baseline.kgal)}</td>
                   <td className="tabular px-4 py-2 text-right">{fmt.gallons(after.kgal)}</td>
                   <td className="tabular px-4 py-2 text-right">{usd2(baseline.cost)}</td>
@@ -339,7 +340,7 @@ export function InvestmentCalculator({ data }: { data: SiteData }) {
                 <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
                   {openFlags.map((f) => (
                     <li key={f.id}>
-                      Meter {meterNumber(f.meter)}, first seen {String(f.first_seen).slice(0, 10)}: {f.likely_cause ?? f.evidence}
+                      {meterName(f.meter)}, first seen {String(f.first_seen).slice(0, 10)}: {f.likely_cause ?? f.evidence}
                     </li>
                   ))}
                 </ul>
@@ -369,7 +370,7 @@ export function InvestmentCalculator({ data }: { data: SiteData }) {
                   {fmt.usd(expected.result.maxAnnualSavings)} a year.
                 </li>
                 <li>
-                  The cut applies to winter too, so the City's cheaper winter allowance shrinks with it. This is where a lasting change settles after its first
+                  The cut applies to winter too, so the City's <Term k="allowance">lower-price allowance</Term> shrinks with it. This is where a lasting change settles after its first
                   winter; the first year can save a little more.
                 </li>
                 <li>{costs.annual > 0 ? `Yearly cost of ${fmt.usd(costs.annual)} is subtracted from savings every year.` : 'No yearly cost was entered, so none is subtracted.'}</li>

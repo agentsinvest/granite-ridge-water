@@ -3,7 +3,7 @@ import type { SiteData } from '../../scripts/site-data'
 import { Bars } from '../components/charts'
 import { Card, PageHeader, Pill, Section, Stat, Stats, TableView } from '../components/ui'
 import { runScenario, type Baseline, type Change } from '../engine/scenarios'
-import { fmt, meterNumber } from '../lib/data'
+import { fmt, meterNumber, meterName } from '../lib/data'
 import { MONTHS, RISK, monthsText, optionChange, type Model } from '../lib/model'
 import { setQuery } from '../lib/route'
 
@@ -98,7 +98,8 @@ export function WhatIf({ data, model, query }: { data: SiteData; model: Model; q
   const { base, result } = run(sc)
   const update = (i: number, c: UIChange) => setSc({ ...sc, changes: sc.changes.map((x, j) => (j === i ? c : x)) })
   const remove = (i: number) => setSc({ ...sc, changes: sc.changes.filter((_, j) => j !== i) })
-  const allowed = model.meters.filter((m) => sc.greenspace || !model.greenspaceMeters.has(m))
+  // Every meter can be changed. Changes that touch the park lawn are labeled, not hidden.
+  const allowed = model.meters
   const firstMeter = allowed[0] ?? model.meters[0]
   const add = (c: UIChange) => setSc({ ...sc, changes: [...sc.changes, c] })
   const leakFlags = model.flags.filter((f) => f.flag.excess_water?.ongoing_gallons_per_year)
@@ -142,13 +143,6 @@ export function WhatIf({ data, model, query }: { data: SiteData; model: Model; q
               : 'Priced at the rates the City recommends from February 1, 2027: usage up 15%, the surcharge split into two tiers, and a $0.13 drought charge. The Council votes December 8, 2026.'}{' '}
             Later years are assumed to stay at this rate.
           </p>
-          <label className="mt-4 flex items-start gap-2 text-sm">
-            <input type="checkbox" className="mt-1 h-4 w-4" checked={sc.greenspace} onChange={(e) => setSc({ ...sc, greenspace: e.target.checked, changes: e.target.checked ? sc.changes : sc.changes.filter((c) => !('meters' in c) || c.meters.every((m) => !model.greenspaceMeters.has(m))) })} />
-            <span>
-              <strong>Include the park greenspace.</strong> Meters {[...model.greenspaceMeters].map(meterNumber).join(' and ')} water the park turf. They are left out
-              unless this is on, because the goal is to keep the turf.
-            </span>
-          </label>
         </Card>
       </Section>
 
@@ -156,7 +150,7 @@ export function WhatIf({ data, model, query }: { data: SiteData; model: Model; q
         <ol className="mt-4 space-y-3">
           {sc.changes.map((c, i) => (
             <li key={i}>
-              <ChangeEditor c={c} meters={model.meters} allowed={allowed} flags={model.flags} onChange={(x) => update(i, x)} onRemove={() => remove(i)} />
+              <ChangeEditor c={c} meters={model.meters} allowed={allowed} lawn={model.greenspaceMeters} flags={model.flags} onChange={(x) => update(i, x)} onRemove={() => remove(i)} />
             </li>
           ))}
         </ol>
@@ -177,11 +171,10 @@ export function WhatIf({ data, model, query }: { data: SiteData; model: Model; q
                   <button
                     type="button"
                     className="rounded-md border border-line px-2 py-1 text-left hover:bg-[var(--ring)] disabled:opacity-60"
-                    disabled={o.touches_greenspace && !sc.greenspace}
                     onClick={() => add(optionChange(o) as UIChange)}
                   >
                     {o.title}
-                    {o.touches_greenspace && !sc.greenspace ? ' (turn on greenspace)' : ''}
+                    {o.touches_greenspace ? ' (changes lawn watering)' : ''}
                   </button>
                 </li>
               ))}
@@ -292,9 +285,10 @@ function AddButton({ onClick, children }: { onClick: () => void; children: strin
 }
 
 function ChangeEditor({
-  c, meters, allowed, flags, onChange, onRemove,
+  c, meters, allowed, lawn, flags, onChange, onRemove,
 }: {
   c: UIChange
+  lawn: Set<string>
   meters: string[]
   allowed: string[]
   flags: Model['flags']
@@ -322,8 +316,8 @@ function ChangeEditor({
                 checked={c.meters.includes(m)}
                 onChange={(e) => onChange({ ...c, meters: e.target.checked ? [...c.meters, m] : c.meters.filter((x) => x !== m) })}
               />
-              Meter {meterNumber(m)}
-              {!allowed.includes(m) && ' (greenspace)'}
+              {meterName(m)}
+              {lawn.has(m) && ' (waters the lawn)'}
             </label>
           ))}
         </div>
@@ -455,7 +449,7 @@ function Results({ result, target, baseLabel }: { result: Extract<ReturnType<typ
           <tbody>
             {result.meters.map((m) => (
               <tr key={m.meter} className="border-b border-line last:border-0">
-                <th scope="row" className="px-3 py-2 font-normal">Meter {meterNumber(m.meter)}</th>
+                <th scope="row" className="px-3 py-2 font-normal">{meterName(m.meter)}</th>
                 <td className="tabular px-3 py-2 text-right">{fmt.int(Math.round(m.baseKgal))} to {fmt.int(Math.round(m.newKgal))}</td>
                 <td className="tabular px-3 py-2 text-right">{fmt.usd(m.baseCost)} to {fmt.usd(m.newCost)}</td>
                 <td className="tabular px-3 py-2 text-right font-semibold">{fmt.usd(m.baseCost - m.newCost)}</td>

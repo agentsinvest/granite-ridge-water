@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { GLOSSARY } from '../lib/glossary'
 
 export function PageHeader({ title, lead }: { title: string; lead: ReactNode }) {
   return (
@@ -184,5 +185,30 @@ export function ScreenTabs({ screen, route, tabs, current }: { screen: string; r
         </ul>
       </nav>
     </div>
+  )
+}
+
+/** A word with its plain definition on hover, focus, or tap. The full list is on About the data. */
+export function Term({ k, children }: { k: import('../lib/glossary').GlossaryKey; children: ReactNode }) {
+  const g = GLOSSARY[k]
+  return (
+    <span className="group relative inline">
+      <button type="button" className="cursor-help underline decoration-dotted underline-offset-4" aria-describedby={`term-${k}`} onClick={(e) => e.currentTarget.focus()}>
+        {children}
+      </button>
+      <span id={`term-${k}`} role="tooltip" className="invisible absolute bottom-full left-0 z-20 mb-1 w-64 rounded-lg bg-surface p-3 text-sm font-normal text-ink shadow-lg ring-1 ring-[var(--ring)] group-focus-within:visible group-hover:visible">
+        {g.def}
+      </span>
+    </span>
+  )
+}
+
+/** Method notes and caveats, folded away so each screen shows at most one short caveat line. */
+export function HowCalculated({ children, title = 'How this is calculated' }: { children: ReactNode; title?: string }) {
+  return (
+    <details className="mt-3 text-sm">
+      <summary className="cursor-pointer font-semibold">{title}</summary>
+      <div className="mt-2 max-w-prose space-y-2 text-ink-2">{children}</div>
+    </details>
   )
 }

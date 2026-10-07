@@ -1,9 +1,9 @@
 import type { SiteData } from '../../scripts/site-data'
 import { Bars, METER_COLOR, Waterfall } from '../components/charts'
-import { GridTable, PageHeader, Section, Stat, Stats, Sure, TableView } from '../components/ui'
+import { GridTable, PageHeader, Section, Stat, Stats, Sure, TableView, Term, HowCalculated } from '../components/ui'
 import { splitUsageCharge } from '../engine/billing'
 import { decomposeYears, summarize } from '../engine/history'
-import { fmt, meterNumber } from '../lib/data'
+import { fmt, meterNumber, meterName } from '../lib/data'
 import type { Model } from '../lib/model'
 
 const EVENT_TYPE: Record<string, string> = {
@@ -55,7 +55,7 @@ function MeterHistory({ data, spend }: { data: SiteData; spend: { year: string; 
   const missing = <span className="italic text-ink-2">Not on file</span>
   const meterLabel = (m: SiteData['meters'][number]) => (
     <>
-      Meter {meterNumber(m.id)}
+      {meterName(m.id)}
       {m.meter_number_last4 ? ` (...${m.meter_number_last4})` : ''}
       {m.location && <span className="block min-w-[10rem] max-w-[16rem] whitespace-normal text-xs text-ink-2">{m.location}</span>}
     </>
@@ -77,7 +77,7 @@ function MeterHistory({ data, spend }: { data: SiteData; spend: { year: string; 
           {
             title: 'Peak surcharge paid ($)',
             rows: [
-              ...data.meters.map((m) => ({ label: `Meter ${meterNumber(m.id)}`, cells: years.map((y) => (cell(y, m.id)?.peakSurcharge == null ? missing : fmt.usd(cell(y, m.id)!.peakSurcharge!))) })),
+              ...data.meters.map((m) => ({ label: meterName(m.id), cells: years.map((y) => (cell(y, m.id)?.peakSurcharge == null ? missing : fmt.usd(cell(y, m.id)!.peakSurcharge!))) })),
               { label: 'All meters', strong: true, cells: years.map((y) => (sum(y, 'peakSurcharge') === null ? missing : fmt.usd(sum(y, 'peakSurcharge')!))) },
             ],
           },
@@ -93,9 +93,10 @@ function MeterHistory({ data, spend }: { data: SiteData; spend: { year: string; 
           },
         ]}
       />
+      <HowCalculated>
       <div className="mt-3 max-w-prose space-y-2 text-sm text-ink-2">
         <p>
-          Peak surcharge is what the HOA paid because water went above each meter's winter allowance: the gallons above it times the difference between the
+          Peak surcharge is what the HOA paid because water went above each meter's <Term k="allowance">lower-price allowance</Term>: the gallons above it times the difference between the
           higher and lower price. Total bill is the HOA's year-end books, and City bills for the year so far. Cost per 1,000 gallons is the total bill divided
           by all-meter gallons.
         </p>
@@ -104,6 +105,7 @@ function MeterHistory({ data, spend }: { data: SiteData; spend: { year: string; 
           Source: {h.source}. <Sure level={h.confidence} />
         </p>
       </div>
+      </HowCalculated>
     </Section>
   )
 }
@@ -211,6 +213,7 @@ export function HowWeGotHere({ data, model }: { data: SiteData; model: Model }) 
             {ytd.unreconciled > 0 ? `, ${ytd.unreconciled} of them unreconciled` : ''}. It is a partial year, so it is not a full-year total. Bill totals and the books can differ because the books may follow payment dates.
           </p>
         )}
+        <HowCalculated>
         <p className="mt-3 max-w-prose text-sm text-ink-2">
           Rainfall is the yearly total the HOA provided. The gauge or weather station behind it is not confirmed yet.
           {(() => {
@@ -218,6 +221,7 @@ export function HowWeGotHere({ data, model }: { data: SiteData; model: Model }) 
             return r ? ` ${r.year} rain is the total so far this year.` : ''
           })()}
         </p>
+        </HowCalculated>
       </Section>
 
       {data.meterYears && <MeterHistory data={data} spend={spend} />}
@@ -258,8 +262,8 @@ export function HowWeGotHere({ data, model }: { data: SiteData; model: Model }) 
 
       <Section
         id="surcharge"
-        title="Water above the winter allowance, by month"
-        lead="The City prices each meter's water in two steps. Water up to the meter's winter allowance (its December to February average) costs the lower price. Water above it costs the higher price."
+        title="Water above the lower-price allowance, by month"
+        lead="The City prices each meter's water in two steps. Water up to the meter's lower-price allowance (its December to February average) costs the lower price. Water above it costs the higher price."
       >
         {surcharge.rows.length === 0 ? (
           <p className="mt-3 text-ink-2">No City prices on file yet, so no bills can be split.</p>
@@ -278,7 +282,7 @@ export function HowWeGotHere({ data, model }: { data: SiteData; model: Model }) 
                 { key: 'lower', name: 'Water at the lower price', color: 'var(--s1)' },
                 { key: 'higher', name: 'Water above the allowance, higher price', color: 'var(--s2)' },
               ]}
-              label="Usage charges by bill month, split into the lower price and the higher price above the winter allowance"
+              label="Usage charges by bill month, split into the lower price and the higher price above the lower-price allowance"
               money
             />
             <TableView
@@ -295,12 +299,14 @@ export function HowWeGotHere({ data, model }: { data: SiteData; model: Model }) 
                 r.unsplit ? `${r.bills - r.unsplit} of ${r.bills} split` : r.bills,
               ])}
             />
+            <HowCalculated>
             <p className="mt-3 max-w-prose text-sm text-ink-2">
               "Extra from higher price" is the gallons above the allowance times the difference between the two prices: what that water cost beyond the lower
               price. Prices are worked out from the bills and match each bill's usage charge to the cent; a bill they do not match is left out and counted in the
               Bills column. The first 3,000 gallons on each bill carry no usage charge. Prices before read periods ending{' '}
               {surcharge.firstPriced ? fmt.month(surcharge.firstPriced) : 'the first rate on file'} are not on file yet, so earlier months are not shown.
             </p>
+            </HowCalculated>
           </>
         )}
       </Section>
@@ -330,10 +336,12 @@ export function HowWeGotHere({ data, model }: { data: SiteData; model: Model }) 
             </div>
           ))}
         </div>
+        <HowCalculated>
         <p className="mt-3 max-w-prose text-sm text-ink-2">
           Up steps are marked + and down steps -. "Water used" is the change in gallons at the earlier year's price. "Price" is the change in price on the later
           year's gallons. "Fixed fees" are service charges, per-bill fees, and late charges.
         </p>
+        </HowCalculated>
       </Section>
 
       <Section id="timeline" title="What happened when" lead="Events that change water use. Rough dates are shown as a month or a year.">
@@ -354,7 +362,7 @@ export function HowWeGotHere({ data, model }: { data: SiteData; model: Model }) 
           </ol>
         )}
         <p className="mt-4 text-sm text-ink-2">
-          Missing events (repairs, schedule changes, overseeding) are on the <a className="underline underline-offset-4" href="#about">Data and accuracy</a> list.
+          Missing events (repairs, schedule changes, overseeding) are on the <a className="underline underline-offset-4" href="#about">About the data</a> list.
         </p>
       </Section>
     </article>

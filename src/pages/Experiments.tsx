@@ -3,7 +3,7 @@ import type { SiteData } from '../../scripts/site-data'
 import { Bars } from '../components/charts'
 import { Card, Empty, PageHeader, Pill, Section, Stat, Stats, Sure, TableView } from '../components/ui'
 import { checkExperiment, type CheckResult, type Day, type Expected } from '../engine/experiments'
-import { fmt, meterNumber } from '../lib/data'
+import { fmt, meterName } from '../lib/data'
 import type { Model } from '../lib/model'
 
 const STATUS: Record<string, string> = { planned: 'Planned', running: 'Running', done: 'Done', stopped: 'Stopped' }
@@ -47,7 +47,7 @@ export function Experiments({ data, model }: { data: SiteData; model: Model }) {
 
       <Section id="list" title="Logged experiments">
         {checked.length === 0 ? (
-          <Empty>No experiments logged yet. Add a file to data/experiments/ (the README there has the format), or try the checker below.</Empty>
+          <Empty>No changes have been logged for checking yet. You can try the checker below.</Empty>
         ) : (
           <ul className="mt-4 space-y-4">
             {checked.map(({ x, r }) => (
@@ -56,7 +56,7 @@ export function Experiments({ data, model }: { data: SiteData; model: Model }) {
                   <p className="flex flex-wrap items-center gap-2 text-sm">
                     <Pill tone={VERDICT[r.verdict].tone}>{VERDICT[r.verdict].text}</Pill>
                     <span className="text-ink-2">
-                      {STATUS[x.status]} · Meter {meterNumber(x.meter)}
+                      {STATUS[x.status]} · {meterName(x.meter)}
                       {x.start ? ` · from ${shortDate(x.start)}${x.end ? ` to ${shortDate(x.end)}` : ''}` : ''}
                     </span>
                   </p>
@@ -86,7 +86,6 @@ export function Experiments({ data, model }: { data: SiteData; model: Model }) {
           <li>Weather is not adjusted for yet (daily weather is not on file), so compare similar weeks and keep trials short in spring and fall.</li>
           <li>Waterfluence's hourly data misses some late-night hours on meters 1 and 4, so daily totals there run low. Before and after are affected the same way.</li>
         </ul>
-        <p className="mt-2 text-sm text-ink-2">These settings live in data/config/site.md.</p>
       </Section>
     </article>
   )
@@ -154,7 +153,7 @@ function Checker({ data, model, settings }: { data: SiteData; model: Model; sett
           <label className="block">
             <span className="font-semibold">Meter</span>
             <select className="mt-1 block w-full rounded border border-line bg-surface p-2" value={meter} onChange={(e) => setMeter(e.target.value)}>
-              {model.meters.map((m) => <option key={m} value={m}>Meter {meterNumber(m)}</option>)}
+              {model.meters.map((m) => <option key={m} value={m}>{meterName(m)}</option>)}
             </select>
           </label>
           <label className="block">
