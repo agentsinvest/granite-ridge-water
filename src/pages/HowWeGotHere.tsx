@@ -9,6 +9,8 @@ const EVENT_TYPE: Record<string, string> = {
   leak: 'Leak', repair: 'Repair', controller: 'Controller', schedule: 'Schedule', landscape: 'Landscape', meter: 'Meter', overseed: 'Overseed', rebate: 'Rebate', other: 'Other',
 }
 
+const longDate = (iso: string) => new Date(`${iso}T12:00:00`).toLocaleDateString('en-US', { dateStyle: 'medium' })
+
 /** Twelve-month windows of read periods ending October to September, so every window is a full year. */
 function waterYears(model: Model) {
   const ends = [...new Set(Object.values(model.periods).flatMap((p) => p.map((x) => x.end)))].sort()
@@ -35,6 +37,22 @@ export function HowWeGotHere({ data, model }: { data: SiteData; model: Model }) 
   const pl = Object.entries(data.financials)
     .map(([y, f]) => ({ year: y, total: f.lines.find((l) => l.account === '50110')?.actual ?? null }))
     .filter((r): r is { year: string; total: number } => r.total !== null)
+  // Year to date for the year after the last P&L, from City bills (the official record) until the year-end books exist.
+  const ytdYear = pl.length ? String(Number(pl.at(-1)!.year) + 1) : null
+  const ytdBills = ytdYear ? data.bills.filter((b) => b.bill_date.startsWith(ytdYear)) : []
+  const ytd = ytdYear && ytdBills.length
+    ? {
+        year: ytdYear,
+        total: Math.round(ytdBills.reduce((s, b) => s + b.printed_total, 0) * 100) / 100,
+        bills: ytdBills.length,
+        unreconciled: ytdBills.filter((b) => b.reconciled !== 'pass').length,
+        through: ytdBills.map((b) => b.bill_date).sort().at(-1)!,
+      }
+    : null
+  const spend = [
+    ...pl.map((r) => ({ year: r.year, total: r.total, partial: 0 })),
+    ...(ytd ? [{ year: `${ytd.year} YTD`, total: ytd.total, partial: 1 }] : []),
+  ]
   const low = pl.reduce((a, b) => (b.total < a.total ? b : a), pl[0])
   const last = pl.at(-1)
   const wy = waterYears(model)
@@ -66,9 +84,26 @@ export function HowWeGotHere({ data, model }: { data: SiteData; model: Model }) 
         </Stats>
       )}
 
-      <Section id="pl" title="What the HOA spent each year" lead="Water line from the HOA's year-end books. The dashed line is the target.">
-        <Bars data={pl.map((r) => ({ year: r.year, total: r.total }))} x="year" series={[{ key: 'total', name: 'Water spend', color: 'var(--s1)' }]} label="HOA water spending by year" money target={model.target} targetLabel={`Target ${fmt.usd(model.target)}`} />
-        <TableView caption="HOA water spending by year" head={['Year', 'Spend']} rows={pl.map((r) => [r.year, fmt.usd(r.total)])} />
+      <Section
+        id="pl"
+        title="What the HOA spent each year"
+        lead={`Water line from the HOA's year-end books.${ytd ? ` ${ytd.year} YTD is the lighter bar: City bills dated ${ytd.year} so far, since the year-end books are not out yet.` : ''} The dashed line is the target.`}
+      >
+        <Bars data={spend} x="year" series={[{ key: 'total', name: 'Water spend', color: 'var(--s1)', dimWhen: 'partial' }]} label="HOA water spending by year" money target={model.target} targetLabel={`Target ${fmt.usd(model.target)}`} />
+        <TableView
+          caption="HOA water spending by year"
+          head={['Year', 'Spend', 'Source']}
+          rows={[
+            ...pl.map((r) => [r.year, fmt.usd(r.total), 'Year-end books']),
+            ...(ytd ? [[`${ytd.year} YTD`, fmt.usd(ytd.total), `${ytd.bills} City bills through ${longDate(ytd.through)}`]] : []),
+          ]}
+        />
+        {ytd && (
+          <p className="mt-3 max-w-prose text-sm text-ink-2">
+            {ytd.year} so far is {fmt.usd(ytd.total)} from {ytd.bills} City bills dated through {longDate(ytd.through)}
+            {ytd.unreconciled > 0 ? `, ${ytd.unreconciled} of them unreconciled` : ''}. It is a partial year, so it is not a full-year total. Bill totals and the books can differ because the books may follow payment dates.
+          </p>
+        )}
       </Section>
 
       <Section id="gallons" title="How much water we used" lead="Gallons metered in each 12-month stretch of City read periods (October to September), by meter. Earlier years are not exported from Waterfluence yet.">

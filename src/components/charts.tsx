@@ -25,7 +25,8 @@ export function ChartFrame({ label, children, height = 260 }: { label: string; c
   )
 }
 
-type Series = { key: string; name: string; color: string }
+/** `dimWhen` names a row field; rows where it is truthy draw lighter, for partial values such as year to date. */
+type Series = { key: string; name: string; color: string; dimWhen?: string }
 
 export function Bars({
   data, x, series, label, money, stacked, target, targetLabel, height,
@@ -68,7 +69,9 @@ export function Bars({
             strokeWidth={stacked ? 1 : 0}
             maxBarSize={56}
             isAnimationActive={false}
-          />
+          >
+            {s.dimWhen && data.map((row, j) => <Cell key={j} fillOpacity={row[s.dimWhen!] ? 0.45 : 1} stroke={s.color} strokeWidth={row[s.dimWhen!] ? 1.5 : 0} />)}
+          </Bar>
         ))}
       </BarChart>
     </ChartFrame>
