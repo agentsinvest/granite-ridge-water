@@ -1,436 +1,486 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { SiteData } from '../../scripts/site-data'
-import type { RatePeriod, ReadPeriod } from '../engine/billing'
-import { breakEvenPercent, evaluate, type Effect, type Outcome } from '../engine/investment'
+import { Bars } from '../components/charts'
+import { Card, PageHeader, Pill, Section, Stat, Stats, TableView } from '../components/ui'
+import { runScenario, type Baseline, type Change } from '../engine/scenarios'
 import { fmt, meterNumber } from '../lib/data'
+import { MONTHS, RISK, monthsText, optionChange, type Model } from '../lib/model'
+import { setQuery } from '../lib/route'
 
-type Investment = {
-  id: string
-  name: string
-  applies_to: string
-  effect: { type: string; value: number | null; range: [number | null, number | null] }
-  upfront_cost_per_unit: number | null
-  unit: string
-  annual_cost: number | null
-  lifespan_years: number | null
-  source: string
-  confidence: string
-  requires_confirmation?: string
-  todo?: string
-}
+type UIChange =
+  | { kind: 'turn_down'; meters: string[]; percent: number; months: number[] }
+  | { kind: 'days'; meters: string[]; from: number; to: number; months: number[] }
+  | { kind: 'shutoff'; meters: string[]; months: number[] }
+  | { kind: 'off'; meters: string[] }
+  | { kind: 'fix_leak'; flag: string }
 
-/** The form, as strings, so it round-trips through the URL exactly as typed. */
-type Form = { inv: string; name: string; m: string[]; kind: 'pct' | 'gal'; val: string; low: string; high: string; cost: string; yearly: string; life: string }
-const EMPTY: Form = { inv: '', name: '', m: [], kind: 'pct', val: '', low: '', high: '', cost: '', yearly: '', life: '' }
-const KEYS = ['inv', 'name', 'kind', 'val', 'low', 'high', 'cost', 'yearly', 'life'] as const
+type Scenario = { base: string; greenspace: boolean; changes: UIChange[] }
+type Saved = Scenario & { name: string }
 
-export function readForm(hash: string): Form {
-  const q = new URLSearchParams(hash.split('?')[1] ?? '')
-  const f: Form = { ...EMPTY, m: q.get('m')?.split(',').filter(Boolean) ?? [] }
-  for (const k of KEYS) {
-    const v = q.get(k)
-    if (v === null) continue
-    if (k === 'kind') f.kind = v === 'gal' ? 'gal' : 'pct'
-    else f[k] = v
+const SEASONS: { name: string; months: number[] }[] = [
+  { name: 'All year', months: [] },
+  { name: 'Summer (May to Sep)', months: [5, 6, 7, 8, 9] },
+  { name: 'Monsoon (Jul to Sep)', months: [7, 8, 9] },
+  { name: 'Winter (Nov to Feb)', months: [11, 12, 1, 2] },
+]
+
+const enc = (x: unknown) => btoa(unescape(encodeURIComponent(JSON.stringify(x)))).replace(/=+$/, '')
+function dec<T>(s: string | null, fallback: T): T {
+  if (!s) return fallback
+  try {
+    return JSON.parse(decodeURIComponent(escape(atob(s)))) as T
+  } catch {
+    return fallback
   }
-  return f
 }
 
-function writeForm(f: Form) {
-  const q = new URLSearchParams()
-  if (f.m.length) q.set('m', f.m.join(','))
-  for (const k of KEYS) if (f[k] && !(k === 'kind' && f.kind === 'pct')) q.set(k, f[k])
-  const s = q.toString()
-  history.replaceState(null, '', `#what-if${s ? `?${s}` : ''}`)
+function baselines(model: Model): { key: string; label: string; data: Baseline }[] {
+  const out = [{ key: 'latest', label: 'Last 12 read periods', data: model.baseline }]
+  const ends = [...new Set(Object.values(model.periods).flatMap((p) => p.map((x) => x.end)))]
+  const wys = [...new Set(ends.map((e) => (Number(e.slice(5, 7)) >= 10 ? Number(e.slice(0, 4)) + 1 : Number(e.slice(0, 4)))))].sort().reverse()
+  for (const wy of wys) {
+    const data: Baseline = Object.fromEntries(
+      model.meters.map((m) => [m, model.periods[m].filter((p) => p.end >= `${wy - 1}-10-01` && p.end <= `${wy}-09-30`)]),
+    )
+    if (Object.values(data).every((ps) => ps.length === 12 && ps.every((p) => p.usage !== null))) out.push({ key: `wy${wy}`, label: `Water used Oct ${wy - 1} to Sep ${wy}`, data })
+  }
+  return out
 }
 
-/** Blank is null; anything else must be a number at or above zero. */
-function num(s: string): number | null | 'bad' {
-  if (s.trim() === '') return null
-  const n = Number(s.replace(/[$,%\s]/g, ''))
-  return Number.isFinite(n) && n >= 0 ? n : 'bad'
-}
-
-const usd2 = (n: number) => n.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
-const signedUsd = (n: number) => (n < 0 ? `minus ${fmt.usd(-n)}` : fmt.usd(n))
-function payback(months: number | null) {
-  if (months === null) return 'Never'
-  if (months < 24) return `${Math.round(months)} months`
-  return `${(months / 12).toFixed(1)} years`
-}
-
-export function WhatIf({ data }: { data: SiteData }) {
-  const [form, setForm] = useState<Form>(() => readForm(window.location.hash))
-  useEffect(() => writeForm(form), [form])
-  const set = (patch: Partial<Form>) => setForm((f) => ({ ...f, ...patch }))
-
-  const investments = data.investments as unknown as Investment[]
-  const rate = data.rates.at(-1) as unknown as (RatePeriod & SiteData['rates'][number]) | undefined
-  const periods = useMemo(
-    () => Object.fromEntries(Object.entries(data.billingPeriods).map(([k, v]) => [k, v.rows])) as Record<string, ReadPeriod[]>,
-    [data],
-  )
-  const site = data.config.site as { annual_target_usd?: { value: number; source: string }; reconciliation?: { required_pass_rate_percent: { value: number } } }
-  const target = site.annual_target_usd?.value ?? null
-  const priced = data.bills.filter((b) => b.reconciled === 'pass' || b.reconciled === 'fail')
-  const passRate = priced.length ? (100 * priced.filter((b) => b.reconciled === 'pass').length) / priced.length : 0
-  const gateMet = priced.length > 0 && passRate >= (site.reconciliation?.required_pass_rate_percent.value ?? 100)
-  const chosen = investments.find((i) => i.id === form.inv) ?? null
-
-  // Each meter's cost for the last 12 read periods at today's rate, to help people choose.
-  const baselines = useMemo(() => {
-    if (!rate) return {}
-    const out: Record<string, Outcome | string> = {}
-    for (const m of data.meters) {
-      const e = evaluate([m.id], periods, rate, { type: 'percent_reduction', value: 0 }, { upfront: 0, annual: 0, lifespanYears: null })
-      out[m.id] = e.ok ? e.result : e.reason
+function toEngine(c: UIChange, flags: Model['flags']): Change | null {
+  switch (c.kind) {
+    case 'days':
+      return c.from > 0 && c.to <= c.from ? { kind: 'turn_down', meters: c.meters, percent: (1 - c.to / c.from) * 100, months: c.months } : null
+    case 'fix_leak': {
+      const f = flags.find((x) => x.flag.id === c.flag)
+      const g = f?.flag.excess_water?.ongoing_gallons_per_year
+      return f && g ? { kind: 'remove_gallons', meter: f.flag.meter, gallonsPerYear: g, label: f.flag.title } : null
     }
-    return out
-  }, [data, periods, rate])
-
-  function pickInvestment(id: string) {
-    const inv = investments.find((i) => i.id === id)
-    if (!inv) return set({ inv: '' })
-    const s = (n: number | null) => (n === null ? '' : String(n))
-    const perMeter = inv.unit === 'meter' || inv.unit === 'one_time' || inv.unit === 'controller'
-    set({
-      inv: id,
-      name: inv.name,
-      kind: inv.effect.type === 'gallons_per_month' ? 'gal' : 'pct',
-      val: s(inv.effect.value),
-      low: s(inv.effect.range[0]),
-      high: s(inv.effect.range[1]),
-      cost: inv.upfront_cost_per_unit !== null && perMeter ? String(inv.upfront_cost_per_unit * (inv.unit === 'meter' ? Math.max(form.m.length, 1) : 1)) : '',
-      yearly: s(inv.annual_cost),
-      life: s(inv.lifespan_years),
-    })
+    default:
+      return c
   }
+}
 
-  const parsed = { val: num(form.val), low: num(form.low), high: num(form.high), cost: num(form.cost), yearly: num(form.yearly), life: num(form.life) }
-  const bad = (Object.keys(parsed) as (keyof typeof parsed)[]).filter((k) => parsed[k] === 'bad')
-  const pctTooBig = form.kind === 'pct' && [parsed.val, parsed.low, parsed.high].some((v) => typeof v === 'number' && v > 100)
-  const ready = rate && gateMet && form.m.length > 0 && typeof parsed.val === 'number' && typeof parsed.cost === 'number' && bad.length === 0 && !pctTooBig
-
-  const costs = {
-    upfront: typeof parsed.cost === 'number' ? parsed.cost : 0,
-    annual: typeof parsed.yearly === 'number' ? parsed.yearly : 0,
-    lifespanYears: typeof parsed.life === 'number' && parsed.life > 0 ? parsed.life : null,
+function describe(c: UIChange, flags: Model['flags']): string {
+  const ms = 'meters' in c ? c.meters.map((m) => meterNumber(m)).join(', ') : ''
+  const who = 'meters' in c ? (c.meters.length === 1 ? `meter ${ms}` : `meters ${ms}`) : ''
+  switch (c.kind) {
+    case 'turn_down': return `Turn ${who} down ${c.percent}%, ${monthsText(c.months)}`
+    case 'days': return `Water ${who} ${c.to} days a week instead of ${c.from}, ${monthsText(c.months)}`
+    case 'shutoff': return `Shut off ${who}, ${monthsText(c.months)}`
+    case 'off': return `Turn ${who} off completely`
+    case 'fix_leak': return `Fix: ${flags.find((f) => f.flag.id === c.flag)?.flag.title ?? c.flag}`
   }
-  const effectOf = (v: number): Effect => (form.kind === 'pct' ? { type: 'percent_reduction', value: v } : { type: 'gallons_per_month', value: v })
-  const run = (v: number | null | 'bad') => (ready && typeof v === 'number' ? evaluate(form.m, periods, rate!, effectOf(v), costs) : null)
-  const expected = run(parsed.val)
-  const worst = run(parsed.low)
-  const best = run(parsed.high)
-  const breakEven = ready ? breakEvenPercent(form.m, periods, rate!, costs, 5) : null
-  const breakEvenLife = ready && costs.lifespanYears && costs.lifespanYears !== 5 ? breakEvenPercent(form.m, periods, rate!, costs, costs.lifespanYears) : null
-  const allMetersCost = Object.values(baselines).every((b) => typeof b !== 'string') ? Object.values(baselines).reduce((s, b) => s + (b as Outcome).baselineCost, 0) : null
-  const openFlags = data.flags.filter((f) => form.m.includes(f.meter) && !['fixed', 'false-alarm'].includes(f.status))
-  const meterList = form.m.map((m) => `meter ${meterNumber(m)}`).join(' and ')
-  const label = form.name.trim() || 'This change'
+}
+
+export function WhatIf({ data, model, query }: { data: SiteData; model: Model; query: URLSearchParams }) {
+  const bases = useMemo(() => baselines(model), [model])
+  const fromOption = data.options.find((o) => o.id === query.get('o'))
+  const [sc, setSc] = useState<Scenario>(() =>
+    fromOption
+      ? { base: 'latest', greenspace: fromOption.touches_greenspace, changes: [optionChange(fromOption) as UIChange] }
+      : dec<Scenario>(query.get('s'), { base: 'latest', greenspace: false, changes: [] }),
+  )
+  const [saved, setSaved] = useState<Saved[]>(() => dec<Saved[]>(query.get('c'), []))
+  useEffect(() => setQuery('whatif', { s: enc(sc), c: saved.length ? enc(saved) : null }), [sc, saved])
+
+  const rate = model.latestRate
+  if (!rate) return <PageHeader title="What if" lead="No City rate is on file, so changes cannot be priced yet." />
+
+  const run = (s: Scenario) => {
+    const base = bases.find((b) => b.key === s.base) ?? bases[0]
+    const changes = s.changes.map((c) => toEngine(c, model.flags)).filter((c): c is Change => c !== null)
+    return { base, result: runScenario(base.data, changes, rate) }
+  }
+  const { base, result } = run(sc)
+  const update = (i: number, c: UIChange) => setSc({ ...sc, changes: sc.changes.map((x, j) => (j === i ? c : x)) })
+  const remove = (i: number) => setSc({ ...sc, changes: sc.changes.filter((_, j) => j !== i) })
+  const allowed = model.meters.filter((m) => sc.greenspace || !model.greenspaceMeters.has(m))
+  const firstMeter = allowed[0] ?? model.meters[0]
+  const add = (c: UIChange) => setSc({ ...sc, changes: [...sc.changes, c] })
+  const leakFlags = model.flags.filter((f) => f.flag.excess_water?.ongoing_gallons_per_year)
+  const touched = new Set(sc.changes.flatMap((c) => ('meters' in c ? c.meters : [])))
+  const greenTouched = [...touched].some((m) => model.greenspaceMeters.has(m))
+  const otherTouched = [...touched].some((m) => !model.greenspaceMeters.has(m))
 
   return (
     <article>
-      <h1 className="text-2xl font-bold md:text-3xl">What if: is it worth it?</h1>
-      <p className="mt-2 max-w-prose text-ink-2">
-        Enter a change or investment, what it costs, and how much water you expect it to save. The calculator re-prices each meter's last 12
-        City bills with less water and shows whether the savings pay back the cost.
-      </p>
+      <PageHeader
+        title="What if we changed something?"
+        lead="Pick a starting year, add changes, and see the gallons and dollars. Everything is priced with the City's current rates. The link in your address bar saves the scenario, so you can share it."
+      />
 
-      {!rate && <Notice>No City of Mesa rate is on file yet, so nothing can be priced.</Notice>}
-      {rate && !gateMet && (
-        <Notice>
-          Savings are hidden until at least {site.reconciliation?.required_pass_rate_percent.value ?? 95}% of priced bills reconcile with the
-          City's rates. Today: {passRate.toFixed(0)}%. See the Bills screen.
-        </Notice>
-      )}
-
-      <form className="mt-6 space-y-6 rounded-xl bg-surface p-4 ring-1 ring-[var(--ring)] md:p-6" onSubmit={(e) => e.preventDefault()}>
-        <Field id="inv" label="Start from the catalog (optional)">
-          <select id="inv" value={form.inv} onChange={(e) => pickInvestment(e.target.value)} className={inputCls}>
-            <option value="">My own change</option>
-            {investments.map((i) => (
-              <option key={i.id} value={i.id}>
-                {i.name}
+      <Section id="step1" title="Step 1. Starting point">
+        <Card className="mt-4">
+          <label className="block text-sm font-semibold" htmlFor="base">
+            Water use to start from
+          </label>
+          <select id="base" className="mt-1 w-full rounded-md border border-line bg-surface p-2 md:w-auto" value={sc.base} onChange={(e) => setSc({ ...sc, base: e.target.value })}>
+            {bases.map((b) => (
+              <option key={b.key} value={b.key}>
+                {b.label}
               </option>
             ))}
           </select>
-          {chosen && (
-            <p className="mt-2 text-sm text-ink-2">
-              {chosen.effect.value === null || chosen.upfront_cost_per_unit === null
-                ? 'Needs a quote: the catalog has no cost or savings for this yet, so enter your own numbers below.'
-                : `Catalog values from ${chosen.source} (confidence ${chosen.confidence}).`}
-              {chosen.requires_confirmation && <span className="block font-semibold text-ink">{chosen.requires_confirmation}</span>}
-            </p>
-          )}
-        </Field>
-
-        <Field id="name" label="Name">
-          <input id="name" value={form.name} onChange={(e) => set({ name: e.target.value })} placeholder="For example, smart controller" className={inputCls} />
-        </Field>
-
-        <fieldset>
-          <legend className="font-semibold">Which meters it affects</legend>
-          <p className="text-sm text-ink-2">Zones and areas are not tied to meters in the data yet, so changes apply to a whole meter's water.</p>
-          <div className="mt-2 grid gap-2 sm:grid-cols-2">
-            {data.meters.map((m) => {
-              const b = baselines[m.id]
-              return (
-                <label key={m.id} className="flex items-start gap-2 rounded-lg p-2 ring-1 ring-[var(--ring)]">
-                  <input
-                    type="checkbox"
-                    className="mt-1 size-4"
-                    checked={form.m.includes(m.id)}
-                    onChange={(e) => set({ m: e.target.checked ? [...form.m, m.id].sort() : form.m.filter((x) => x !== m.id) })}
-                  />
-                  <span>
-                    <span className="font-semibold">Meter {meterNumber(m.id)}</span>
-                    <span className="block text-sm text-ink-2">
-                      {typeof b === 'object' ? `${fmt.usd(b.baselineCost)} a year at today's rate, ${fmt.gallons(b.baselineKgal)}` : b ?? 'Cannot be priced'}
-                    </span>
-                  </span>
-                </label>
-              )
-            })}
-          </div>
-        </fieldset>
-
-        <fieldset>
-          <legend className="font-semibold">Water it saves</legend>
-          <div className="mt-2 flex flex-wrap gap-4">
-            {(['pct', 'gal'] as const).map((k) => (
-              <label key={k} className="flex items-center gap-2">
-                <input type="radio" name="kind" className="size-4" checked={form.kind === k} onChange={() => set({ kind: k })} />
-                {k === 'pct' ? 'Percent of the meter’s water' : 'Gallons per month'}
-              </label>
-            ))}
-          </div>
-          <div className="mt-3 grid gap-4 sm:grid-cols-3">
-            <Field id="val" label={form.kind === 'pct' ? 'Expected cut (%)' : 'Expected gallons a month'} error={parsed.val === 'bad' || (form.kind === 'pct' && typeof parsed.val === 'number' && parsed.val > 100)}>
-              <input id="val" inputMode="decimal" value={form.val} onChange={(e) => set({ val: e.target.value })} className={inputCls} />
-            </Field>
-            <Field id="low" label="Worst case (optional)" error={parsed.low === 'bad'}>
-              <input id="low" inputMode="decimal" value={form.low} onChange={(e) => set({ low: e.target.value })} className={inputCls} />
-            </Field>
-            <Field id="high" label="Best case (optional)" error={parsed.high === 'bad'}>
-              <input id="high" inputMode="decimal" value={form.high} onChange={(e) => set({ high: e.target.value })} className={inputCls} />
-            </Field>
-          </div>
-        </fieldset>
-
-        <div className="grid gap-4 sm:grid-cols-3">
-          <Field id="cost" label="Upfront cost ($)" error={parsed.cost === 'bad'}>
-            <input id="cost" inputMode="decimal" value={form.cost} onChange={(e) => set({ cost: e.target.value })} placeholder="6000" className={inputCls} />
-          </Field>
-          <Field id="yearly" label="Yearly cost, like a subscription ($, optional)" error={parsed.yearly === 'bad'}>
-            <input id="yearly" inputMode="decimal" value={form.yearly} onChange={(e) => set({ yearly: e.target.value })} className={inputCls} />
-          </Field>
-          <Field id="life" label="Expected life in years (optional)" error={parsed.life === 'bad'}>
-            <input id="life" inputMode="decimal" value={form.life} onChange={(e) => set({ life: e.target.value })} className={inputCls} />
-          </Field>
-        </div>
-        {(bad.length > 0 || pctTooBig) && (
-          <p role="alert" className="text-sm font-semibold">
-            <span aria-hidden="true">! </span>
-            {pctTooBig ? 'A percent cut cannot be more than 100. ' : ''}
-            {bad.length > 0 ? 'Some boxes are not numbers. Use plain numbers like 6000 or 20.' : ''}
+          <p className="mt-2 text-sm text-ink-2">
+            Priced at the City rate for read periods from {fmt.month(rate.applies_from_period_end)} on (derived from our bills, {rate.confidence} confidence). Later
+            years are assumed to stay at this rate; no 2027 rate is on file yet.
           </p>
-        )}
-        <button type="button" onClick={() => setForm(EMPTY)} className="text-sm underline underline-offset-4">
-          Start over
-        </button>
-      </form>
+          <label className="mt-4 flex items-start gap-2 text-sm">
+            <input type="checkbox" className="mt-1 h-4 w-4" checked={sc.greenspace} onChange={(e) => setSc({ ...sc, greenspace: e.target.checked, changes: e.target.checked ? sc.changes : sc.changes.filter((c) => !('meters' in c) || c.meters.every((m) => !model.greenspaceMeters.has(m))) })} />
+            <span>
+              <strong>Include the park greenspace.</strong> Meters {[...model.greenspaceMeters].map(meterNumber).join(' and ')} water the park turf. They are left out
+              unless this is on, because the goal is to keep the turf.
+            </span>
+          </label>
+        </Card>
+      </Section>
 
-      <section aria-labelledby="result-heading" aria-live="polite" className="mt-8">
-        <h2 id="result-heading" className="text-xl font-bold">
-          Result
-        </h2>
-        {!ready && gateMet && rate && (
-          <p className="mt-2 text-ink-2">Choose at least one meter and enter the upfront cost and the expected saving to see the result.</p>
-        )}
-        {expected && !expected.ok && <Notice>Cannot price this: {expected.reason}.</Notice>}
-        {expected?.ok && (
-          <>
-            <p className="mt-3 text-2xl font-bold">
-              {expected.result.paybackMonths === null
-                ? `${label} never pays for itself.`
-                : `${label} pays for itself in ${payback(expected.result.paybackMonths)}.`}
-            </p>
-            <p className="mt-1 max-w-prose text-ink-2">
-              {expected.result.paybackMonths === null
-                ? `Its yearly cost is as large as or larger than the ${fmt.usd(expected.result.annualSavings)} a year it would save on ${meterList}.`
-                : costs.lifespanYears
-                  ? expected.result.paybackMonths / 12 <= costs.lifespanYears
-                    ? `That is within its expected ${costs.lifespanYears}-year life.`
-                    : `That is longer than its expected ${costs.lifespanYears}-year life, so it would wear out before paying for itself.`
-                  : 'Enter an expected life to see whether it lasts that long.'}
-            </p>
-
-            <dl className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-              <Tile value={fmt.usd(expected.result.annualSavings)} label={`lower bills a year on ${meterList}`} />
-              <Tile value={payback(expected.result.paybackMonths)} label="to pay back the upfront cost" />
-              <Tile value={signedUsd(expected.result.fiveYearNet)} label="ahead after 5 years (savings minus all costs)" flag={expected.result.fiveYearNet < 0} />
-              <Tile value={fmt.usd(expected.result.maxAnnualSavings)} label="the most any change could save a year here, if it used no water at all" />
-            </dl>
-
-            <p className="mt-4 max-w-prose">
-              {breakEven === null
-                ? `Even using no water at all, ${meterList} could not pay back ${fmt.usd(costs.upfront)} in 5 years.`
-                : breakEven === 0
-                  ? 'It pays back within 5 years even with no water saved.'
-                  : `To pay back in 5 years, it would need to cut ${meterList}'s water by at least ${breakEven}%.`}
-              {breakEvenLife !== null && ` To pay back within its ${costs.lifespanYears}-year life: at least ${breakEvenLife}%.`}
-              {costs.lifespanYears && costs.lifespanYears !== 5 && breakEvenLife === null && ` It could not pay back within its ${costs.lifespanYears}-year life even using no water.`}
-            </p>
-
-            {(worst?.ok || best?.ok) && (
-              <Table caption="Worst, expected, and best case" heads={['', 'Worst case', 'Expected', 'Best case']}>
-                {(
-                  [
-                    ['Saved', (o: Outcome) => fmt.gallons(o.baselineKgal - o.afterKgal) + ' a year'],
-                    ['Lower bills a year', (o: Outcome) => fmt.usd(o.annualSavings)],
-                    ['Payback', (o: Outcome) => payback(o.paybackMonths)],
-                    ['Ahead after 5 years', (o: Outcome) => signedUsd(o.fiveYearNet)],
-                  ] as [string, (o: Outcome) => string][]
-                ).map(([name, f]) => (
-                  <tr key={name} className="border-b border-line last:border-0">
-                    <th scope="row" className="px-4 py-2 font-semibold">{name}</th>
-                    {[worst, expected, best].map((e, i) => (
-                      <td key={i} className="tabular px-4 py-2 text-right">
-                        {e?.ok ? f(e.result) : <span className="italic text-ink-2">Not entered</span>}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </Table>
-            )}
-
-            <Table caption="By meter, last 12 read periods at today's rate" heads={['Meter', 'Water now', 'Water after', 'Bills now', 'Bills after']}>
-              {expected.byMeter.map(({ baseline, after }) => (
-                <tr key={baseline.meter} className="border-b border-line last:border-0">
-                  <th scope="row" className="px-4 py-2 font-semibold">Meter {meterNumber(baseline.meter)}</th>
-                  <td className="tabular px-4 py-2 text-right">{fmt.gallons(baseline.kgal)}</td>
-                  <td className="tabular px-4 py-2 text-right">{fmt.gallons(after.kgal)}</td>
-                  <td className="tabular px-4 py-2 text-right">{usd2(baseline.cost)}</td>
-                  <td className="tabular px-4 py-2 text-right">{usd2(after.cost)}</td>
-                </tr>
+      <Section id="step2" title="Step 2. Changes" lead="Changes apply in order. Two 20% cuts on the same water make a 36% cut, not 40%.">
+        <ol className="mt-4 space-y-3">
+          {sc.changes.map((c, i) => (
+            <li key={i}>
+              <ChangeEditor c={c} meters={model.meters} allowed={allowed} flags={model.flags} onChange={(x) => update(i, x)} onRemove={() => remove(i)} />
+            </li>
+          ))}
+        </ol>
+        {sc.changes.length === 0 && <p className="mt-3 text-ink-2">No changes yet. Add one below.</p>}
+        <div className="mt-4 flex flex-wrap gap-2">
+          <AddButton onClick={() => add({ kind: 'turn_down', meters: [firstMeter], percent: 10, months: [] })}>Turn down</AddButton>
+          <AddButton onClick={() => add({ kind: 'days', meters: [firstMeter], from: 3, to: 2, months: [] })}>Fewer watering days</AddButton>
+          <AddButton onClick={() => add({ kind: 'shutoff', meters: [firstMeter], months: [12, 1, 2] })}>Seasonal shutoff</AddButton>
+          <AddButton onClick={() => add({ kind: 'off', meters: [firstMeter] })}>Turn off completely</AddButton>
+          {leakFlags.length > 0 && <AddButton onClick={() => add({ kind: 'fix_leak', flag: leakFlags[0].flag.id })}>Fix a leak</AddButton>}
+        </div>
+        {data.options.length > 0 && (
+          <div className="mt-4 text-sm">
+            <p className="font-semibold">Or start from a recommended option:</p>
+            <ul className="mt-1 flex flex-wrap gap-2">
+              {data.options.map((o) => (
+                <li key={o.id}>
+                  <button
+                    type="button"
+                    className="rounded-md border border-line px-2 py-1 text-left hover:bg-[var(--ring)] disabled:opacity-60"
+                    disabled={o.touches_greenspace && !sc.greenspace}
+                    onClick={() => add(optionChange(o) as UIChange)}
+                  >
+                    {o.title}
+                    {o.touches_greenspace && !sc.greenspace ? ' (turn on greenspace)' : ''}
+                  </button>
+                </li>
               ))}
-            </Table>
-
-            {target !== null && allMetersCost !== null && (
-              <p className="mt-4 max-w-prose">
-                All four meters cost about {fmt.usd(allMetersCost)} a year at today's rate. With this change: about{' '}
-                {fmt.usd(allMetersCost - expected.result.annualSavings)}, against the HOA's {fmt.usd(target)} target (
-                {allMetersCost - expected.result.annualSavings <= target
-                  ? 'at or under target'
-                  : `${fmt.usd(allMetersCost - expected.result.annualSavings - target)} still to go`}
-                ).
-              </p>
-            )}
-
-            {openFlags.length > 0 && (
-              <div className="mt-6 rounded-xl p-4 ring-2 ring-serious">
-                <p className="font-semibold">
-                  <span aria-hidden="true">! </span>
-                  {openFlags.length === 1 ? 'There is a possible leak' : `There are ${openFlags.length} possible leaks`} on {meterList}.
-                </p>
-                <p className="mt-1 text-sm">
-                  A percent cut assumes the water is used on schedule. Water lost to a leak or a stuck valve is only saved by fixing it.
-                </p>
-                <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
-                  {openFlags.map((f) => (
-                    <li key={f.id}>
-                      Meter {meterNumber(f.meter)}, first seen {String(f.first_seen).slice(0, 10)}: {f.likely_cause ?? f.evidence}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            <section aria-labelledby="assumptions-heading" className="mt-8">
-              <h3 id="assumptions-heading" className="text-lg font-bold">
-                What this assumes
-              </h3>
-              <ul className="mt-2 max-w-prose list-disc space-y-2 pl-5 text-sm">
-                <li>
-                  The water saved is your estimate{chosen && chosen.effect.value !== null ? ` (catalog: ${chosen.source}, confidence ${chosen.confidence})` : ''}. It is not a
-                  vendor quote or a measured result.
-                </li>
-                <li>
-                  Water use is each meter's last 12 read periods ({expected.byMeter.map((x) => `meter ${meterNumber(x.baseline.meter)} ${x.baseline.from} to ${x.baseline.to}`).join('; ')}),
-                  from Waterfluence.
-                </li>
-                <li>
-                  Every bill is priced at the City of Mesa rate in effect since the read period ending {rate!.id}, which was{' '}
-                  {rate!.derived ? 'worked out from the HOA’s bills, not yet checked against the City’s published schedule' : 'taken from the City’s schedule'}{' '}
-                  (confidence {rate!.confidence}). Rates are held flat for later years; if City rates rise, savings grow.
-                </li>
-                <li>
-                  The service charge and per-bill fees stay the same however little water is used, which is why savings stop at{' '}
-                  {fmt.usd(expected.result.maxAnnualSavings)} a year.
-                </li>
-                <li>
-                  The cut applies to winter too, so the City's cheaper winter allowance shrinks with it. This is where a lasting change settles after its first
-                  winter; the first year can save a little more.
-                </li>
-                <li>{costs.annual > 0 ? `Yearly cost of ${fmt.usd(costs.annual)} is subtracted from savings every year.` : 'No yearly cost was entered, so none is subtracted.'}</li>
-                <li>Payback is simple payback: no interest, rebates, or financing.</li>
-              </ul>
-              <p className="mt-3 text-sm text-ink-2">The link in your address bar saves these inputs, so you can share this result.</p>
-            </section>
-          </>
+            </ul>
+          </div>
         )}
-      </section>
+        <details className="mt-4 text-sm">
+          <summary className="cursor-pointer font-semibold">Investments (controllers, sensors, nozzles)</summary>
+          <p className="mt-2 text-ink-2">
+            These are added to scenarios once a quote or a cited savings figure is on file. To test one with your own numbers now, use{' '}
+            <a href="#invest" className="underline underline-offset-4">Is an investment worth it?</a>
+          </p>
+          <ul className="mt-2 space-y-1">
+            {(data.investments as { id: string; name: string; effect: { value: number | null } }[]).map((inv) => (
+              <li key={inv.id} className="flex flex-wrap items-center gap-2">
+                <a href={`#invest?inv=${inv.id}`} className="underline underline-offset-4">{inv.name}</a>
+                {inv.effect.value === null && <Pill tone="neutral">Needs a quote</Pill>}
+              </li>
+            ))}
+          </ul>
+        </details>
+      </Section>
+
+      <Section id="step3" title="Step 3. Results">
+        {!result.ok ? (
+          <p className="mt-3 rounded-lg border-2 border-serious p-3">Could not price this: {result.reason}</p>
+        ) : (
+          <Results result={result} target={model.target} baseLabel={base.label} />
+        )}
+        {result.ok && sc.changes.length > 0 && (
+          <Card className="mt-4">
+            <h3 className="font-semibold">Before you try this</h3>
+            <ul className="mt-2 list-disc space-y-2 pl-5 text-sm">
+              {greenTouched && <li>{RISK.turf}</li>}
+              {greenTouched && <li>{RISK.trees}</li>}
+              {otherTouched && <li>{RISK.unknownTrees}</li>}
+              <li>
+                A "keep tree watering" allowance and a "below estimated plant need" check need minimum plant factors from a cited source. They are not on file yet, so
+                this result cannot warn when a cut goes below what plants need.
+              </li>
+              <li>Try a change on one meter for a few weeks first and log it on the <a href="#experiments" className="underline underline-offset-4">Experiments</a> screen.</li>
+            </ul>
+          </Card>
+        )}
+        <Assumptions rate={rate} baseLabel={base.label} flags={model.flags} changes={sc.changes} />
+      </Section>
+
+      <Section id="compare" title="Compare scenarios" lead="Save up to three scenarios to see them side by side. They are kept in the link.">
+        <button
+          type="button"
+          className="mt-3 rounded-md bg-ink px-3 py-2 text-sm font-semibold text-page disabled:opacity-50"
+          disabled={saved.length >= 3 || sc.changes.length === 0}
+          onClick={() => setSaved([...saved, { ...sc, name: `Scenario ${String.fromCharCode(65 + saved.length)}` }])}
+        >
+          Save this scenario to compare
+        </button>
+        {saved.length > 0 && (
+          <div className="mt-4 overflow-x-auto rounded-xl bg-surface ring-1 ring-[var(--ring)]">
+            <table className="w-full min-w-[36rem] text-left text-sm">
+              <caption className="sr-only">Saved scenarios compared</caption>
+              <thead className="border-b border-line text-ink-2">
+                <tr>
+                  <th scope="col" className="px-3 py-2 font-semibold">Scenario</th>
+                  <th scope="col" className="px-3 py-2 text-right font-semibold">Yearly cost</th>
+                  <th scope="col" className="px-3 py-2 text-right font-semibold">Saves</th>
+                  <th scope="col" className="px-3 py-2 text-right font-semibold">vs target</th>
+                  <th scope="col" className="px-3 py-2"><span className="sr-only">Actions</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                {saved.map((s, i) => {
+                  const r = run(s).result
+                  return (
+                    <tr key={i} className="border-b border-line align-top last:border-0">
+                      <th scope="row" className="px-3 py-2 font-normal">
+                        <span className="font-semibold">{s.name}</span>
+                        <span className="block text-ink-2">{s.changes.map((c) => describe(c, model.flags)).join('; ')}</span>
+                      </th>
+                      <td className="tabular px-3 py-2 text-right">{r.ok ? fmt.usd(r.newCost) : 'Error'}</td>
+                      <td className="tabular px-3 py-2 text-right">{r.ok ? fmt.usd(r.baseCost - r.newCost) : ''}</td>
+                      <td className="tabular px-3 py-2 text-right">{r.ok ? (r.newCost <= model.target ? 'Meets it' : `${fmt.usd(r.newCost - model.target)} over`) : ''}</td>
+                      <td className="px-3 py-2 text-right">
+                        <button type="button" className="underline underline-offset-4" onClick={() => setSc({ base: s.base, greenspace: s.greenspace, changes: s.changes })}>
+                          Open
+                        </button>{' '}
+                        <button type="button" className="ml-2 underline underline-offset-4" onClick={() => setSaved(saved.filter((_, j) => j !== i))}>
+                          Remove
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Section>
     </article>
   )
 }
 
-const inputCls = 'mt-1 w-full rounded-lg border border-line bg-page px-3 py-2 text-ink'
-
-function Field({ id, label, error, children }: { id: string; label: string; error?: boolean; children: ReactNode }) {
+function AddButton({ onClick, children }: { onClick: () => void; children: string }) {
   return (
-    <div>
-      <label htmlFor={id} className="block font-semibold">
-        {label}
-      </label>
-      {children}
-      {error && (
-        <p className="mt-1 text-sm font-semibold">
-          <span aria-hidden="true">! </span>Not a valid number
-        </p>
+    <button type="button" onClick={onClick} className="rounded-md border-2 border-ink px-3 py-1.5 text-sm font-semibold hover:bg-[var(--ring)]">
+      + {children}
+    </button>
+  )
+}
+
+function ChangeEditor({
+  c, meters, allowed, flags, onChange, onRemove,
+}: {
+  c: UIChange
+  meters: string[]
+  allowed: string[]
+  flags: Model['flags']
+  onChange: (c: UIChange) => void
+  onRemove: () => void
+}) {
+  const title = { turn_down: 'Turn down', days: 'Fewer watering days', shutoff: 'Seasonal shutoff', off: 'Turn off completely', fix_leak: 'Fix a leak' }[c.kind]
+  return (
+    <fieldset className="rounded-xl bg-surface p-4 ring-1 ring-[var(--ring)]">
+      <legend className="sr-only">{title}</legend>
+      <div className="flex items-center justify-between gap-2">
+        <p className="font-semibold">{title}</p>
+        <button type="button" onClick={onRemove} className="text-sm underline underline-offset-4">
+          Remove
+        </button>
+      </div>
+      {'meters' in c && (
+        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm" role="group" aria-label="Meters">
+          {meters.map((m) => (
+            <label key={m} className={`flex items-center gap-1.5 ${allowed.includes(m) ? '' : 'text-ink-2'}`}>
+              <input
+                type="checkbox"
+                className="h-4 w-4"
+                disabled={!allowed.includes(m)}
+                checked={c.meters.includes(m)}
+                onChange={(e) => onChange({ ...c, meters: e.target.checked ? [...c.meters, m] : c.meters.filter((x) => x !== m) })}
+              />
+              Meter {meterNumber(m)}
+              {!allowed.includes(m) && ' (greenspace)'}
+            </label>
+          ))}
+        </div>
       )}
-    </div>
-  )
-}
-
-function Notice({ children }: { children: ReactNode }) {
-  return <p className="mt-4 max-w-prose rounded-xl p-4 ring-2 ring-serious">{children}</p>
-}
-
-function Tile({ value, label, flag }: { value: string; label: string; flag?: boolean }) {
-  return (
-    <div className={`flex flex-col rounded-xl bg-surface p-4 ring-1 ${flag ? 'ring-2 ring-serious' : 'ring-[var(--ring)]'}`}>
-      <dt className="order-2 mt-1 text-sm text-ink-2">{label}</dt>
-      <dd className="order-1 text-2xl font-bold">{value}</dd>
-    </div>
-  )
-}
-
-function Table({ caption, heads, children }: { caption: string; heads: string[]; children: ReactNode }) {
-  return (
-    <div className="mt-6 overflow-x-auto rounded-xl bg-surface ring-1 ring-[var(--ring)]">
-      <table className="w-full min-w-[32rem] text-left text-sm">
-        <caption className="px-4 pt-3 text-left font-semibold">{caption}</caption>
-        <thead className="border-b border-line text-ink-2">
-          <tr>
-            {heads.map((h, i) => (
-              <th key={h || i} scope="col" className={`px-4 py-2 font-semibold ${i > 0 ? 'text-right' : ''}`}>
-                {h}
-              </th>
+      {c.kind === 'turn_down' && (
+        <label className="mt-3 block text-sm">
+          <span className="font-semibold">Cut run times by {c.percent}%</span>
+          <input type="range" min={5} max={90} step={5} value={c.percent} onChange={(e) => onChange({ ...c, percent: Number(e.target.value) })} className="mt-1 block w-full max-w-sm" />
+        </label>
+      )}
+      {c.kind === 'days' && (
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
+          <label>
+            From{' '}
+            <select className="rounded border border-line bg-surface p-1" value={c.from} onChange={(e) => onChange({ ...c, from: Number(e.target.value) })}>
+              {[1, 2, 3, 4, 5, 6, 7].map((n) => <option key={n}>{n}</option>)}
+            </select>
+          </label>
+          <label>
+            to{' '}
+            <select className="rounded border border-line bg-surface p-1" value={c.to} onChange={(e) => onChange({ ...c, to: Number(e.target.value) })}>
+              {[0, 1, 2, 3, 4, 5, 6, 7].filter((n) => n <= c.from).map((n) => <option key={n}>{n}</option>)}
+            </select>{' '}
+            days a week
+          </label>
+          <span className="text-ink-2">({Math.round((1 - c.to / c.from) * 100)}% less water, same run time per day)</span>
+        </div>
+      )}
+      {(c.kind === 'turn_down' || c.kind === 'days' || c.kind === 'shutoff') && <MonthPicker months={c.months} allowAll={c.kind !== 'shutoff'} onChange={(months) => onChange({ ...c, months })} />}
+      {c.kind === 'fix_leak' && (
+        <label className="mt-2 block text-sm">
+          <span className="sr-only">Leak</span>
+          <select className="w-full rounded border border-line bg-surface p-1" value={c.flag} onChange={(e) => onChange({ ...c, flag: e.target.value })}>
+            {flags.filter((f) => f.flag.excess_water?.ongoing_gallons_per_year).map((f) => (
+              <option key={f.flag.id} value={f.flag.id}>
+                {f.flag.title} ({fmt.int(f.flag.excess_water!.ongoing_gallons_per_year!)} gallons a year)
+              </option>
             ))}
-          </tr>
-        </thead>
-        <tbody>{children}</tbody>
-      </table>
+          </select>
+        </label>
+      )}
+      {'meters' in c && c.meters.length === 0 && <p className="mt-2 text-sm text-ink-2">Pick at least one meter.</p>}
+    </fieldset>
+  )
+}
+
+function MonthPicker({ months, allowAll, onChange }: { months: number[]; allowAll: boolean; onChange: (m: number[]) => void }) {
+  return (
+    <div className="mt-3 text-sm">
+      <div className="flex flex-wrap gap-2" role="group" aria-label="Season">
+        {SEASONS.filter((s) => allowAll || s.months.length > 0).map((s) => (
+          <button
+            key={s.name}
+            type="button"
+            aria-pressed={JSON.stringify(s.months) === JSON.stringify(months)}
+            onClick={() => onChange(s.months)}
+            className="rounded-md border border-line px-2 py-1 aria-pressed:border-ink aria-pressed:font-semibold"
+          >
+            {s.name}
+          </button>
+        ))}
+      </div>
+      <div className="mt-2 flex flex-wrap gap-1" role="group" aria-label="Months">
+        {MONTHS.map((name, i) => {
+          const on = months.includes(i + 1)
+          return (
+            <button
+              key={name}
+              type="button"
+              aria-pressed={on}
+              onClick={() => onChange(on ? months.filter((x) => x !== i + 1) : [...months, i + 1].sort((a, b) => a - b))}
+              className="w-11 rounded border border-line py-0.5 aria-pressed:bg-ink aria-pressed:text-page"
+            >
+              {name}
+            </button>
+          )
+        })}
+      </div>
+      <p className="mt-1 text-ink-2">Applies: {monthsText(months)}. A read period counts in the month of its middle day.</p>
     </div>
   )
 }
+
+function Results({ result, target, baseLabel }: { result: Extract<ReturnType<typeof runScenario>, { ok: true }>; target: number; baseLabel: string }) {
+  const saved = result.baseCost - result.newCost
+  const gal = result.baseKgal - result.newKgal
+  const gap = result.newCost - target
+  const max = Math.max(result.baseCost, target) * 1.05
+  const monthly = result.meters[0].periods.map((_, i) => ({
+    period: fmt.month(result.meters[0].periods[i].end),
+    before: Math.round(result.meters.reduce((s, m) => s + m.periods[i].baseCost, 0)),
+    after: Math.round(result.meters.reduce((s, m) => s + m.periods[i].newCost, 0)),
+  }))
+  return (
+    <>
+      <Stats>
+        <Stat value={fmt.usd(result.newCost)} label={`yearly cost (was ${fmt.usd(result.baseCost)})`} />
+        <Stat value={fmt.usd(saved)} label={`saved a year (${result.baseCost ? fmt.pct(saved / result.baseCost) : '0%'})`} good={saved > 0} />
+        <Stat value={gal >= 0.5 ? `${fmt.int(Math.round(gal))},000` : '0'} label="gallons saved a year" />
+        <Stat value={gap <= 0 ? 'Meets it' : fmt.usd(gap)} label={gap <= 0 ? `the ${fmt.usd(target)} target` : `still over the ${fmt.usd(target)} target`} good={gap <= 0} flag={gap > 0} />
+      </Stats>
+      <p className="mt-3 max-w-prose text-sm text-ink-2">
+        "Before" is the starting water use priced at today's City prices, so it can be higher than what was actually billed at the older prices.
+      </p>
+      <Card className="mt-4">
+        <p className="text-sm font-semibold">Progress toward the {fmt.usd(target)} target</p>
+        <div className="relative mt-3 h-8 rounded bg-[var(--grid)]" role="img" aria-label={`Before ${fmt.usd(result.baseCost)}, after ${fmt.usd(result.newCost)}, target ${fmt.usd(target)}`}>
+          <div className="absolute inset-y-0 left-0 rounded bg-[var(--s1)] opacity-35" style={{ width: `${(result.baseCost / max) * 100}%` }} />
+          <div className="absolute inset-y-1 left-0 rounded bg-[var(--s1)]" style={{ width: `${(result.newCost / max) * 100}%` }} />
+          <div className="absolute -inset-y-1 w-1 bg-ink" style={{ left: `${(target / max) * 100}%` }} />
+        </div>
+        <p className="mt-2 flex flex-wrap gap-x-4 text-sm text-ink-2">
+          <span>Light bar: before ({fmt.usd(result.baseCost)})</span>
+          <span>Dark bar: after ({fmt.usd(result.newCost)})</span>
+          <span>Black line: target</span>
+        </p>
+      </Card>
+      <div className="mt-4 overflow-x-auto rounded-xl bg-surface ring-1 ring-[var(--ring)]">
+        <table className="w-full min-w-[34rem] text-left text-sm">
+          <caption className="sr-only">Results by meter</caption>
+          <thead className="border-b border-line text-ink-2">
+            <tr>
+              <th scope="col" className="px-3 py-2 font-semibold">Meter</th>
+              <th scope="col" className="px-3 py-2 text-right font-semibold">Thousand gallons</th>
+              <th scope="col" className="px-3 py-2 text-right font-semibold">Yearly cost</th>
+              <th scope="col" className="px-3 py-2 text-right font-semibold">Saves</th>
+            </tr>
+          </thead>
+          <tbody>
+            {result.meters.map((m) => (
+              <tr key={m.meter} className="border-b border-line last:border-0">
+                <th scope="row" className="px-3 py-2 font-normal">Meter {meterNumber(m.meter)}</th>
+                <td className="tabular px-3 py-2 text-right">{fmt.int(Math.round(m.baseKgal))} to {fmt.int(Math.round(m.newKgal))}</td>
+                <td className="tabular px-3 py-2 text-right">{fmt.usd(m.baseCost)} to {fmt.usd(m.newCost)}</td>
+                <td className="tabular px-3 py-2 text-right font-semibold">{fmt.usd(m.baseCost - m.newCost)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <h3 className="mt-6 font-semibold">Month by month</h3>
+      <Bars data={monthly} x="period" series={[{ key: 'before', name: 'Before', color: 'var(--s1)' }, { key: 'after', name: 'After', color: 'var(--s2)' }]} label={`Monthly cost before and after, ${baseLabel}`} money />
+      <TableView caption="Monthly cost before and after" head={['Read period ending', 'Before', 'After']} rows={monthly.map((r) => [r.period, fmt.usd(r.before), fmt.usd(r.after)])} />
+    </>
+  )
+}
+
+function Assumptions({ rate, baseLabel, flags, changes }: { rate: NonNullable<Model['latestRate']>; baseLabel: string; flags: Model['flags']; changes: UIChange[] }) {
+  const leaks = changes.filter((c): c is Extract<UIChange, { kind: 'fix_leak' }> => c.kind === 'fix_leak').map((c) => flags.find((f) => f.flag.id === c.flag)?.flag).filter(Boolean)
+  return (
+    <details className="mt-4 rounded-xl bg-surface p-4 text-sm ring-1 ring-[var(--ring)]">
+      <summary className="cursor-pointer font-semibold">Every assumption behind these numbers</summary>
+      <ul className="mt-3 list-disc space-y-2 pl-5 text-ink-2">
+        <li>Starting point: {baseLabel}, metered gallons per City read period (Waterfluence ENERGY STAR export).</li>
+        <li>
+          Prices: City rate for read periods from {rate.applies_from_period_end}, {rate.source} ({rate.confidence} confidence). Block prices $
+          {rate.volumetric.blocks.map((b) => b.price.toFixed(2)).join(' and $')} per thousand gallons, plus fees and {rate.taxes.map((t) => `${t.rate_percent}%`).join(', ')} tax.
+        </li>
+        <li>
+          The cheaper first block is set from each meter's December to February use. Results assume a change has been in place a full year, so cutting winter
+          water also lowers that allowance. The starting point is priced the same way.
+        </li>
+        <li>Service charges and per-bill fees stay even if a meter is turned off, unless the City closes the meter.</li>
+        <li>Changes are applied in order, so percentages multiply rather than add.</li>
+        <li>"Fewer watering days" assumes the same run time on the days that remain.</li>
+        <li>Weather is held the same as the starting year.</li>
+        {leaks.map((f) => (
+          <li key={f!.id}>
+            {f!.title}: {fmt.int(f!.excess_water!.ongoing_gallons_per_year!)} gallons a year. {f!.excess_water!.method} ({f!.excess_water!.confidence} confidence)
+          </li>
+        ))}
+      </ul>
+    </details>
+  )
+}
+
