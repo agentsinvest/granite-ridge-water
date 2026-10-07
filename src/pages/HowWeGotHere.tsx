@@ -79,9 +79,18 @@ export function HowWeGotHere({ data, model }: { data: SiteData; model: Model }) 
         through: ytdBills.map((b) => b.bill_date).sort().at(-1)!,
       }
     : null
+  const rainFor = (year: string) => data.annualRainfall.find((r) => String(r.year) === year) ?? null
+  const rainLabel = (year: string) => {
+    const r = rainFor(year)
+    return r?.inches == null ? 'no data' : `${r.inches.toFixed(1)} in`
+  }
+  const rainText = (year: string) => {
+    const r = rainFor(year)
+    return r?.inches == null ? 'Not on file' : `${r.inches.toFixed(2)} in${r.complete ? '' : ' so far'}`
+  }
   const spend = [
-    ...pl.map((r) => ({ year: r.year, total: r.total, partial: 0 })),
-    ...(ytd ? [{ year: `${ytd.year} YTD`, total: ytd.total, partial: 1 }] : []),
+    ...pl.map((r) => ({ year: r.year, total: r.total, partial: 0, rain: rainLabel(r.year) })),
+    ...(ytd ? [{ year: `${ytd.year} YTD`, total: ytd.total, partial: 1, rain: rainLabel(ytd.year) }] : []),
   ]
   const low = pl.reduce((a, b) => (b.total < a.total ? b : a), pl[0])
   const last = pl.at(-1)
@@ -118,15 +127,15 @@ export function HowWeGotHere({ data, model }: { data: SiteData; model: Model }) 
       <Section
         id="pl"
         title="What the HOA spent each year"
-        lead={`Water line from the HOA's year-end books.${ytd ? ` ${ytd.year} YTD is the lighter bar: City bills dated ${ytd.year} so far, since the year-end books are not out yet.` : ''} The dashed line is the target.`}
+        lead={`Water line from the HOA's year-end books.${ytd ? ` ${ytd.year} YTD is the lighter bar: City bills dated ${ytd.year} so far, since the year-end books are not out yet.` : ''} The dashed line is the target. Under each year is that year's rainfall in inches.`}
       >
-        <Bars data={spend} x="year" series={[{ key: 'total', name: 'Water spend', color: 'var(--s1)', dimWhen: 'partial' }]} label="HOA water spending by year" money target={model.target} targetLabel={`Target ${fmt.usd(model.target)}`} />
+        <Bars data={spend} x="year" xSub="rain" series={[{ key: 'total', name: 'Water spend', color: 'var(--s1)', dimWhen: 'partial' }]} label="HOA water spending by year" money target={model.target} targetLabel={`Target ${fmt.usd(model.target)}`} />
         <TableView
           caption="HOA water spending by year"
-          head={['Year', 'Spend', 'Source']}
+          head={['Year', 'Spend', 'Rain', 'Source']}
           rows={[
-            ...pl.map((r) => [r.year, fmt.usd(r.total), 'Year-end books']),
-            ...(ytd ? [[`${ytd.year} YTD`, fmt.usd(ytd.total), `${ytd.bills} City bills through ${longDate(ytd.through)}`]] : []),
+            ...pl.map((r) => [r.year, fmt.usd(r.total), rainText(r.year), 'Year-end books']),
+            ...(ytd ? [[`${ytd.year} YTD`, fmt.usd(ytd.total), rainText(ytd.year), `${ytd.bills} City bills through ${longDate(ytd.through)}`]] : []),
           ]}
         />
         {ytd && (
@@ -135,6 +144,13 @@ export function HowWeGotHere({ data, model }: { data: SiteData; model: Model }) 
             {ytd.unreconciled > 0 ? `, ${ytd.unreconciled} of them unreconciled` : ''}. It is a partial year, so it is not a full-year total. Bill totals and the books can differ because the books may follow payment dates.
           </p>
         )}
+        <p className="mt-3 max-w-prose text-sm text-ink-2">
+          Rainfall is the yearly total the HOA provided. The gauge or weather station behind it is not confirmed yet.
+          {(() => {
+            const r = data.annualRainfall.find((x) => !x.complete)
+            return r ? ` ${r.year} rain is the total so far this year.` : ''
+          })()}
+        </p>
       </Section>
 
       <Section id="gallons" title="How much water we used" lead="Gallons metered in each 12-month stretch of City read periods (October to September), by meter. Earlier years are not exported from Waterfluence yet.">

@@ -29,10 +29,12 @@ export function ChartFrame({ label, children, height = 260 }: { label: string; c
 type Series = { key: string; name: string; color: string; dimWhen?: string }
 
 export function Bars({
-  data, x, series, label, money, stacked, target, targetLabel, height,
+  data, x, xSub, series, label, money, stacked, target, targetLabel, height,
 }: {
   data: Record<string, string | number | null>[]
   x: string
+  /** Row field shown as a second, smaller line under each x-axis label. */
+  xSub?: string
   series: Series[]
   label: string
   money?: boolean
@@ -50,7 +52,29 @@ export function Bars({
     <ChartFrame label={label} height={height}>
       <BarChart data={data} margin={{ top: 16, right: 8, left: 0, bottom: 0 }} barCategoryGap="20%">
         <CartesianGrid vertical={false} stroke="var(--grid)" />
-        <XAxis dataKey={x} {...axis} />
+        {xSub ? (
+          <XAxis
+            dataKey={x}
+            {...axis}
+            interval={0}
+            height={54}
+            tick={(p: { x?: number | string; y?: number | string; payload?: { value?: unknown }; index?: number }) => {
+              // Each word of the label on its own line (so "2026 YTD" stacks), then the sub label.
+              const lines = [...String(p.payload?.value ?? '').split(' '), String(data[p.index ?? -1]?.[xSub] ?? '')]
+              return (
+                <text x={p.x} y={p.y} textAnchor="middle" fill="var(--ink-2)" fontSize={12}>
+                  {lines.map((l, i) => (
+                    <tspan key={i} x={p.x} dy={i === 0 ? '0.9em' : '1.25em'}>
+                      {l}
+                    </tspan>
+                  ))}
+                </text>
+              )
+            }}
+          />
+        ) : (
+          <XAxis dataKey={x} {...axis} />
+        )}
         <YAxis {...axis} width={52} tickFormatter={short} />
         <Tooltip {...tooltipStyle} formatter={(v) => fmt(Number(v))} />
         {series.length > 1 && <Legend wrapperStyle={{ fontSize: 13, color: 'var(--ink)' }} />}
