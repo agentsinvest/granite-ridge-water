@@ -11,6 +11,9 @@ One file per City of Mesa meter: `meter-1.md` through `meter-4.md`. Frontmatter 
 | `size_inches` | yes | Meter size, for fixed-charge lookup. |
 | `service_type` | yes | As printed by Mesa (for example, landscape irrigation). |
 | `waterfluence_id` | no | Identifier used in Waterfluence exports. |
+| `areas_served` | yes | Area ids from `areas.md`, or `null`. Add `areas_served_note` and `areas_served_source`. |
+| `controller` | no | `name`, `model` (or `null`), `summary` (plain words), `source`, `confidence`. Shown on the meter card. |
+| `checks` | no | List of things to check on this meter that are not leaks: `kind` (`action` or `question`), `title`, `detail`, `source`, `confidence`. Shown on the Meters page until removed. |
 | `active_from` / `active_to` | no | Service dates if the meter was added or retired. |
 | `source` | yes | Document and page each fact came from. |
 | `todo` | no | What is still unknown. |
