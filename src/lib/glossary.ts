@@ -2,7 +2,7 @@
 export const GLOSSARY = {
   allowance: {
     term: 'Lower-price allowance',
-    also: 'The City calls this the winter allowance, or block 1',
+    also: 'Also called the winter base. The City calls it the winter water average, winter allowance, or block 1',
     def: "Each meter's monthly amount of water billed at the City's lower price. The City sets it from that meter's average use in December to February. Water above it costs more.",
   },
   higher: {

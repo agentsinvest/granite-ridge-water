@@ -3,6 +3,7 @@ import type { SiteData } from '../../scripts/site-data'
 import { LeakFlags, dollarRange } from '../components/LeakFlags'
 import { WateringAfterRain } from '../components/WateringAfterRain'
 import { WateringChecks } from '../components/WateringChecks'
+import { WinterBaseSection } from '../components/WinterBase'
 import { buildRainCheck } from '../lib/rainCheck'
 import { PageHeader, Section, Stat, Stats } from '../components/ui'
 import type { Model } from '../lib/model'
@@ -30,6 +31,8 @@ export function Problems({ data, model }: { data: SiteData; model: Model }) {
       <Section id="checks" title="Watering checks" lead="Not leaks, but worth raising with the landscaper: water that stopped when it should not have, or watering we cannot explain yet.">
         <WateringChecks data={data} />
       </Section>
+
+      <WinterBaseSection data={data} model={model} />
 
       <WateringAfterRain data={data} rc={rain} />
     </article>
