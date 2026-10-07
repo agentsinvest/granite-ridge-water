@@ -74,6 +74,8 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
     turfMinimum: null,
     monthlyNormals: null,
     quickWins: null,
+    actions: [],
+    evidenceLabels: {},
     openTodos: [],
   }
   for (const abs of walk(dataDir).sort()) {
@@ -164,6 +166,15 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
       if (`options/${o.id}.md` !== rel) fail(file, keyLine(text, 'id'), 'id does not match file name')
       if (o.change.kind === 'turn_down' && o.change.percent === null) fail(file, keyLine(text, 'change'), 'turn_down needs a percent')
       out.options.push(o)
+    } else if (rel.match(/^actions\/[^/]+\.md$/)) {
+      const a = check(S.actionSchema, fm, file, text)
+      if (`actions/${a.id}.md` !== rel) fail(file, keyLine(text, 'id'), 'id does not match file name')
+      if (a.savings_from && a.savings_per_year) fail(file, keyLine(text, 'savings_per_year'), 'use savings_from or savings_per_year, not both')
+      if (a.savings_per_year && !a.savings_source) fail(file, keyLine(text, 'savings_per_year'), 'savings_per_year needs a savings_source')
+      if (a.savings_per_year && a.savings_per_year[0] > a.savings_per_year[1]) fail(file, keyLine(text, 'savings_per_year'), 'low is above high')
+      if (a.history.at(-1)!.date > a.updated) fail(file, keyLine(text, 'updated'), 'updated is before the last history entry')
+      for (let i = 1; i < a.history.length; i++) if (a.history[i].date < a.history[i - 1].date) fail(file, keyLine(text, 'history'), 'history must be oldest first')
+      out.actions.push({ ...a, body: p.body.trim() })
     } else if (rel === 'data-needs.md') {
       check(S.dataNeedsFrontmatterSchema, fm, file, text)
       out.dataNeeds = rows(firstTable(p, ['Priority', 'Need'], file), S.dataNeedRowSchema, file).map((r) => ({
@@ -229,6 +240,36 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
   }
   for (const r of out.meterYears?.rows ?? []) if (!meterIds.has(r.meter)) fail('data/history/by-meter-year.md', null, `unknown meter "${r.meter}"`)
   for (const o of out.options) for (const mid of o.meters) if (!meterIds.has(mid)) fail(`data/options/${o.id}.md`, null, `unknown meter "${mid}"`)
+  const optionIds = new Set(out.options.map((o) => o.id))
+  const investmentIds = new Set(out.investments.map((i) => i.id as string))
+  const experimentIds = new Set(out.experiments.map((x) => x.id))
+  const actionIds = new Set(out.actions.map((a) => a.id))
+  for (const a of out.actions) {
+    const where = `data/actions/${a.id}.md`
+    if (a.meter.startsWith('meter-') && !meterIds.has(a.meter)) fail(where, null, `unknown meter "${a.meter}"`)
+    for (const id of a.after) if (!actionIds.has(id)) fail(where, null, `after: unknown action "${id}"`)
+    if (a.verify_experiment && !experimentIds.has(a.verify_experiment)) fail(where, null, `unknown experiment "${a.verify_experiment}"`)
+    for (const ref of [...a.evidence, ...(a.savings_from ? [a.savings_from] : [])]) {
+      const [kind, id] = [ref.slice(0, ref.indexOf(':')), ref.slice(ref.indexOf(':') + 1)]
+      const known = kind === 'flag' ? flagIds : kind === 'option' ? optionIds : kind === 'investment' ? investmentIds : kind === 'experiment' ? experimentIds : null
+      if (known && !known.has(id)) fail(where, null, `unknown ${kind} "${id}"`)
+      if (kind === 'source') {
+        // Evidence documents live in /sources or /docs. Only their title is published, never the path or the text.
+        const path = join(root, `${id}.md`)
+        let doc: string
+        try {
+          doc = readFileSync(path, 'utf8')
+        } catch {
+          fail(where, null, `evidence file not found: ${id}.md`)
+        }
+        const docFm = parseMarkdown(doc).frontmatter
+        const title = typeof docFm.document === 'string' ? docFm.document : doc.match(/^# (.+)$/m)?.[1]
+        if (!title) fail(where, null, `${id}.md has no document name or heading to show`)
+        out.evidenceLabels[id] = title
+      }
+    }
+  }
+  out.actions.sort((a, b) => a.id.localeCompare(b.id))
   out.dataNeeds.sort((a, b) => a.priority - b.priority)
   out.rates.sort((a, b) => a.id.localeCompare(b.id))
   out.bills.sort((a, b) => a.id.localeCompare(b.id))

@@ -445,6 +445,39 @@ export const budgetCheckRowSchema = z.object({
   Confidence: confidence,
 })
 
+/** YAML turns bare dates into Date objects; keep them as YYYY-MM-DD strings. */
+const isoDate = z.union([date, z.date().transform((d) => d.toISOString().slice(0, 10))])
+export const ACTION_STATUSES = ['not-started', 'asked', 'scheduled', 'done', 'verified', 'dropped'] as const
+const actionStatus = z.enum(ACTION_STATUSES)
+export const actionSchema = z.object({
+  id: z.string().regex(/^[a-z0-9-]+$/),
+  title: z.string().min(1),
+  problem: z.string().min(1),
+  meter: z.string().regex(/^(meter-\d+|all|park)$/),
+  controller: z.enum(['Park', 'Entrance', 'B']).nullable(),
+  stations: z.array(z.string()).default([]),
+  category: z.enum(['fix-leak', 'schedule-change', 'equipment', 'decision', 'get-info']),
+  lawn_impact: z.enum(['none', 'changes-lawn-watering', 'removes-lawn']),
+  owner: z.enum(['Landscaper', 'Trestle', 'HOA', 'City of Mesa']),
+  status: actionStatus,
+  urgent: z.enum(['tree-risk', 'open-leak']).nullable().default(null),
+  due: isoDate.nullable().default(null),
+  after: z.array(z.string()).default([]),
+  cost: z.union([z.number().nonnegative(), z.literal('needs quote'), z.literal('no purchase')]),
+  cost_source: z.string().min(1),
+  savings_from: z.string().regex(/^(option|flag|investment):[a-z0-9-]+$/).nullable().default(null),
+  savings_per_year: z.tuple([z.number(), z.number()]).nullable().default(null),
+  savings_source: z.string().optional(),
+  savings_note: z.string().optional(),
+  evidence: z.array(z.string().regex(/^(flag|source|experiment|option|investment):.+$/)),
+  verify_with: z.string().min(1),
+  verify_experiment: z.string().nullable().default(null),
+  updated: isoDate,
+  history: z.array(z.object({ date: isoDate, status: actionStatus, note: z.string().optional() })).min(1),
+  todo: z.string().optional(),
+})
+export type Action = z.infer<typeof actionSchema>
+
 export type Meter = z.infer<typeof meterSchema>
 export type AreaRow = z.infer<typeof areaRowSchema>
 export type SiteMap = z.infer<typeof mapSchema>

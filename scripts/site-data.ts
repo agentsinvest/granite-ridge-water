@@ -1,4 +1,4 @@
-import type { AreaRow, Bill, Experiment, Flag, Meter, MoveOption, QuickWinsPlan, Rate, SiteMap } from './schemas'
+import type { Action, AreaRow, Bill, Experiment, Flag, Meter, MoveOption, QuickWinsPlan, Rate, SiteMap } from './schemas'
 
 export type BillingPeriod = { start: string; end: string; usage: number | null }
 export type DailyUsage = { date: string; gallons: number | null; hours: number | null; minHour: number | null }
@@ -43,5 +43,8 @@ export type SiteData = {
   } | null
   quickWins: QuickWinsPlan | null
   budgetCheck: { period: string; source: string; note: string; rows: { scope: string; measure: string; low: number | null; high: number | null; source: string; confidence: string }[] } | null
+  /** Tracked actions. `body` is the markdown below the front matter; `evidenceLabels` names each `source:` evidence file. */
+  actions: (Action & { body: string })[]
+  evidenceLabels: Record<string, string>
   openTodos: { file: string; todo: string }[]
 }
