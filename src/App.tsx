@@ -4,6 +4,7 @@ import { buildModel } from './lib/model'
 import { useRoute, type RouteName } from './lib/route'
 import { MetersAndAreas } from './pages/MetersAndAreas'
 import { Bills } from './pages/Bills'
+import { Schedule } from './pages/Schedule'
 import { Overview } from './pages/Overview'
 import { HowWeGotHere } from './pages/HowWeGotHere'
 import { HowMuch } from './pages/HowMuch'
@@ -17,6 +18,7 @@ const SCREENS: { name: string; route: RouteName }[] = [
   { name: 'Overview', route: 'overview' },
   { name: 'How we got here', route: 'history' },
   { name: 'Meters and leaks', route: 'meters' },
+  { name: 'Watering schedule', route: 'schedule' },
   { name: 'How much should we use', route: 'budget' },
   { name: 'What if', route: 'whatif' },
   { name: 'Is an investment worth it?', route: 'invest' },
@@ -40,6 +42,7 @@ export function App() {
     switch (route.name) {
       case 'history': return <HowWeGotHere data={data} model={model} />
       case 'meters': return <MetersAndAreas data={data} />
+      case 'schedule': return <Schedule data={data} />
       case 'budget': return <HowMuch data={data} model={model} />
       case 'whatif': return <WhatIf data={data} model={model} query={route.query} />
       case 'invest': return <InvestmentCalculator data={data} />

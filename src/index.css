@@ -17,6 +17,7 @@
   --pin-ink: #ffffff;
   --serious: #ec835a;
   --focus: #2a78d6;
+  --bar: #2a78d6;
   --ring: rgba(11, 11, 11, 0.1);
   --s1: #2a78d6;
   --s2: #eb6834;
@@ -42,6 +43,7 @@
     --pin-ink: #0b0b0b;
     --serious: #ec835a;
     --focus: #3987e5;
+    --bar: #3987e5;
     --ring: rgba(255, 255, 255, 0.1);
     --s1: #3987e5;
     --s2: #d95926;
@@ -67,6 +69,7 @@
   --pin-ink: #0b0b0b;
   --serious: #ec835a;
   --focus: #3987e5;
+  --bar: #3987e5;
   --ring: rgba(255, 255, 255, 0.1);
   --s1: #3987e5;
   --s2: #d95926;

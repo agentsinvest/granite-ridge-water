@@ -119,6 +119,12 @@ export const usageRowSchema = z.object({
   'Waterfluence budget gal': cellNumber,
 })
 
+export const hourlyFrontmatterSchema = usageFrontmatterSchema
+export const hourlyRowSchema = z.object({
+  'Read time': z.string().regex(/^\d{4}-\d{2}-\d{2} \d{2}:00$/, 'must be YYYY-MM-DD HH:00'),
+  Gallons: cellNumber.refine((n) => n !== null, 'blank hours must be left out, not written as empty'),
+})
+
 export const financialsFrontmatterSchema = z.object({
   year: z.number(),
   basis: z.enum(['cash', 'accrual']).nullable(),
@@ -200,6 +206,7 @@ export const siteConfigSchema = z.object({
   waterfluence_budget_disagreement_percent: sourced(z.number()),
   weather: z.object({ azmet_station: nullableString, source: z.string().optional(), confidence: confidence.optional(), todo: z.string().optional() }),
   waterfluence_unit_cost: sourced(z.number()),
+  watering_schedule: z.object({ watering_hour_min_gallons: sourced(z.number().positive()), max_gap_hours: sourced(z.number().int().nonnegative()), measured_min_complete_share: sourced(z.number().min(0).max(1)) }),
   post_2027_rate_assumption: z.object({ method: z.string(), label: z.string(), source: z.string(), confidence }),
   experiment_check: z.object({
     min_days_each_side: sourced(z.number().int().positive()),

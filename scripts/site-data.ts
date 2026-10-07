@@ -2,6 +2,7 @@ import type { AreaRow, Bill, Experiment, Flag, Meter, MoveOption, Rate, SiteMap 
 
 export type BillingPeriod = { start: string; end: string; usage: number | null }
 export type DailyUsage = { date: string; gallons: number | null; hours: number | null; minHour: number | null }
+export type HourlyRead = { time: string; gallons: number }
 export type FinancialLine = { account: string; line: string; actual: number | null; budget: number | null }
 export type EventRow = { date: string; precision: string; meter: string; type: string; what: string; source: string }
 
@@ -12,6 +13,7 @@ export type SiteData = {
   map: SiteMap
   billingPeriods: Record<string, { unit: string; unitConfidence: string; rows: BillingPeriod[] }>
   usage: Record<string, Record<string, DailyUsage[]>>
+  hourly: Record<string, { covers: string; source: string; reads: HourlyRead[] }>
   financials: Record<string, { lines: FinancialLine[]; needsReview: boolean }>
   flags: Flag[]
   rates: (Rate & { id: string })[]

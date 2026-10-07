@@ -57,6 +57,7 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
     map: undefined as unknown as SiteData['map'],
     billingPeriods: {},
     usage: {},
+    hourly: {},
     financials: {},
     flags: [],
     rates: [],
@@ -104,6 +105,20 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
       const r = rows(firstTable(p, ['Date', 'Gallons'], file), S.usageRowSchema, file)
       out.usage[m[1]] ??= {}
       out.usage[m[1]][m[2]] = r.map((x) => ({ date: x.Date, gallons: x.Gallons, hours: x['Hours reported'], minHour: x['Min hour gal'] }))
+    } else if ((m = rel.match(/^hourly\/(meter-\d+)\/(\d{4})\.md$/))) {
+      const f = check(S.hourlyFrontmatterSchema, fm, file, text)
+      if (f.meter !== m[1]) fail(file, keyLine(text, 'meter'), 'meter does not match folder')
+      const table = firstTable(p, ['Read time', 'Gallons'], file)
+      const r = rows(table, S.hourlyRowSchema, file)
+      const reads = r.map((x) => ({ time: x['Read time'], gallons: x.Gallons as number }))
+      reads.forEach((x, i) => {
+        if (!x.time.startsWith(m![2])) fail(file, table.rows[i].line, `read time ${x.time} is not in ${m![2]}`)
+        if (i > 0 && x.time <= reads[i - 1].time) fail(file, table.rows[i].line, 'read times must be in order with no repeats')
+      })
+      const prev = out.hourly[m[1]]
+      out.hourly[m[1]] = prev
+        ? { covers: `${prev.covers}; ${f.covers}`, source: `${prev.source}; ${f.source}`, reads: [...prev.reads, ...reads] }
+        : { covers: f.covers, source: f.source, reads }
     } else if ((m = rel.match(/^financials\/(\d{4})\.md$/))) {
       const f = check(S.financialsFrontmatterSchema, fm, file, text)
       const r = rows(firstTable(p, ['Account', 'Actual'], file), S.financialsRowSchema, file)
@@ -170,6 +185,7 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
   for (const a of out.map.areas) if (!areaIds.has(a.id)) fail('data/map.md', null, `unknown area "${a.id}"`)
   if (!areaIds.has(out.map.streets.area)) fail('data/map.md', null, `unknown streets area "${out.map.streets.area}"`)
   for (const b of out.bills) if (!meterIds.has(b.meter)) fail(`data/${b.id}.md`, null, `unknown meter "${b.meter}"`)
+  for (const id of Object.keys(out.hourly)) if (!meterIds.has(id)) fail(`data/hourly/${id}`, null, `unknown meter "${id}"`)
   for (const f of out.flags) if (!meterIds.has(f.meter)) fail(`data/flags/${f.id}.md`, null, `unknown meter "${f.meter}"`)
   const flagIds = new Set(out.flags.map((f) => f.id))
   for (const x of out.experiments) {
