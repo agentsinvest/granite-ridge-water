@@ -2,6 +2,8 @@
 // Money is computed in whole cents with half-up rounding, the way bills round each line.
 
 export type RatePeriod = {
+  source?: string
+  confidence?: string
   applies_from_period_end: string
   applies_to_period_end: string | null
   fixed_charges: { meters: string[]; amount: number }[]
@@ -17,6 +19,11 @@ export type LineItem = { name: string; amount: number }
 export type BillResult =
   | { ok: true; lineItems: LineItem[]; total: number; allowanceKgal: number; rate: RatePeriod }
   | { ok: false; reason: string }
+
+/** Which tax base a fee belongs to, matching the `applies_to` keys in rate files. Untaxed fees return null. */
+export function feeTaxKey(name: string): string | null {
+  return name === 'Water drought' ? 'water_drought' : name === 'Superfund charge' ? 'superfund' : null
+}
 
 const cents = (x: number) => Math.round(x * 100 + Number.EPSILON * 100) // x already in dollars
 const dollars = (c: number) => c / 100
@@ -51,6 +58,8 @@ export function calculateBill(
   gallons: number,
   rates: RatePeriod[],
   readPeriods: ReadPeriod[],
+  /** Use this block 1 allowance (thousand gallons above the included amount) instead of the meter's winter history. */
+  allowanceOverrideKgal?: number,
 ): BillResult {
   if (periodStart > periodEnd) return { ok: false, reason: 'period starts after it ends' }
   const rate = selectRate(rates, periodEnd)
@@ -58,7 +67,7 @@ export function calculateBill(
   const fixed = rate.fixed_charges.find((f) => f.meters.includes(meter))
   if (!fixed) return { ok: false, reason: `no service charge for ${meter}` }
   const included = rate.included_kgal_per_bill.value
-  const allowance = winterAllowanceKgal(readPeriods, periodEnd, included)
+  const allowance = allowanceOverrideKgal ?? winterAllowanceKgal(readPeriods, periodEnd, included)
   if (allowance === null) return { ok: false, reason: 'winter usage needed for the allowance is missing' }
 
   const kgal = gallons / 1000
@@ -72,8 +81,7 @@ export function calculateBill(
   ]
   for (const f of rate.fees) {
     const base = f.basis === 'per_bill' ? 1 : f.basis === 'per_1000_gallons' ? kgal : excess
-    const key = f.name === 'Water drought' ? 'water_drought' : f.name === 'Superfund charge' ? 'superfund' : null
-    items.push({ name: f.name, c: cents(base * f.amount), taxable: key })
+    items.push({ name: f.name, c: cents(base * f.amount), taxable: feeTaxKey(f.name) })
   }
   const taxLines = rate.taxes.map((t) => {
     const base = items.filter((i) => i.taxable && t.applies_to.includes(i.taxable)).reduce((s, i) => s + i.c, 0)

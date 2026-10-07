@@ -138,6 +138,8 @@ export const financialsRowSchema = z.object({
 
 export const flagSchema = z.object({
   id: z.string(),
+  title: z.string().min(1),
+  summary: z.string().min(1),
   meter: z.string(),
   zones: z.array(z.string()),
   rule: z.enum(['over_budget', 'step_change', 'off_schedule', 'never_zero', 'winter_summer_ratio', 'meter_vs_meter', 'manual']),
@@ -146,6 +148,15 @@ export const flagSchema = z.object({
   fixed_on: z.union([date, z.date()]).nullable(),
   evidence: z.string(),
   likely_cause: z.string().optional(),
+  excess_water: z
+    .object({
+      episodes: z.array(z.object({ from: date, to: date, gallons: z.number().positive() })),
+      ongoing_gallons_per_year: z.number().positive().nullable(),
+      method: z.string().min(1),
+      source: z.string().min(1),
+      confidence,
+    })
+    .nullable(),
   related_events: z.array(z.string()),
   source: z.string().optional(),
   todo: z.string().optional(),
@@ -190,6 +201,12 @@ export const siteConfigSchema = z.object({
   weather: z.object({ azmet_station: nullableString, source: z.string().optional(), confidence: confidence.optional(), todo: z.string().optional() }),
   waterfluence_unit_cost: sourced(z.number()),
   post_2027_rate_assumption: z.object({ method: z.string(), label: z.string(), source: z.string(), confidence }),
+  experiment_check: z.object({
+    min_days_each_side: sourced(z.number().int().positive()),
+    min_hours_per_day: sourced(z.number().int().positive()),
+    share_of_target_for_success: sourced(z.number().positive()),
+    noise_percent: sourced(z.number().positive()),
+  }),
 })
 
 export const plantFactorsFrontmatterSchema = z.object({
@@ -256,9 +273,68 @@ export const annualRainRowSchema = z.object({ Year: z.string().regex(/^\d{4}$/),
 
 export const eventsFrontmatterSchema = z.object({ todo: z.string().optional() })
 
+export const experimentSchema = z.object({
+  id: z.string(),
+  title: z.string().min(1),
+  meter: z.string(),
+  what_changes: z.string().min(1),
+  status: z.enum(['planned', 'running', 'done', 'stopped']),
+  start: date.nullable(),
+  end: date.nullable(),
+  baseline_days: z.number().int().positive(),
+  expected: z.object({
+    type: z.enum(['percent_reduction', 'max_daily_gallons']),
+    value: z.number().positive(),
+    source: z.string().min(1),
+    confidence,
+  }),
+  linked_flags: z.array(z.string()).optional(),
+  outcome_note: z.string().optional(),
+  todo: z.string().optional(),
+})
+
+export const optionSchema = z.object({
+  id: z.string(),
+  title: z.string().min(1),
+  why: z.string().min(1),
+  meters: z.array(z.string()).min(1),
+  change: z.object({ kind: z.enum(['turn_down', 'shutoff']), percent: z.number().positive().max(100).nullable(), months: z.array(z.number().int().min(1).max(12)) }),
+  touches_greenspace: z.boolean(),
+  has_trees: z.boolean().nullable(),
+  upfront_cost: z.number().nonnegative().nullable(),
+  upfront_cost_source: z.string(),
+  effort: z.enum(['low', 'medium', 'high']),
+  source: z.string().min(1),
+  confidence,
+  how_to_test: z.string().optional(),
+  todo: z.string().optional(),
+})
+
+export const dataNeedsFrontmatterSchema = z.object({ updated: date, todo: z.string().optional() })
+export const dataNeedRowSchema = z.object({
+  Priority: z.string().regex(/^\d+$/),
+  Need: z.string().min(1),
+  'Why it matters': z.string().min(1),
+  'What it unlocks': z.string().min(1),
+  'Who has it': z.string(),
+  Status: z.enum(['needed', 'partly in', 'in hand']),
+})
+
+export const budgetCheckFrontmatterSchema = z.object({ period: z.string(), source: z.string(), confidence, note: z.string(), todo: z.string().optional() })
+export const budgetCheckRowSchema = z.object({
+  Scope: z.string().min(1),
+  Measure: z.string().min(1),
+  'Low kgal': cellNumber,
+  'High kgal': cellNumber,
+  Source: z.string().min(1),
+  Confidence: confidence,
+})
+
 export type Meter = z.infer<typeof meterSchema>
 export type AreaRow = z.infer<typeof areaRowSchema>
 export type SiteMap = z.infer<typeof mapSchema>
 export type Flag = z.infer<typeof flagSchema>
 export type Rate = z.infer<typeof rateSchema>
 export type Bill = z.infer<typeof billSchema>
+export type Experiment = z.infer<typeof experimentSchema>
+export type MoveOption = z.infer<typeof optionSchema>
