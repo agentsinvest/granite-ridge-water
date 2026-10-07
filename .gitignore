@@ -10,3 +10,6 @@ src/generated/
 .env.*
 .DS_Store
 coverage/
+
+# Generated at build time from /data
+public/data/

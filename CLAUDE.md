@@ -208,6 +208,10 @@ Design all five states on every screen: populated, first-time empty, filtered em
 * `robots.txt` disallows all and the noindex tag is present.
 * Lighthouse accessibility score 95 or higher on Overview, Meters, and What if; phone check at 390px width.
 
+## Weather for the "Watering after rain" check
+
+Run `node scripts/fetch-weather.mjs` (or `npm run fetch-weather`) from the repo root, then commit the two files it writes. It updates `data/weather/daily-rain/<YYYY>.md` (NOAA ACIS, COOP East Mesa, `pcpn`) and `data/weather/daily-eto/<YYYY>.md` (AZMET Queen Creek az22, `eto_pen_mon_in`) from July 1, 2026 to today. Use `--from YYYY-MM-DD --to YYYY-MM-DD` for another range; rows outside the range are kept. Run it after each storm, or at least monthly. The site never calls these APIs; the build reads the markdown and writes `public/data/watering-after-rain.csv`.
+
 ## Current status
 
 See `/data/INVENTORY.md` for what data is in hand and what is still needed. Decisions are logged in `/docs/decisions/`.

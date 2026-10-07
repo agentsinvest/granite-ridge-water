@@ -1,6 +1,9 @@
+import { useMemo } from 'react'
 import type { SiteData } from '../../scripts/site-data'
 import { ActionCard } from '../components/actions'
 import { Bars } from '../components/charts'
+import { rainSummaryText } from '../components/WateringAfterRain'
+import { buildRainCheck } from '../lib/rainCheck'
 import { dollarRange } from '../components/LeakFlags'
 import { Pill, Section, TableView } from '../components/ui'
 import { checkExperiment } from '../engine/experiments'
@@ -27,6 +30,7 @@ export function Home({ data, model }: { data: SiteData; model: Model }) {
   const found = bands.reduce((s, b) => s + b.low, 0)
   const top = fixNow(priced)
   const changes = whatChanged(data)
+  const rain = useMemo(() => buildRainCheck(data), [data])
 
   const plYears = Object.entries(data.financials)
     .map(([y, f]) => ({ year: y, total: f.lines.find((l) => l.account === '50110')?.actual ?? null }))
@@ -113,6 +117,11 @@ export function Home({ data, model }: { data: SiteData; model: Model }) {
       </section>
 
       <Section id="changed" title="What changed since the last update">
+        <p className="mt-3 rounded-xl bg-surface p-4 text-sm ring-1 ring-[var(--ring)]">
+          <strong>Watering after rain: </strong>
+          {rain && rain.rainDays > 0 ? rainSummaryText(rain) : 'Rain gauge readings are not in yet, so this check has not run.'}{' '}
+          <a className="font-semibold underline underline-offset-4" href="#problems/watering-after-rain">See every rain event</a>
+        </p>
         {changes.length === 0 ? (
           <p className="mt-3 text-ink-2">Nothing new yet.</p>
         ) : (

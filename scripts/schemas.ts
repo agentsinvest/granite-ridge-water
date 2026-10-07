@@ -245,6 +245,21 @@ export const siteConfigSchema = z.object({
   homes: sourced(z.number().int().positive()),
   small_wins_budget_usd: sourced(z.number().positive()),
   post_2027_rate_assumption: z.object({ method: z.string(), label: z.string(), source: z.string(), confidence }),
+  rain_check: z.object({
+    min_event_inches: sourced(z.number().positive()),
+    usable_share: sourced(z.number().min(0).max(1)),
+    usable_cap_inches: sourced(z.number().positive()),
+    plant_factors: sourced(z.array(z.object({ meters: z.array(z.string()).min(1), months: z.array(z.number().int().min(1).max(12)), factor: z.number().positive() })).min(1)),
+    summer_months: sourced(z.array(z.number().int().min(1).max(12))),
+    max_days_summer: sourced(z.number().int().positive()),
+    max_days_winter: sourced(z.number().int().positive()),
+    already_off_days: sourced(z.number().int().positive()),
+    night_start_hour: sourced(z.number().int().min(12).max(23)),
+    night_end_hour: sourced(z.number().int().min(0).max(12)),
+    since: sourced(date),
+    action_id: sourced(z.string()),
+    action_verify_min_inches: sourced(z.number().positive()),
+  }),
   experiment_check: z.object({
     min_days_each_side: sourced(z.number().int().positive()),
     min_hours_per_day: sourced(z.number().int().positive()),
@@ -519,3 +534,18 @@ export type Rate = z.infer<typeof rateSchema>
 export type Bill = z.infer<typeof billSchema>
 export type Experiment = z.infer<typeof experimentSchema>
 export type MoveOption = z.infer<typeof optionSchema>
+
+/** Daily weather from one station, one file per year (weather/daily-rain/<YYYY>.md, weather/daily-eto/<YYYY>.md). */
+export const dailyWeatherFrontmatterSchema = z.object({
+  year: z.number(),
+  station_id: z.string(),
+  station_name: z.string(),
+  source: z.string(),
+  retrieved_on: z.union([date, z.date()]).nullable(),
+  covers: z.string().nullable(),
+  todo: z.string().optional(),
+})
+/** `Reported` is the gauge's own value: a number, T (trace, stored as 0), M (missing), or S (included in a later day's total). */
+export const dailyRainRowSchema = z.object({ Date: cellDate, 'Rain in': cellNumber, Reported: z.string().min(1, 'copy what the gauge reported') })
+export const dailyEtoRowSchema = z.object({ Date: cellDate, 'ETo in': cellNumber })
+

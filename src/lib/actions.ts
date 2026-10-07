@@ -4,6 +4,8 @@
 import type { SiteData } from '../../scripts/site-data'
 import { runScenario, type Change } from '../engine/scenarios'
 import { buildMoves, type Model, type Move } from './model'
+import { COUNTED, RESULT_TEXT } from '../engine/rainResponse'
+import { buildRainCheck } from './rainCheck'
 
 export type Action = SiteData['actions'][number]
 export type Status = Action['status']
@@ -130,7 +132,7 @@ export type Update = { date: string; text: string; link: string }
 
 const plural = (n: number, one: string, many: string) => (n === 1 ? one : many)
 
-/** Recent changes from the data itself: bills, flags, action status changes, and experiments. Newest first. */
+/** Recent changes from the data itself: bills, flags, action status changes, experiments, and rain checks. Newest first. */
 export function whatChanged(data: SiteData, n = 6): Update[] {
   const out: Update[] = []
   // Bills, grouped by the month they were issued.
@@ -173,6 +175,21 @@ export function whatChanged(data: SiteData, n = 6): Update[] {
   for (const x of data.experiments) {
     if (x.start) out.push({ date: x.start, text: `Test started: ${x.title}`, link: '#calculator?tab=did-it-work' })
     if (x.end) out.push({ date: x.end, text: `Test finished: ${x.title}`, link: '#calculator?tab=did-it-work' })
+  }
+  // One line per rain event: what the meters did, grouped by result. Rows left out of the counts are left out here too.
+  const rain = buildRainCheck(data)
+  for (const e of rain?.checks ?? []) {
+    const by = new Map<string, string[]>()
+    for (const m of e.meters) {
+      if (!COUNTED.includes(m.result)) continue
+      const what = m.result === 'too-soon' && m.daysEarly ? `started again ${m.daysEarly} ${plural(m.daysEarly, 'day', 'days')} early` : RESULT_TEXT[m.result].toLowerCase()
+      by.set(what, [...(by.get(what) ?? []), m.meter.replace('meter-', '')])
+    }
+    if (by.size === 0) continue
+    const parts = [...by].map(([what, ms]) => `${plural(ms.length, 'meter', 'meters')} ${ms.join(' and ')} ${what}`)
+    const when = new Date(`${e.start}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    const worked = rain!.actionWorking.has(e.start) ? ' The rain fix worked.' : ''
+    out.push({ date: e.end, text: `Rain on ${when} (${e.inches.toFixed(2)} in): ${parts.join('; ')}.${worked}`, link: '#problems/watering-after-rain' })
   }
   return out.sort((a, b) => b.date.localeCompare(a.date)).slice(0, n)
 }

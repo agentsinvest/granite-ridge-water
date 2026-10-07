@@ -58,7 +58,7 @@ describe('buildData', () => {
 
   it('reads action files and names their evidence documents', () => {
     const d = buildData()
-    expect(d.actions).toHaveLength(11)
+    expect(d.actions).toHaveLength(12)
     expect(d.evidenceLabels['sources/controllers/eco-verde-assessment-2026']).toMatch(/Eco Verde/)
   })
 
