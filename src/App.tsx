@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react'
 import { data } from './lib/data'
 import { MetersAndAreas } from './pages/MetersAndAreas'
 import { Bills } from './pages/Bills'
+import { Schedule } from './pages/Schedule'
 
 const SCREENS = [
   { name: 'Overview', route: null },
   { name: 'How we got here', route: null },
   { name: 'Meters and areas', route: 'meters' },
+  { name: 'Watering schedule', route: 'schedule' },
   { name: 'How much should we use', route: null },
   { name: 'What if', route: null },
   { name: 'Recommended moves', route: null },
@@ -14,14 +16,15 @@ const SCREENS = [
   { name: 'Data freshness', route: null },
 ] as const
 
-type Route = 'meters' | 'bills'
-const readRoute = (): Route => (window.location.hash === '#bills' ? 'bills' : 'meters')
+type Route = 'meters' | 'schedule' | 'bills'
+const ROUTES: Route[] = ['meters', 'schedule', 'bills']
+const readRoute = (): Route => ROUTES.find((r) => window.location.hash === `#${r}`) ?? 'meters'
 
 export function App() {
   const [route, setRoute] = useState<Route>(readRoute)
   useEffect(() => {
     const onHash = () => {
-      if (window.location.hash === '#bills' || window.location.hash === '#meters') {
+      if (ROUTES.some((r) => window.location.hash === `#${r}`)) {
         setRoute(readRoute())
         window.scrollTo(0, 0)
       }
@@ -60,7 +63,7 @@ export function App() {
       </nav>
       <div className="min-w-0 flex-1">
         <main id="main" className="mx-auto max-w-5xl px-4 py-6 md:px-8 md:py-10">
-          {route === 'bills' ? <Bills data={data} /> : <MetersAndAreas data={data} />}
+          {route === 'bills' ? <Bills data={data} /> : route === 'schedule' ? <Schedule data={data} /> : <MetersAndAreas data={data} />}
         </main>
         <footer className="mx-auto max-w-5xl border-t border-line px-4 py-6 text-sm text-ink-2 md:px-8">
           <p>Estimates are based on City of Mesa published rates and HOA records. Bills from the City are the official record.</p>

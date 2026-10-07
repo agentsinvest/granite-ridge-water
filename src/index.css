@@ -17,6 +17,7 @@
   --pin-ink: #ffffff;
   --serious: #ec835a;
   --focus: #2a78d6;
+  --bar: #2a78d6;
   --ring: rgba(11, 11, 11, 0.1);
 }
 @media (prefers-color-scheme: dark) {
@@ -36,6 +37,7 @@
     --pin-ink: #0b0b0b;
     --serious: #ec835a;
     --focus: #3987e5;
+    --bar: #3987e5;
     --ring: rgba(255, 255, 255, 0.1);
   }
 }
@@ -55,6 +57,7 @@
   --pin-ink: #0b0b0b;
   --serious: #ec835a;
   --focus: #3987e5;
+  --bar: #3987e5;
   --ring: rgba(255, 255, 255, 0.1);
 }
 

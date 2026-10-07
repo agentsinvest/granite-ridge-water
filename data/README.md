@@ -22,6 +22,7 @@ Every number the app shows comes from a file in this folder. Git history is the 
 | `rates/<effective-start>.md` | One file per City of Mesa rate period | `rates/README.md` |
 | `billing-periods/<meter>.md` | Usage per Mesa read period from Waterfluence | `billing-periods/README.md` |
 | `usage/<meter>/<YYYY>.md` | Waterfluence daily totals, one table per year | `usage/README.md` |
+| `hourly/<meter>/<YYYY>.md` | Waterfluence hourly gallons, used for the watering schedule view | `hourly/README.md` |
 | `weather/<YYYY>.md` | AZMET daily ETo and rain | `weather/README.md` |
 | `financials/<YYYY>.md` | HOA year-end P&L water and landscape lines, a cross-check against bills | `financials/README.md` |
 | `events.md` | Dated log of repairs, leaks, controller and landscape changes | in the file |

@@ -37,6 +37,19 @@ waterfluence_unit_cost:
   source: "Waterfluence Agency panel, site MESA-437"
   confidence: low
   note: "Waterfluence's flat cost assumption for its $ Cost charts. Not a City of Mesa rate; never used to price bills."
+watering_schedule:
+  watering_hour_min_gallons:
+    value: 50
+    source: "Set 2026-10-07 from the hourly AMI data: hours outside watering read 0 to 5 gallons (the meter-1 trickle is 3 to 5), and the smallest scheduled hours read about 100 gallons (meter-3) and about 370 (meter-4). 50 sits well between the two."
+    confidence: medium
+  max_gap_hours:
+    value: 3
+    source: "Set 2026-10-07: up to 3 missing hourly reads between two watering hours are treated as one watering night with a gap, because Waterfluence drops 1 to 2 late-night reads on many nights on meters 1, 3, and 4."
+    confidence: medium
+  measured_min_complete_share:
+    value: 0.8
+    source: "Set 2026-10-07: the 'end earlier' estimate measures gallons directly only when at least 80% of watering nights have every hour read. Below that, the nights with every hour read are mostly the short ones (meters 1, 3, and 4 lose late-night reads), so the estimate uses the share of watering hours removed instead."
+    confidence: medium
 post_2027_rate_assumption:
   method: hold_2027_flat
   label: "Years after 2027 assume 2027 City of Mesa rates stay the same. This is an assumption, not a published rate."
