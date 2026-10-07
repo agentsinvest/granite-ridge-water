@@ -3,6 +3,7 @@ import { data } from './lib/data'
 import { MetersAndAreas } from './pages/MetersAndAreas'
 import { Bills } from './pages/Bills'
 import { Schedule } from './pages/Schedule'
+import { WhatIf } from './pages/WhatIf'
 
 const SCREENS = [
   { name: 'Overview', route: null },
@@ -10,21 +11,23 @@ const SCREENS = [
   { name: 'Meters and areas', route: 'meters' },
   { name: 'Watering schedule', route: 'schedule' },
   { name: 'How much should we use', route: null },
-  { name: 'What if', route: null },
+  { name: 'What if', route: 'what-if' },
   { name: 'Recommended moves', route: null },
   { name: 'Bills', route: 'bills' },
   { name: 'Data freshness', route: null },
 ] as const
 
-type Route = 'meters' | 'schedule' | 'bills'
-const ROUTES: Route[] = ['meters', 'schedule', 'bills']
-const readRoute = (): Route => ROUTES.find((r) => window.location.hash === `#${r}`) ?? 'meters'
+type Route = 'meters' | 'schedule' | 'bills' | 'what-if'
+const ROUTES: Route[] = ['meters', 'schedule', 'bills', 'what-if']
+/** The screen named by the hash, ignoring any ?inputs after it. Anything else is the default screen. */
+const routeOf = (hash: string): Route | null => ROUTES.find((r) => hash.slice(1).split('?')[0] === r) ?? null
+const readRoute = (): Route => routeOf(window.location.hash) ?? 'meters'
 
 export function App() {
   const [route, setRoute] = useState<Route>(readRoute)
   useEffect(() => {
     const onHash = () => {
-      if (ROUTES.some((r) => window.location.hash === `#${r}`)) {
+      if (routeOf(window.location.hash)) {
         setRoute(readRoute())
         window.scrollTo(0, 0)
       }
@@ -63,7 +66,7 @@ export function App() {
       </nav>
       <div className="min-w-0 flex-1">
         <main id="main" className="mx-auto max-w-5xl px-4 py-6 md:px-8 md:py-10">
-          {route === 'bills' ? <Bills data={data} /> : route === 'schedule' ? <Schedule data={data} /> : <MetersAndAreas data={data} />}
+          {route === 'bills' ? <Bills data={data} /> : route === 'what-if' ? <WhatIf data={data} /> : route === 'schedule' ? <Schedule data={data} /> : <MetersAndAreas data={data} />}
         </main>
         <footer className="mx-auto max-w-5xl border-t border-line px-4 py-6 text-sm text-ink-2 md:px-8">
           <p>Estimates are based on City of Mesa published rates and HOA records. Bills from the City are the official record.</p>
