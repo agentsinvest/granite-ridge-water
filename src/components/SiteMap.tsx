@@ -1,12 +1,17 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { SiteData } from '../../scripts/site-data'
 import { meterNumber } from '../lib/data'
+import { MapCostCard, type MapCosts } from './MapCostCard'
 
 type Props = {
   map: SiteData['map']
   areaNames: Record<string, { label: string; name: string }>
   flaggedMeters: Set<string>
+  /** Bills and stations for the cost card shown on hover, focus, or tap. Without it the map shows no costs. */
+  costs?: MapCosts
 }
+
+type Active = { kind: 'meter' | 'zone'; id: string; at: [number, number] }
 
 const toPoints = (pts: [number, number][]) => pts.map(([x, y]) => `${x},${y}`).join(' ')
 
@@ -14,13 +19,37 @@ const toPoints = (pts: [number, number][]) => pts.map(([x, y]) => `${x},${y}`).j
 export const zoneColor = (controller: string) => `var(--zone-${controller.toLowerCase()})`
 const meterList = (meters: string[]) => (meters.length > 1 ? 'meters ' : 'meter ') + meters.map(meterNumber).join(' and ')
 
-export function SiteMap({ map, areaNames, flaggedMeters }: Props) {
+export function SiteMap({ map, areaNames, flaggedMeters, costs }: Props) {
   const { width, height } = map.canvas
   const controllers = map.controllers ?? []
   const zones = map.zones ?? []
   const hasZones = controllers.length > 0 || zones.length > 0
   const [showZones, setShowZones] = useState(true)
   const zonesOn = hasZones && showZones
+  const [active, setActive] = useState<Active | null>(null)
+  const wrapRef = useRef<HTMLDivElement>(null)
+  const closeTimer = useRef<number | undefined>(undefined)
+  // Hover cards stay open while the pointer moves onto them, and Escape closes them (WCAG 1.4.13).
+  const show = (a: Active) => {
+    window.clearTimeout(closeTimer.current)
+    setActive(a)
+  }
+  const hideSoon = () => {
+    window.clearTimeout(closeTimer.current)
+    closeTimer.current = window.setTimeout(() => setActive(null), 200)
+  }
+  useEffect(() => {
+    if (!active) return
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setActive(null)
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [active])
+  useEffect(() => () => window.clearTimeout(closeTimer.current), [])
+  const hoverProps = (a: Active) =>
+    costs
+      ? { onMouseEnter: () => show(a), onMouseLeave: hideSoon, onFocus: () => show(a), onBlur: () => setActive(null), 'aria-describedby': active?.id === a.id ? 'map-cost-card' : undefined }
+      : {}
+  const activeZone = active?.kind === 'zone' ? zones.find((z) => z.id === active.id) : undefined
   return (
     <figure className="m-0">
       {hasZones && (
@@ -29,6 +58,7 @@ export function SiteMap({ map, areaNames, flaggedMeters }: Props) {
           Show watering zones and controllers
         </label>
       )}
+      <div ref={wrapRef} className="relative">
       <svg
         viewBox={`0 0 ${width} ${height}`}
         className="block h-auto w-full rounded-lg bg-surface"
@@ -77,21 +107,30 @@ export function SiteMap({ map, areaNames, flaggedMeters }: Props) {
         {zonesOn &&
           zones.map((z) => {
             const c = controllers.find((x) => x.id === z.controller)
-            return (
+            const label = `Zone ${z.label}: ${z.name}. ${c?.name ?? `Controller ${z.controller}`}${c ? `, ${meterList(c.meters)}` : ''}.${z.status === 'off' ? ' Turned off.' : ''}`
+            const a: Active = { kind: 'zone', id: z.id, at: z.label_at }
+            return costs ? (
+              <g
+                key={z.id}
+                className="map-zone"
+                tabIndex={0}
+                role="button"
+                aria-label={`${label} Show what its meter costs.`}
+                {...hoverProps(a)}
+                onClick={() => show(a)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    show(a)
+                  }
+                }}
+              >
+                <ZoneShapes z={z} />
+              </g>
+            ) : (
               <g key={z.id}>
-                <title>{`Zone ${z.label}: ${z.name}. ${c?.name ?? `Controller ${z.controller}`}${c ? `, ${meterList(c.meters)}` : ''}.${z.status === 'off' ? ' Turned off.' : ''}`}</title>
-                {z.parts.map((part, i) => (
-                  <polygon
-                    key={i}
-                    points={toPoints(part)}
-                    fill={z.status === 'off' ? 'none' : `url(#zone-hatch-${z.controller})`}
-                    fillOpacity={0.55}
-                    stroke={zoneColor(z.controller)}
-                    strokeWidth={4}
-                    strokeDasharray={z.status === 'off' ? '10 8' : undefined}
-                    strokeLinejoin="round"
-                  />
-                ))}
+                <title>{label}</title>
+                <ZoneShapes z={z} />
               </g>
             )
           })}
@@ -139,7 +178,7 @@ export function SiteMap({ map, areaNames, flaggedMeters }: Props) {
         </g>
 
         {zonesOn && (
-          <g aria-hidden="true" fontSize={21} fontWeight={700}>
+          <g aria-hidden="true" fontSize={21} fontWeight={700} pointerEvents="none">
             {zones.map((z) => (
               <text
                 key={z.id}
@@ -173,7 +212,12 @@ export function SiteMap({ map, areaNames, flaggedMeters }: Props) {
           const n = meterNumber(pin.meter)
           const flagged = flaggedMeters.has(pin.meter)
           return (
-            <a key={pin.meter} href={`#water/${pin.meter}?tab=meters`} aria-label={`Meter ${n}${flagged ? ', has a leak flag' : ''}. Go to details.`}>
+            <a
+              key={pin.meter}
+              href={`#water/${pin.meter}?tab=meters`}
+              aria-label={`Meter ${n}${flagged ? ', has a leak flag' : ''}. Go to details.`}
+              {...hoverProps({ kind: 'meter', id: pin.meter, at: pin.at })}
+            >
               <g transform={`translate(${pin.at[0]} ${pin.at[1]})`} className="map-pin">
                 <circle r={34} fill="transparent" />
                 <circle className="pin-ring" r={24} fill="var(--pin)" stroke="var(--surface)" strokeWidth={4} />
@@ -193,6 +237,19 @@ export function SiteMap({ map, areaNames, flaggedMeters }: Props) {
           )
         })}
       </svg>
+      {costs && active && (active.kind === 'meter' || activeZone) && (
+        <MapCostCard
+          id="map-cost-card"
+          costs={costs}
+          target={active.kind === 'meter' ? { kind: 'meter', meter: active.id, flagged: flaggedMeters.has(active.id) } : { kind: 'zone', zone: activeZone!, controller: controllers.find((c) => c.id === activeZone!.controller) }}
+          at={active.at}
+          canvas={map.canvas}
+          wrap={wrapRef.current}
+          onMouseEnter={() => window.clearTimeout(closeTimer.current)}
+          onMouseLeave={hideSoon}
+        />
+      )}
+      </div>
       <figcaption className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm text-ink-2">
         <LegendSwatch kind="shrub" label="Shrub and desert landscape" />
         <LegendSwatch kind="turf" label="Turf" />
@@ -255,5 +312,25 @@ function LegendSwatch({ kind, label }: { kind: 'shrub' | 'turf' | 'street'; labe
       </svg>
       {label}
     </span>
+  )
+}
+
+function ZoneShapes({ z }: { z: NonNullable<SiteData['map']['zones']>[number] }) {
+  return (
+    <>
+      {z.parts.map((part, i) => (
+        <polygon
+          key={i}
+          className="zone-shape"
+          points={toPoints(part)}
+          fill={z.status === 'off' ? 'none' : `url(#zone-hatch-${z.controller})`}
+          fillOpacity={0.55}
+          stroke={zoneColor(z.controller)}
+          strokeWidth={4}
+          strokeDasharray={z.status === 'off' ? '10 8' : undefined}
+          strokeLinejoin="round"
+        />
+      ))}
+    </>
   )
 }

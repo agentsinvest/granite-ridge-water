@@ -109,6 +109,7 @@ export const mapSchema = z.object({
     .array(
       z.object({
         id: z.string(),
+        stations: z.array(z.string()).min(1),
         controller: z.string(),
         label: z.string(),
         name: z.string(),
