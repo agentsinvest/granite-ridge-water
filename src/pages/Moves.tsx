@@ -66,6 +66,11 @@ export function Moves({ data, model }: { data: SiteData; model: Model }) {
                   {m.title} <Pill tone="neutral">Needs a quote</Pill>
                 </p>
                 <p className="mt-2 text-sm text-ink-2">{m.why}</p>
+                {m.kind === 'investment' && (
+                  <p className="mt-2 text-sm">
+                    <a href={`#invest?inv=${m.id}`} className="font-semibold underline underline-offset-4">Try it with your own numbers</a>
+                  </p>
+                )}
               </Card>
             </li>
           ))}

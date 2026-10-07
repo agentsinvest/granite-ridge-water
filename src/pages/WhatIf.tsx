@@ -174,11 +174,14 @@ export function WhatIf({ data, model, query }: { data: SiteData; model: Model; q
         )}
         <details className="mt-4 text-sm">
           <summary className="cursor-pointer font-semibold">Investments (controllers, sensors, nozzles)</summary>
-          <p className="mt-2 text-ink-2">These can be added once a quote or a cited savings figure is on file. Until then they are not priced, so they cannot mislead.</p>
+          <p className="mt-2 text-ink-2">
+            These are added to scenarios once a quote or a cited savings figure is on file. To test one with your own numbers now, use{' '}
+            <a href="#invest" className="underline underline-offset-4">Is an investment worth it?</a>
+          </p>
           <ul className="mt-2 space-y-1">
             {(data.investments as { id: string; name: string; effect: { value: number | null } }[]).map((inv) => (
               <li key={inv.id} className="flex flex-wrap items-center gap-2">
-                <span>{inv.name}</span>
+                <a href={`#invest?inv=${inv.id}`} className="underline underline-offset-4">{inv.name}</a>
                 {inv.effect.value === null && <Pill tone="neutral">Needs a quote</Pill>}
               </li>
             ))}

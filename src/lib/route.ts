@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react'
 
-export const ROUTES = ['overview', 'history', 'meters', 'budget', 'whatif', 'moves', 'experiments', 'bills', 'data'] as const
+export const ROUTES = ['overview', 'history', 'meters', 'budget', 'whatif', 'invest', 'moves', 'experiments', 'bills', 'data'] as const
 export type RouteName = (typeof ROUTES)[number]
 export type Route = { name: RouteName; anchor: string | null; query: URLSearchParams }
 
 export function parseHash(hash: string): Route {
   const raw = hash.replace(/^#/, '')
   const [path, q = ''] = raw.split('?')
-  const [name, anchor = null] = path.split('/')
+  const [first, anchor = null] = path.split('/')
+  // Links shared before the screens were split used #what-if for the investment calculator.
+  const name = first === 'what-if' ? 'invest' : first
   return { name: (ROUTES as readonly string[]).includes(name) ? (name as RouteName) : 'overview', anchor, query: new URLSearchParams(q) }
 }
 

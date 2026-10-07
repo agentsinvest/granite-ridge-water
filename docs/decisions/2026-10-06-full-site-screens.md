@@ -12,3 +12,8 @@
 * **Bills** can be filtered by preset period (last 12 or 24 months, any year, all) or chosen months, and by meter. The filter is kept in the link.
 * Meter replacement dates (meters 1, 2, and 4) were added to `events.md` from the meter numbers printed on the bills, at month precision.
 * Charts use Recharts with a fixed color per meter, and each has a "Show as a table" view.
+
+## Merge with main (2026-10-07)
+
+* Main added an investment calculator at `src/pages/WhatIf.tsx` while this branch built the scenario builder under the same name. Both are kept: the scenario builder is "What if" (`#whatif`), and the calculator moved to `src/pages/Investment.tsx` as "Is an investment worth it?" (`#invest`). Old `#what-if` links open the calculator with their inputs.
+* Investments on Recommended moves and in the What if investments list link to the calculator, prefilled from the catalog.
