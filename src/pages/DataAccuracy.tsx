@@ -25,7 +25,7 @@ export function DataAccuracy({ data, model }: { data: SiteData; model: Model }) 
     <article>
       <PageHeader
         title="About the data"
-        lead="How fresh the numbers are, what is still estimated, and the data that would make the site more accurate. If you can help with any item on the list, tell the board."
+        lead="How fresh the numbers are, what is still estimated, and the data that would make the site more accurate. If you can help with any item on the list, tell the HOA."
       />
       <Stats>
         <Stat value={String(needed.length)} label="data requests open" flag={needed.length > 0} />
