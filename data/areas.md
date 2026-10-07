@@ -1,8 +1,8 @@
 ---
-source: "Jennifer's annotated aerial map (raw/maps/areas-aerial.webp), received 2026-10-06"
+source: "Annotated aerial map published on the HOA website (sources/maps/areas-aerial.webp), shared by Jennifer 2026-10-06; source confirmed 2026-10-07"
 site_slope:
   value: "North to south, about 2%. The park green is the lowest point."
-  source: "Jennifer's annotated aerial map"
+  source: "HOA website annotated aerial map"
   confidence: medium
 lot_area_included:
   value: false

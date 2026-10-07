@@ -1,7 +1,8 @@
 ---
 document: "Annotated aerial map of Granite Ridge common areas"
 original_file: "areas-aerial.webp"
-provided_by: "Jennifer, 2026-10-06"
+provided_by: "Jennifer, 2026-10-06 (resent 2026-10-07)"
+published_by: "Granite Ridge HOA website (confirmed by Jennifer 2026-10-07)"
 ---
 
 # Common-area map

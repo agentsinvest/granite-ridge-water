@@ -1,5 +1,5 @@
 ---
-source: "Traced by hand from Jennifer's annotated aerial map (sources/maps/areas-aerial.md), 2026-10-06. Meter locations transferred from the Waterfluence Controller Map (sources/waterfluence/landscape-and-controller-maps.md)."
+source: "Traced by hand from the HOA website annotated aerial map (sources/maps/areas-aerial.md), 2026-10-06. Meter locations transferred from the Waterfluence Controller Map (sources/waterfluence/landscape-and-controller-maps.md)."
 confidence: medium
 note: "Schematic, not to scale. Coordinates are pixels on a 1050 by 1020 canvas matching Jennifer's map. Shapes are simplified; square footages come from areas.md, never from these shapes."
 canvas:
@@ -57,7 +57,7 @@ boundary_roads:
     rotate: 90
 slope:
   text: "Ground slopes about 2% from north to south. The park is the lowest point."
-  source: "Jennifer's annotated aerial map"
+  source: "HOA website annotated aerial map"
 ---
 
 # Site map geometry

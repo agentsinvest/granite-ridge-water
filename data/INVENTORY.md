@@ -30,7 +30,7 @@ Full transcriptions of every file below are in `/sources/` (see `sources/README.
 | `invoices/invoices-text.txt` (Google Drive text of `Invoices (1)_opt (1).pdf`, 18.6 MB) | City of Mesa summary bills with meter reads and every charge | all 4 | Drive returned bills dated 2024-12-27 to 2026-08-26 only (text cut off at about 127,000 characters) | 25 summary bills confirmed line by line and given meter reads; 4 bills for 2026-08 added; `sources/bills/city-bills-2024-12-to-2026-08-text.md` | Older bills (2020 to 2024) in the PDF not yet readable: file is over the connector's 10 MB download limit and direct download is blocked |
 | (table in chat, 2026-10-06) | Annual rainfall totals, 2020 to 2026 year to date | site | 2020 to 2026 | `weather/annual-rainfall.md` | Gauge or station and the year-to-date end date not stated |
 | (screenshot in chat) | Waterfluence Summary of 1 Sites: landscape characteristics and annual performance | all | last 12 months | `sources/waterfluence/summary-landscape-and-annual-performance.md` | Applied 2.8 ft vs budget 3.0 ft (95%) |
-| `maps/areas-aerial.webp` | Aerial with 5 named areas (A to E), square footages, slope note | n/a | n/a | `areas.md` | Gross common-area square footage (no homeowner lots, confirmed by Jennifer 2026-10-06); not irrigated area |
+| `maps/areas-aerial.webp` | Aerial with 5 named areas (A to E), square footages, slope note. Published on the HOA website | n/a | n/a | `areas.md` | Gross common-area square footage (no homeowner lots, confirmed by Jennifer 2026-10-06); not irrigated area |
 
 The P&Ls also contain bank account digits and owner names (construction deposits). Those were not copied into `/data/`.
 
