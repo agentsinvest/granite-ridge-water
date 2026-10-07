@@ -101,6 +101,23 @@ export const mapSchema = z.object({
   meters: z.array(z.object({ meter: z.string(), at: point })),
   boundary_roads: z.array(z.object({ name: z.string(), line: z.array(point).min(2), label_at: point, rotate: z.number().optional() })),
   slope: z.object({ text: z.string(), source: z.string() }),
+  controllers: z
+    .array(z.object({ id: z.string().regex(/^[A-Z]$/), name: z.string(), meters: z.array(z.string()).min(1), at: point }))
+    .optional(),
+  zones: z
+    .array(
+      z.object({
+        id: z.string(),
+        controller: z.string(),
+        label: z.string(),
+        name: z.string(),
+        status: z.enum(['on', 'off']),
+        label_at: point,
+        parts: z.array(z.array(point).min(3)).min(1),
+      }),
+    )
+    .optional(),
+  zones_source: z.string().optional(),
 })
 
 export const billingPeriodsFrontmatterSchema = z.object({

@@ -129,7 +129,41 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
             Waterfluence controller map. It is a simplified drawing: square footages below come from the source maps, not
             from the drawing. {data.map.slope.text}
           </p>
+          {data.map.zones_source && <p className="mt-2 max-w-prose">Watering zones and controllers: {data.map.zones_source}</p>}
         </details>
+        {(data.map.zones ?? []).length > 0 && (
+          <details className="mt-3 text-sm">
+            <summary className="cursor-pointer font-semibold">Watering zones as a table</summary>
+            <div className="mt-2 overflow-x-auto rounded-xl bg-surface ring-1 ring-[var(--ring)]">
+              <table className="w-full min-w-[32rem] text-left text-sm">
+                <caption className="sr-only">Watering zones by controller and meter</caption>
+                <thead className="border-b border-line text-ink-2">
+                  <tr>
+                    <th scope="col" className="px-4 py-2 font-semibold">Zone</th>
+                    <th scope="col" className="px-4 py-2 font-semibold">What it waters</th>
+                    <th scope="col" className="px-4 py-2 font-semibold">Controller</th>
+                    <th scope="col" className="px-4 py-2 font-semibold">Meter</th>
+                    <th scope="col" className="px-4 py-2 font-semibold">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(data.map.zones ?? []).map((z) => {
+                    const c = (data.map.controllers ?? []).find((x) => x.id === z.controller)
+                    return (
+                      <tr key={z.id} className="border-b border-line last:border-0 align-top">
+                        <th scope="row" className="px-4 py-2 font-semibold">{z.label}</th>
+                        <td className="px-4 py-2">{z.name}</td>
+                        <td className="px-4 py-2">{c?.name ?? z.controller}</td>
+                        <td className="px-4 py-2">{c ? c.meters.map(meterNumber).join(' and ') : <Missing what="Meter" />}</td>
+                        <td className="px-4 py-2">{z.status === 'off' ? 'Turned off' : 'On'}</td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </details>
+        )}
       </section>
 
       <section aria-labelledby="areas-heading" className="mt-10">

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { SiteData } from '../../scripts/site-data'
 import { meterNumber } from '../lib/data'
 
@@ -9,10 +10,25 @@ type Props = {
 
 const toPoints = (pts: [number, number][]) => pts.map(([x, y]) => `${x},${y}`).join(' ')
 
+/** One color token per controller letter; the letter is always printed too, so color is never the only cue. */
+export const zoneColor = (controller: string) => `var(--zone-${controller.toLowerCase()})`
+const meterList = (meters: string[]) => (meters.length > 1 ? 'meters ' : 'meter ') + meters.map(meterNumber).join(' and ')
+
 export function SiteMap({ map, areaNames, flaggedMeters }: Props) {
   const { width, height } = map.canvas
+  const controllers = map.controllers ?? []
+  const zones = map.zones ?? []
+  const hasZones = controllers.length > 0 || zones.length > 0
+  const [showZones, setShowZones] = useState(true)
+  const zonesOn = hasZones && showZones
   return (
     <figure className="m-0">
+      {hasZones && (
+        <label className="mb-3 inline-flex cursor-pointer items-center gap-2 text-sm font-semibold">
+          <input type="checkbox" checked={showZones} onChange={(e) => setShowZones(e.target.checked)} className="h-4 w-4" />
+          Show watering zones and controllers
+        </label>
+      )}
       <svg
         viewBox={`0 0 ${width} ${height}`}
         className="block h-auto w-full rounded-lg bg-surface"
@@ -25,6 +41,11 @@ export function SiteMap({ map, areaNames, flaggedMeters }: Props) {
           numbered 1 to 4. The same information is in the tables below the map.
         </desc>
         <defs>
+          {controllers.map((c) => (
+            <pattern key={c.id} id={`zone-hatch-${c.id}`} patternUnits="userSpaceOnUse" width="12" height="12" patternTransform="rotate(-45)">
+              <line x1="0" y1="0" x2="0" y2="12" stroke={zoneColor(c.id)} strokeWidth="5" />
+            </pattern>
+          ))}
           <pattern id="turf-hatch" patternUnits="userSpaceOnUse" width="14" height="14" patternTransform="rotate(45)">
             <line x1="0" y1="0" x2="0" y2="14" stroke="var(--turf-hatch)" strokeWidth="4" />
           </pattern>
@@ -52,6 +73,28 @@ export function SiteMap({ map, areaNames, flaggedMeters }: Props) {
             <polygon points={toPoints(t.points)} fill="url(#turf-hatch)" opacity={0.6} />
           </g>
         ))}
+
+        {zonesOn &&
+          zones.map((z) => {
+            const c = controllers.find((x) => x.id === z.controller)
+            return (
+              <g key={z.id}>
+                <title>{`Zone ${z.label}: ${z.name}. ${c?.name ?? `Controller ${z.controller}`}${c ? `, ${meterList(c.meters)}` : ''}.${z.status === 'off' ? ' Turned off.' : ''}`}</title>
+                {z.parts.map((part, i) => (
+                  <polygon
+                    key={i}
+                    points={toPoints(part)}
+                    fill={z.status === 'off' ? 'none' : `url(#zone-hatch-${z.controller})`}
+                    fillOpacity={0.55}
+                    stroke={zoneColor(z.controller)}
+                    strokeWidth={4}
+                    strokeDasharray={z.status === 'off' ? '10 8' : undefined}
+                    strokeLinejoin="round"
+                  />
+                ))}
+              </g>
+            )
+          })}
 
         <g>
           <title>{`${areaNames[map.streets.area]?.label ?? ''} ${areaNames[map.streets.area]?.name ?? 'Private streets'}`.trim()}</title>
@@ -94,6 +137,37 @@ export function SiteMap({ map, areaNames, flaggedMeters }: Props) {
             </g>
           ))}
         </g>
+
+        {zonesOn && (
+          <g aria-hidden="true" fontSize={21} fontWeight={700}>
+            {zones.map((z) => (
+              <text
+                key={z.id}
+                x={z.label_at[0]}
+                y={z.label_at[1]}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill="var(--ink)"
+                stroke="var(--surface)"
+                strokeWidth={6}
+                paintOrder="stroke"
+              >
+                {z.status === 'off' ? `${z.label} off` : z.label}
+              </text>
+            ))}
+          </g>
+        )}
+
+        {zonesOn &&
+          controllers.map((c) => (
+            <g key={c.id} transform={`translate(${c.at[0]} ${c.at[1]})`}>
+              <title>{`${c.name} (controller ${c.id}), ${meterList(c.meters)}`}</title>
+              <polygon points="0,-26 24,16 -24,16" fill="var(--surface)" stroke={zoneColor(c.id)} strokeWidth={5} strokeLinejoin="round" />
+              <text y={4} textAnchor="middle" dominantBaseline="central" fontSize={22} fontWeight={800} fill="var(--ink)" aria-hidden="true">
+                {c.id}
+              </text>
+            </g>
+          ))}
 
         {map.meters.map((pin) => {
           const n = meterNumber(pin.meter)
@@ -141,6 +215,26 @@ export function SiteMap({ map, areaNames, flaggedMeters }: Props) {
           </svg>
           Leak flag
         </span>
+        {zonesOn &&
+          controllers.map((c) => (
+            <span key={c.id} className="inline-flex items-center gap-2">
+              <svg width="22" height="20" viewBox="-14 -14 28 26" aria-hidden="true">
+                <polygon points="0,-12 12,9 -12,9" fill="var(--surface)" stroke={zoneColor(c.id)} strokeWidth={3} />
+                <text y={2} textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight={800} fill="var(--ink)">
+                  {c.id}
+                </text>
+              </svg>
+              {c.name} ({meterList(c.meters)})
+            </span>
+          ))}
+        {zonesOn && zones.some((z) => z.status === 'off') && (
+          <span className="inline-flex items-center gap-2">
+            <svg width="22" height="14" aria-hidden="true">
+              <rect x="2" y="2" width="18" height="10" rx="2" fill="none" stroke="var(--ink-2)" strokeWidth="2" strokeDasharray="4 3" />
+            </svg>
+            Dashed outline: zone turned off
+          </span>
+        )}
         <span>North is up. Schematic, not to scale.</span>
       </figcaption>
     </figure>
