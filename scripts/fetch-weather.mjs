@@ -3,6 +3,7 @@
 // Run from the repo root: node scripts/fetch-weather.mjs [--from YYYY-MM-DD] [--to YYYY-MM-DD]
 // Defaults: from 2026-07-01 to today. Rows inside the range are replaced; rows outside it are kept.
 // This runs on a maintainer's machine only. The site never calls these APIs.
+// Behind an HTTPS proxy (as in a Claude Code cloud session), run with NODE_USE_ENV_PROXY=1 so fetch uses it.
 
 import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
