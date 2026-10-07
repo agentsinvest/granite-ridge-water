@@ -26,6 +26,8 @@ export const meterSchema = z.object({
   account_last4: last4,
   meter_number_last4: last4,
   size_inches: z.number().nullable(),
+  size_source: z.string().optional(),
+  turf_share_percent: z.object({ value: z.number().min(0).max(100), source: z.string(), confidence }).optional(),
   service_type: nullableString,
   waterfluence_id: nullableString,
   location: nullableString,
@@ -207,6 +209,8 @@ export const siteConfigSchema = z.object({
   weather: z.object({ azmet_station: nullableString, source: z.string().optional(), confidence: confidence.optional(), todo: z.string().optional() }),
   waterfluence_unit_cost: sourced(z.number()),
   watering_schedule: z.object({ watering_hour_min_gallons: sourced(z.number().positive()), max_gap_hours: sourced(z.number().int().nonnegative()), measured_min_complete_share: sourced(z.number().min(0).max(1)) }),
+  homes: sourced(z.number().int().positive()),
+  small_wins_budget_usd: sourced(z.number().positive()),
   post_2027_rate_assumption: z.object({ method: z.string(), label: z.string(), source: z.string(), confidence }),
   experiment_check: z.object({
     min_days_each_side: sourced(z.number().int().positive()),
@@ -224,6 +228,8 @@ export const plantFactorsFrontmatterSchema = z.object({
 
 const derivedValue = { derived: z.boolean(), source: z.string() }
 export const rateSchema = z.object({
+  /** `recommended` rates are proposals not yet adopted: they price future scenarios only, never "today". */
+  status: z.enum(['in_effect', 'recommended', 'adopted']).default('in_effect'),
   effective_start: z.union([date, z.date()]).nullable(),
   effective_end: z.union([date, z.date()]).nullable(),
   applies_from_period_end: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -238,7 +244,16 @@ export const rateSchema = z.object({
   volumetric: z.object({
     unit: z.literal('per_1000_gallons'),
     applies_to: z.string(),
-    blocks: z.array(z.object({ block: z.number(), limit: z.enum(['winter_allowance']).nullable(), price: z.number(), ...derivedValue })).length(2),
+    blocks: z
+      .array(
+        z.object({
+          block: z.number(),
+          limit: z.union([z.literal('winter_allowance'), z.object({ winter_average_multiple: z.number().gt(1) })]).nullable(),
+          price: z.number(),
+          ...derivedValue,
+        }),
+      )
+      .min(2),
   }),
   winter_allowance: z.object({ method: z.string(), derived: z.boolean(), confidence, source: z.string() }),
   fees: z.array(z.object({ name: z.string(), basis: z.enum(['per_1000_gallons_above_included', 'per_1000_gallons', 'per_bill']), amount: z.number(), ...derivedValue })),
@@ -327,6 +342,68 @@ export const dataNeedRowSchema = z.object({
   Status: z.enum(['needed', 'partly in', 'in hand']),
 })
 
+export const historyFrontmatterSchema = z.object({
+  source: z.string(),
+  confidence,
+  covers: z.string(),
+  note: z.string().optional(),
+  checks: z.string().optional(),
+  todo: z.string().optional(),
+})
+export const historyRowSchema = z.object({
+  Year: z.string().regex(/^\d{4}$/),
+  Meter: z.string().regex(/^meter-\d+$/),
+  'Gallons kgal': cellNumber,
+  'Peak surcharge': cellNumber,
+  Complete: z.enum(['yes', 'no']),
+})
+const sourcedNumber = z.object({ value: z.number(), source: z.string(), confidence })
+export const turfMinimumFrontmatterSchema = z.object({
+  turf_area_sq_ft: sourcedNumber,
+  plant_factor: sourcedNumber,
+  efficiency: sourcedNumber,
+  effective_rain_share: sourcedNumber,
+  source: z.string(),
+  confidence,
+  todo: z.string().optional(),
+})
+const monthName = z.enum(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
+export const monthlyNormalsFrontmatterSchema = z.object({ eto_source: z.string(), eto_confidence: confidence, rain_source: z.string(), rain_confidence: confidence, todo: z.string().optional() })
+export const monthlyNormalsRowSchema = z.object({ Month: monthName, 'ETo in': cellNumber, 'Rain avg in': cellNumber, 'Rain 2020 in': cellNumber, 'Rain 2021 in': cellNumber })
+const lever = <T extends z.ZodTypeAny>(v: T) =>
+  z.object({
+    label: z.string(),
+    by_year: z.array(v),
+    months: z.array(z.number().int().min(1).max(12)).optional(),
+    applies_to: z.enum(['all_water', 'turf', 'drip']),
+    why: z.string(),
+    investment: z.string().optional(),
+    source: z.string(),
+    confidence,
+  })
+const pct = z.number().min(0).max(100)
+export const quickWinsPlanSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  kind: z.literal('quick_wins_plan'),
+  source: z.string(),
+  confidence,
+  created_on: z.union([date, z.date()]),
+  years: z.array(z.number().int()).min(1),
+  levers: z.object({
+    leak_repair_cut_percent: lever(pct),
+    controller_cut_percent: lever(pct),
+    stop_overseeding: lever(z.boolean()),
+    winter_turf_percent: lever(pct),
+    october_turf_percent: lever(pct),
+    summer_turf_percent: lever(pct),
+    desert_drip_percent: lever(pct),
+  }),
+  controller_rebate: z.object({ share: z.number().min(0).max(1), cap_usd: z.number(), source: z.string(), confidence, todo: z.string().optional() }),
+  overseeding_cost: z.object({ source: z.string(), note: z.string() }),
+  notes: z.string().optional(),
+})
+export type QuickWinsPlan = z.infer<typeof quickWinsPlanSchema>
 export const budgetCheckFrontmatterSchema = z.object({ period: z.string(), source: z.string(), confidence, note: z.string(), todo: z.string().optional() })
 export const budgetCheckRowSchema = z.object({
   Scope: z.string().min(1),

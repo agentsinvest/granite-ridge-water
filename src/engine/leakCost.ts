@@ -2,7 +2,7 @@
 // Leak water is always the last water through the meter, so it is priced at the margin: the bill with the leak
 // minus the bill without it. That puts it in block 2 whenever the meter is over its winter allowance.
 
-import { calculateBill, feeTaxKey, selectRate, type RatePeriod, type ReadPeriod } from './billing'
+import { calculateBill, currentRate, feeTaxKey, selectRate, type RatePeriod, type ReadPeriod } from './billing'
 
 export type Episode = { from: string; to: string; gallons: number }
 
@@ -80,7 +80,7 @@ export function leakCost(
   const highOf = (e: EpisodeCost) => (e.kind === 'billed' ? e.usd : e.kind === 'range' ? e.high : 0)
 
   let perYear: LeakCost['perYear'] = null
-  const latest = [...rates].sort((a, b) => b.applies_from_period_end.localeCompare(a.applies_from_period_end))[0]
+  const latest = currentRate(rates)
   const range = latest ? priceRange(latest) : null
   if (excess.ongoing_gallons_per_year !== null && range) {
     const kgal = excess.ongoing_gallons_per_year / 1000

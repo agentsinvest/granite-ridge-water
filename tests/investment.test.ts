@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import type { RatePeriod, ReadPeriod } from '../src/engine/billing'
+import { currentRate, type RatePeriod, type ReadPeriod } from '../src/engine/billing'
 import { applyEffect, breakEvenPercent, evaluate, outcome, priceMeterYear, type MeterYear } from '../src/engine/investment'
 import { buildData } from '../scripts/build-data'
 
 const data = buildData()
-const rate = data.rates.at(-1) as unknown as RatePeriod
+const rate = currentRate(data.rates as unknown as RatePeriod[])!
 const periods = Object.fromEntries(Object.entries(data.billingPeriods).map(([k, v]) => [k, v.rows])) as Record<string, ReadPeriod[]>
 const noCosts = { upfront: 0, annual: 0, lifespanYears: null }
 

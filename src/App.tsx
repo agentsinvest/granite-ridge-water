@@ -10,6 +10,7 @@ import { HowWeGotHere } from './pages/HowWeGotHere'
 import { HowMuch } from './pages/HowMuch'
 import { WhatIf } from './pages/WhatIf'
 import { InvestmentCalculator } from './pages/Investment'
+import { QuickWins } from './pages/QuickWins'
 import { Moves } from './pages/Moves'
 import { Experiments } from './pages/Experiments'
 import { DataAccuracy } from './pages/DataAccuracy'
@@ -21,6 +22,7 @@ const SCREENS: { name: string; route: RouteName }[] = [
   { name: 'Watering schedule', route: 'schedule' },
   { name: 'How much should we use', route: 'budget' },
   { name: 'What if', route: 'whatif' },
+  { name: 'Quick wins', route: 'quickwins' },
   { name: 'Is an investment worth it?', route: 'invest' },
   { name: 'Recommended moves', route: 'moves' },
   { name: 'Experiments', route: 'experiments' },
@@ -45,6 +47,7 @@ export function App() {
       case 'schedule': return <Schedule data={data} />
       case 'budget': return <HowMuch data={data} model={model} />
       case 'whatif': return <WhatIf data={data} model={model} query={route.query} />
+      case 'quickwins': return <QuickWins data={data} model={model} query={route.query} />
       case 'invest': return <InvestmentCalculator data={data} />
       case 'moves': return <Moves data={data} model={model} />
       case 'experiments': return <Experiments data={data} model={model} />

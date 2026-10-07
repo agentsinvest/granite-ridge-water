@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import type { RatePeriod, ReadPeriod } from '../src/engine/billing'
+import { currentRate, type RatePeriod, type ReadPeriod } from '../src/engine/billing'
 import { applyChanges, cutToReach, latestBaseline, payback, runScenario } from '../src/engine/scenarios'
 import { buildData } from '../scripts/build-data'
 
 const data = buildData()
 const rates = data.rates as unknown as RatePeriod[]
-const rate = rates.at(-1)!
+const rate = currentRate(rates)!
 const all = Object.fromEntries(Object.entries(data.billingPeriods).map(([m, v]) => [m, v.rows as ReadPeriod[]]))
 const meters = data.meters.map((m) => m.id)
 const base = latestBaseline(all, meters)

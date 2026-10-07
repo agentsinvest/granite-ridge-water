@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-export const ROUTES = ['overview', 'history', 'meters', 'schedule', 'budget', 'whatif', 'invest', 'moves', 'experiments', 'bills', 'data'] as const
+export const ROUTES = ['overview', 'history', 'meters', 'schedule', 'budget', 'whatif', 'quickwins', 'invest', 'moves', 'experiments', 'bills', 'data'] as const
 export type RouteName = (typeof ROUTES)[number]
 export type Route = { name: RouteName; anchor: string | null; query: URLSearchParams }
 

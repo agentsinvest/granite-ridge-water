@@ -14,7 +14,7 @@ type UIChange =
   | { kind: 'off'; meters: string[] }
   | { kind: 'fix_leak'; flag: string }
 
-type Scenario = { base: string; greenspace: boolean; changes: UIChange[] }
+type Scenario = { base: string; greenspace: boolean; changes: UIChange[]; prices?: 'today' | 'next' }
 type Saved = Scenario & { name: string }
 
 const SEASONS: { name: string; months: number[] }[] = [
@@ -84,10 +84,13 @@ export function WhatIf({ data, model, query }: { data: SiteData; model: Model; q
   const [saved, setSaved] = useState<Saved[]>(() => dec<Saved[]>(query.get('c'), []))
   useEffect(() => setQuery('whatif', { s: enc(sc), c: saved.length ? enc(saved) : null }), [sc, saved])
 
-  const rate = model.latestRate
-  if (!rate) return <PageHeader title="What if" lead="No City rate is on file, so changes cannot be priced yet." />
+  const today = model.latestRate
+  if (!today) return <PageHeader title="What if" lead="No City rate is on file, so changes cannot be priced yet." />
 
+  const rateFor = (s: Scenario) => (s.prices === 'next' && model.nextRate ? model.nextRate : today)
+  const rate = rateFor(sc)
   const run = (s: Scenario) => {
+    const rate = rateFor(s)
     const base = bases.find((b) => b.key === s.base) ?? bases[0]
     const changes = s.changes.map((c) => toEngine(c, model.flags)).filter((c): c is Change => c !== null)
     return { base, result: runScenario(base.data, changes, rate) }
@@ -107,7 +110,7 @@ export function WhatIf({ data, model, query }: { data: SiteData; model: Model; q
     <article>
       <PageHeader
         title="What if we changed something?"
-        lead="Pick a starting year, add changes, and see the gallons and dollars. Everything is priced with the City's current rates. The link in your address bar saves the scenario, so you can share it."
+        lead="Pick a starting year, add changes, and see the gallons and dollars. Everything is priced with City rates: today's, or the City's recommended 2027 prices. The link in your address bar saves the scenario, so you can share it."
       />
 
       <Section id="step1" title="Step 1. Starting point">
@@ -122,9 +125,22 @@ export function WhatIf({ data, model, query }: { data: SiteData; model: Model; q
               </option>
             ))}
           </select>
+          {model.nextRate ? (
+            <>
+              <label className="mt-4 block text-sm font-semibold" htmlFor="prices">
+                Prices
+              </label>
+              <select id="prices" className="mt-1 w-full rounded-md border border-line bg-surface p-2 md:w-auto" value={sc.prices ?? 'today'} onChange={(e) => setSc({ ...sc, prices: e.target.value as Scenario['prices'] })}>
+                <option value="today">Today's City prices</option>
+                <option value="next">City's recommended prices from February 2027 (not adopted yet)</option>
+              </select>
+            </>
+          ) : null}
           <p className="mt-2 text-sm text-ink-2">
-            Priced at the City rate for read periods from {fmt.month(rate.applies_from_period_end)} on (derived from our bills, {rate.confidence} confidence). Later
-            years are assumed to stay at this rate; no 2027 rate is on file yet.
+            {rate === today
+              ? `Priced at the City rate for read periods from ${fmt.month(today.applies_from_period_end)} on (derived from our bills, ${today.confidence} confidence).`
+              : 'Priced at the rates the City recommends from February 1, 2027: usage up 15%, the surcharge split into two tiers, and a $0.13 drought charge. The Council votes December 8, 2026.'}{' '}
+            Later years are assumed to stay at this rate.
           </p>
           <label className="mt-4 flex items-start gap-2 text-sm">
             <input type="checkbox" className="mt-1 h-4 w-4" checked={sc.greenspace} onChange={(e) => setSc({ ...sc, greenspace: e.target.checked, changes: e.target.checked ? sc.changes : sc.changes.filter((c) => !('meters' in c) || c.meters.every((m) => !model.greenspaceMeters.has(m))) })} />
