@@ -18,3 +18,11 @@
 * Date of the entry turf conversion, and whether entrance stations 1 to 3 were turned off.
 * Whether the Eco Verde repairs were made, and when.
 * The rest of the Park settings report (run times) and a printout from controller B.
+
+## Update: run times matched to Waterfluence (2026-10-07)
+
+* Jennifer confirmed the entry became artificial turf in September 2026. The event is now month precision (2026-09).
+* Compared the controller reports with Waterfluence hourly data in `docs/analysis/2026-10-07-controller-run-times-vs-waterfluence.md`. The park controller's totals match meters 1 and 2 within the proration error, and both park meters pause on the same days.
+* Recorded the likely park station split (1 to 7, 14, 15 on meter-1; 8 to 12, 13 on meter-2) in the meter files as medium confidence, based on valve locations, station names, and flow. Not added as zone files yet, because square footage and run times are still unknown.
+* Logged that meter-3 had no water at all from 2026-09-15, drip included, as a `schedule` event, and asked for the entrance drip to be turned back on. Not raised as a leak flag, because it is missing water, not extra water.
+* The park's every-night 10 PM program (about a third of summer park water) goes into the open questions rather than into an option or saving, because its stations and minutes are unknown.
