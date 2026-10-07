@@ -49,36 +49,6 @@ export function planChanges(meters: { id: string; turfShare: number }[], l: Year
   return out
 }
 
-export type ProposedPrices = {
-  usage_price: number
-  tier1_surcharge: number
-  tier1_limit_multiple_of_winter_average: number
-  tier2_surcharge: number
-  drought_per_kgal: number
-  service_increase_percent: number
-}
-
-/**
- * A rate built from today's rate with proposed prices swapped in: the usage price below the winter allowance, a first
- * surcharge tier up to a multiple of the winter average, and a second tier above it. Service charges rise by the
- * proposed percent, rounded to the cent. Other fees and taxes stay as they are today.
- */
-export function proposedRate(current: RatePeriod, p: ProposedPrices): RatePeriod {
-  return {
-    ...current,
-    source: 'Proposed prices (not adopted)',
-    fixed_charges: current.fixed_charges.map((f) => ({ ...f, amount: Math.round(f.amount * (1 + p.service_increase_percent / 100) * 100) / 100 })),
-    volumetric: {
-      blocks: [
-        { block: 1, limit: 'winter_allowance', price: p.usage_price },
-        { block: 2, limit: { winter_average_multiple: p.tier1_limit_multiple_of_winter_average }, price: p.usage_price + p.tier1_surcharge },
-        { block: 3, limit: null, price: p.usage_price + p.tier2_surcharge },
-      ],
-    },
-    fees: current.fees.map((f) => (f.name === 'Water drought' ? { ...f, amount: p.drought_per_kgal } : f)),
-  }
-}
-
 export type TurfNeedInputs = { areaSqFt: number; plantFactor: number; efficiency: number; effectiveRainShare: number }
 
 /** Thousand gallons the turf needs each month to stay green: max(0, ETo x PF - rain x share) x 0.623 / efficiency x area. */

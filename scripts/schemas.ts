@@ -228,6 +228,8 @@ export const plantFactorsFrontmatterSchema = z.object({
 
 const derivedValue = { derived: z.boolean(), source: z.string() }
 export const rateSchema = z.object({
+  /** `recommended` rates are proposals not yet adopted: they price future scenarios only, never "today". */
+  status: z.enum(['in_effect', 'recommended', 'adopted']).default('in_effect'),
   effective_start: z.union([date, z.date()]).nullable(),
   effective_end: z.union([date, z.date()]).nullable(),
   applies_from_period_end: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -242,7 +244,16 @@ export const rateSchema = z.object({
   volumetric: z.object({
     unit: z.literal('per_1000_gallons'),
     applies_to: z.string(),
-    blocks: z.array(z.object({ block: z.number(), limit: z.enum(['winter_allowance']).nullable(), price: z.number(), ...derivedValue })).length(2),
+    blocks: z
+      .array(
+        z.object({
+          block: z.number(),
+          limit: z.union([z.literal('winter_allowance'), z.object({ winter_average_multiple: z.number().gt(1) })]).nullable(),
+          price: z.number(),
+          ...derivedValue,
+        }),
+      )
+      .min(2),
   }),
   winter_allowance: z.object({ method: z.string(), derived: z.boolean(), confidence, source: z.string() }),
   fees: z.array(z.object({ name: z.string(), basis: z.enum(['per_1000_gallons_above_included', 'per_1000_gallons', 'per_bill']), amount: z.number(), ...derivedValue })),
@@ -390,19 +401,6 @@ export const quickWinsPlanSchema = z.object({
   }),
   controller_rebate: z.object({ share: z.number().min(0).max(1), cap_usd: z.number(), source: z.string(), confidence, todo: z.string().optional() }),
   overseeding_cost: z.object({ source: z.string(), note: z.string() }),
-  proposed_2027_prices: z.object({
-    status: z.literal('proposed'),
-    label: z.string(),
-    source: z.string(),
-    confidence,
-    usage_price: z.number(),
-    tier1_surcharge: z.number(),
-    tier1_limit_multiple_of_winter_average: z.number().gt(1),
-    tier2_surcharge: z.number(),
-    drought_per_kgal: z.number(),
-    service_increase_percent: z.number(),
-    todo: z.string().optional(),
-  }),
   notes: z.string().optional(),
 })
 export type QuickWinsPlan = z.infer<typeof quickWinsPlanSchema>

@@ -8,11 +8,11 @@ Rain gardens, rainwater harvesting, and landscape conversion (the workbook's Das
 
 ## How it works
 
-* `data/scenarios/quick-wins.md` holds the workbook's levers by year, each with a source and confidence, plus the controller rebate note and the proposed FY26/27 City prices (labeled proposed, low confidence).
+* `data/scenarios/quick-wins.md` holds the workbook's levers by year, each with a source and confidence, and the controller rebate note. 2027 prices now come from the City's recommended rate file, `data/rates/2027-02-01.md` (see 2026-10-07-city-2027-rates.md).
 * `src/engine/quickWins.ts` splits each meter's water into turf and desert drip by its turf share, applies the levers in order (they multiply), and turns them into ordinary scenario changes priced by `runScenario`. The plan uses the same billing engine, winter allowance, fees, and taxes as the rest of the site.
-* `calculateBill` now accepts a third price block whose limit is a multiple of the winter average, for the proposed two-tier peak surcharge. Real rate files still have two blocks; all bills reconcile as before.
-* Tests reproduce the workbook: the turf healthy minimum month by month, plan water for all four years to the gallon, and the 2027 bill under proposed prices within 1%.
-* The screen is editable (every lever, every year), shareable by URL, priced at today's City prices by default with a switch to the proposed prices, and has a "leave the park turf as it is" switch.
+* `calculateBill` now accepts a third price block whose limit is a multiple of the winter average, for the City's proposed two-tier peak surcharge. All bills reconcile as before.
+* Tests reproduce the workbook: the turf healthy minimum month by month, plan water for all four years, and the 2027 bills under the City's recommended prices within 1%.
+* The screen is editable (every lever, every year), shareable by URL, priced at today's City prices by default with a switch to the City's recommended February 2027 prices, and has a "leave the park turf as it is" switch.
 * Upfront costs: no costs are invented. Leak repair and the controller show "Needs a quote", with each step's first-year savings on its own and a 2-year-payback ceiling to compare quotes against. Schedule changes and stopping overseeding are $0 if the landscape contract covers them (to confirm).
 
 ## What changed from the workbook, and why
@@ -32,7 +32,7 @@ Rain gardens, rainwater harvesting, and landscape conversion (the workbook's Das
 
 ## Finding
 
-Stopping overseeding alone saves almost no money (about $79 in 2027) even though it cuts a lot of winter water, because the City's lower-price allowance comes from December to February use. It pays off only when paired with the summer steps.
+Stopping overseeding alone saves almost no money at today's prices (about $79 in 2027), and at the City's recommended 2027 prices it raises the bill (about $438), even though it cuts a lot of winter water. The City's lower-price allowance and the new 150% surcharge tier both come from December to February use. It pays off only when paired with the summer steps.
 
 ## Open questions
 

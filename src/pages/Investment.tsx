@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { SiteData } from '../../scripts/site-data'
-import type { RatePeriod, ReadPeriod } from '../engine/billing'
+import { currentRate, type RatePeriod, type ReadPeriod } from '../engine/billing'
 import { breakEvenPercent, evaluate, type Effect, type Outcome } from '../engine/investment'
 import { fmt, meterNumber } from '../lib/data'
 
@@ -65,7 +65,7 @@ export function InvestmentCalculator({ data }: { data: SiteData }) {
   const set = (patch: Partial<Form>) => setForm((f) => ({ ...f, ...patch }))
 
   const investments = data.investments as unknown as Investment[]
-  const rate = data.rates.at(-1) as unknown as (RatePeriod & SiteData['rates'][number]) | undefined
+  const rate = (currentRate(data.rates as unknown as RatePeriod[]) ?? undefined) as unknown as (RatePeriod & SiteData['rates'][number]) | undefined
   const periods = useMemo(
     () => Object.fromEntries(Object.entries(data.billingPeriods).map(([k, v]) => [k, v.rows])) as Record<string, ReadPeriod[]>,
     [data],

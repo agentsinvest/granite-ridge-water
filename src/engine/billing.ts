@@ -2,6 +2,8 @@
 // Money is computed in whole cents with half-up rounding, the way bills round each line.
 
 export type RatePeriod = {
+  /** `recommended` = a City proposal not yet adopted: prices future scenarios only, never a bill or "today". */
+  status?: 'in_effect' | 'recommended' | 'adopted'
   source?: string
   confidence?: string
   applies_from_period_end: string
@@ -33,6 +35,11 @@ export function feeTaxKey(name: string): string | null {
 
 const cents = (x: number) => Math.round(x * 100 + Number.EPSILON * 100) // x already in dollars
 const dollars = (c: number) => c / 100
+
+/** The latest rate in effect today: the newest one that is not only recommended. */
+export function currentRate<T extends RatePeriod>(rates: T[]): T | null {
+  return [...rates].filter((r) => r.status !== 'recommended').sort((a, b) => a.applies_from_period_end.localeCompare(b.applies_from_period_end)).at(-1) ?? null
+}
 
 /** Rate period that covers a read period ending on `periodEnd` (YYYY-MM-DD). */
 export function selectRate(rates: RatePeriod[], periodEnd: string): RatePeriod | null {

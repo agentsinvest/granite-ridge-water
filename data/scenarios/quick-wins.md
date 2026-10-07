@@ -70,19 +70,7 @@ controller_rebate:
 overseeding_cost:
   source: "HOA year-end books, account 51110 Landscape - Overseeding (data/financials/)"
   note: "Stopping overseeding also ends this landscape line, separate from the water bill."
-proposed_2027_prices:
-  status: proposed
-  label: "City of Mesa proposed FY26/27 landscape water prices (not adopted)"
-  source: "Zone Plan Model, Quick Wins assumptions: proposed FY26/27 usage $5.95 plus 15%, peak surcharge $2.99 plus 15% up to 150% of the winter average and plus 25% above it, drought charge $0.13, service charge plus 3.5%. The City proposal itself is not in the repo."
-  confidence: low
-  usage_price: 6.8425
-  tier1_surcharge: 3.4385
-  tier1_limit_multiple_of_winter_average: 1.5
-  tier2_surcharge: 3.7375
-  drought_per_kgal: 0.13
-  service_increase_percent: 3.5
-  todo: "Get the City's FY26/27 rate proposal or adopted rate book and replace these with its numbers."
-notes: "The workbook raises prices 10% a year after 2027. This plan holds 2027 prices flat after 2027, the site default in config/site.md."
+notes: "2027 prices come from data/rates/2027-02-01.md (the City's recommended FY 26/27 rates), not the workbook. The workbook raises prices 10% a year after 2027; this plan holds 2027 prices flat after 2027, the site default in config/site.md."
 ---
 
 # Quick wins plan

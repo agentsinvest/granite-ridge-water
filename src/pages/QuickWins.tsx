@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { SiteData } from '../../scripts/site-data'
 import { Bars } from '../components/charts'
 import { Card, GridTable, PageHeader, Pill, Section, Stat, Stats, Sure } from '../components/ui'
-import { proposedRate, runPlan, turfNeedKgal, turfWaterKgal, type YearLevers } from '../engine/quickWins'
+import { runPlan, turfNeedKgal, turfWaterKgal, type YearLevers } from '../engine/quickWins'
 import { fmt, meterNumber } from '../lib/data'
 import { RISK, type Model } from '../lib/model'
 import { setQuery } from '../lib/route'
@@ -91,7 +91,8 @@ function QuickWinsBody({ data, model, plan, rate, query }: { data: SiteData; mod
 
   const meters = data.meters.map((m) => ({ id: m.id, turfShare: (m.turf_share_percent?.value ?? 0) / 100 }))
   const missingShare = data.meters.filter((m) => !m.turf_share_percent).map((m) => m.id)
-  const priced = prices === 'proposed' ? proposedRate(rate, plan.proposed_2027_prices) : rate
+  const next = model.nextRate
+  const priced = prices === 'proposed' && next ? next : rate
   const years = plan.years.map((year, i) => ({ year, levers: leversFor(plan, values, i, keepTurf) }))
   const out = runPlan(model.baseline, meters, years, priced)
   const ok = out.every((y) => y.result.ok)
@@ -169,7 +170,7 @@ function QuickWinsBody({ data, model, plan, rate, query }: { data: SiteData; mod
         <fieldset>
           <legend className="font-semibold">Price the plan at</legend>
           <div className="mt-2 flex flex-wrap gap-x-6 gap-y-2">
-            {(['today', 'proposed'] as const).map((p) => (
+            {(next ? (['today', 'proposed'] as const) : (['today'] as const)).map((p) => (
               <label key={p} className="flex items-center gap-2">
                 <input
                   type="radio"
@@ -181,7 +182,7 @@ function QuickWinsBody({ data, model, plan, rate, query }: { data: SiteData; mod
                     save(values, p, keepTurf)
                   }}
                 />
-                {p === 'today' ? "Today's City prices" : `${plan.proposed_2027_prices.label}`}
+                {p === 'today' ? "Today's City prices" : "City's recommended prices from February 2027 (vote December 8, 2026)"}
               </label>
             ))}
           </div>
@@ -402,7 +403,7 @@ function QuickWinsBody({ data, model, plan, rate, query }: { data: SiteData; mod
                   label: c.label,
                   cells: [
                     c.cost === null ? <Pill tone="neutral">Needs a quote</Pill> : fmt.usd(c.cost),
-                    s === null ? missing : fmt.usd(s),
+                    s === null ? missing : s < 0 ? <Pill tone="serious">Costs {fmt.usd(-s)} more</Pill> : fmt.usd(s),
                     c.cost === null && s !== null && s > 0 ? fmt.usd(2 * s) : '',
                     <span className="block min-w-[12rem] max-w-[18rem] whitespace-normal text-ink-2">{c.note}</span>,
                   ],
@@ -421,9 +422,10 @@ function QuickWinsBody({ data, model, plan, rate, query }: { data: SiteData; mod
           ]}
         />
         <p className="mt-3 max-w-prose text-sm text-ink-2">
-          Stopping overseeding saves a lot of winter water but little money on its own: the City sets each meter's lower-price allowance from December to
-          February use, so less winter water moves more summer water to the higher price. It pays off when paired with the summer steps, as in the plan. No
-          step is ranked on a guessed price. "2-year payback if under" is two years of that step's own savings, a ceiling to compare quotes against.
+          Stopping overseeding saves a lot of winter water but {(leverAlone.overseed ?? 0) < 0 ? 'raises the bill' : 'little money'} on its own: the City sets
+          each meter's lower-price allowance from December to February use, so less winter water moves more summer water to the higher price
+          {prices === 'proposed' ? ', and under the 2027 prices more of it into the top tier above 1.5 times the winter average' : ''}. It pays off only when
+          paired with the summer steps, as in the plan. No step is ranked on a guessed price. "2-year payback if under" is two years of that step's own savings, a ceiling to compare quotes against.
           Budget: {budget.source}.
         </p>
       </Section>
@@ -453,7 +455,8 @@ function QuickWinsBody({ data, model, plan, rate, query }: { data: SiteData; mod
             </li>
           ) : (
             <li>
-              Prices: {plan.proposed_2027_prices.source}. <Sure level={plan.proposed_2027_prices.confidence} /> Fees, taxes, and the winter allowance rule are as today.
+              Prices: {next?.source}. Usage {`$${next?.volumetric.blocks[0].price.toFixed(2)}`}, a first surcharge tier up to 1.5 times the winter average, a
+              second tier above it, and a $0.13 drought charge. Recommended, not yet adopted. <Sure level={next?.confidence ?? 'low'} />
             </li>
           )}
           <li>{(model.site as unknown as { post_2027_rate_assumption: { label: string } }).post_2027_rate_assumption.label} {plan.notes}</li>

@@ -90,7 +90,14 @@ export function DataAccuracy({ data, model }: { data: SiteData; model: Model }) 
           </table>
         </div>
         <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-ink-2">
-          <li>City rates on file: {data.rates.length} periods, all derived from our own bills{lastRate ? `; latest applies from read periods ending ${longDate(lastRate.applies_from_period_end)}` : ''}. No published rate schedule yet.</li>
+          <li>
+            City rates on file: {data.rates.filter((r) => r.status !== 'recommended').length} periods derived from our own bills
+            {lastRate ? `; latest applies from read periods ending ${longDate(lastRate.applies_from_period_end)}` : ''}.
+            {model.nextRate
+              ? ` Plus the City's recommended rates from February 1, 2027 (FY 26/27 rate presentation), not adopted until the Council votes on December 8, 2026.`
+              : ' No published rate schedule yet.'}
+          </li>
+          {data.monthlyNormals && <li>Monthly weather averages: on file (AZMET Queen Creek weather demand, NOAA East Mesa rain), for planning.</li>}
           <li>Daily weather: not on file (AZMET). Annual rainfall only, {data.annualRainfall.map((r) => r.year).join(', ')}.</li>
           <li>Zones: none on file yet. Everything is by meter.</li>
           <li>HOA year-end books: {Object.keys(data.financials).join(', ')}.</li>

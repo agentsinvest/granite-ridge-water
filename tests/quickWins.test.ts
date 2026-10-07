@@ -2,13 +2,14 @@ import { describe, expect, it } from 'vitest'
 import { buildData } from '../scripts/build-data'
 import type { RatePeriod, ReadPeriod } from '../src/engine/billing'
 import { calculateBill } from '../src/engine/billing'
-import { meterFactor, planChanges, proposedRate, runPlan, turfNeedKgal, type YearLevers } from '../src/engine/quickWins'
+import { meterFactor, planChanges, runPlan, turfNeedKgal, type YearLevers } from '../src/engine/quickWins'
 import { runScenario, type Baseline } from '../src/engine/scenarios'
 
 const d = buildData()
 const plan = d.quickWins!
 const rates = d.rates as unknown as RatePeriod[]
-const current = rates.at(-1)!
+const current = rates.filter((r) => (r as { status?: string }).status !== 'recommended').at(-1)!
+const next = rates.find((r) => (r as { status?: string }).status === 'recommended')!
 
 const levers = (i: number): YearLevers => {
   const l = plan.levers
@@ -78,27 +79,41 @@ describe('quick wins levers', () => {
   })
 })
 
-describe('proposed 2027 prices', () => {
-  const p = proposedRate(current, plan.proposed_2027_prices)
+describe("City's recommended February 2027 rate (data/rates/2027-02-01.md)", () => {
+  const open = { ...next, applies_from_period_end: '0000-01-01', applies_to_period_end: null }
   it('prices the three blocks: allowance, up to 1.5x the winter average, above it', () => {
-    // Winter average 100 (allowance 97 above the included 3). 200 thousand gallons:
-    // 97 at usage, 150-100 = 50 at tier 1, 50 at tier 2.
-    const b = calculateBill('meter-1', '2027-07-01', '2027-07-30', 200000, [{ ...p, applies_from_period_end: '0000-01-01', applies_to_period_end: null }], [], 97)
+    // Winter average 100 (allowance 97 above the included 3). 200 thousand gallons: 97 at usage, 50 at tier 1, 50 at tier 2.
+    const b = calculateBill('meter-1', '2027-07-01', '2027-07-30', 200000, [open], [], 97)
     expect(b.ok).toBe(true)
     if (!b.ok) return
-    const usage = b.lineItems.find((l) => l.name === 'Excess usage charge')!.amount
-    const u = plan.proposed_2027_prices.usage_price
-    expect(usage).toBeCloseTo(97 * u + 50 * (u + plan.proposed_2027_prices.tier1_surcharge) + 50 * (u + plan.proposed_2027_prices.tier2_surcharge), 2)
+    expect(b.lineItems.find((l) => l.name === 'Excess usage charge')!.amount).toBeCloseTo(97 * 6.84 + 50 * 10.28 + 50 * 10.58, 2)
   })
-  it("prices the workbook's do-nothing 2027 year within 1% of the workbook ($63,725)", () => {
-    const r = runScenario(wbBaseline, [], p)
+  it("reproduces the City's typical Commercial - Landscape bill: 33 thousand gallons, $266.04 before taxes and fees (page 19)", () => {
+    const b = calculateBill('meter-1', '2027-03-01', '2027-03-30', 33000, [open], [], 30)
+    expect(b.ok).toBe(true)
+    if (!b.ok) return
+    const part = (n: string) => b.lineItems.find((l) => l.name === n)!.amount
+    expect(part('Service charge') + part('Excess usage charge') + part('Water drought')).toBeCloseTo(266.04, 2)
+  })
+  it("and today's rate reproduces the City's current $235.91 for the same customer", () => {
+    const b = calculateBill('meter-1', '2026-06-01', '2026-06-30', 33000, [{ ...current, applies_from_period_end: '0000-01-01', applies_to_period_end: null }], [], 30)
+    expect(b.ok).toBe(true)
+    if (!b.ok) return
+    const part = (n: string) => b.lineItems.find((l) => l.name === n)!.amount
+    expect(part('Service charge') + part('Excess usage charge') + part('Water drought')).toBeCloseTo(235.91, 2)
+  })
+  it("prices the workbook's do-nothing 2027 year within 1% of the workbook ($63,725), which used the same proposal", () => {
+    const r = runScenario(wbBaseline, [], next)
     expect(r.ok).toBe(true)
     if (r.ok) expect(Math.abs(r.baseCost / 63725.4 - 1)).toBeLessThan(0.01)
   })
   it("prices the workbook's 2027 plan within 1% of the workbook ($44,560)", () => {
-    const [y] = runPlan(wbBaseline, shares, [{ year: 2027, levers: levers(0) }], p)
+    const [y] = runPlan(wbBaseline, shares, [{ year: 2027, levers: levers(0) }], next)
     expect(y.result.ok).toBe(true)
     if (y.result.ok) expect(Math.abs(y.result.newCost / 44559.56 - 1)).toBeLessThan(0.01)
+  })
+  it('is never used as today\'s rate for a past bill', () => {
+    for (const b of d.bills) if (b.period_end) expect(b.period_end < next.applies_from_period_end).toBe(true)
   })
 })
 

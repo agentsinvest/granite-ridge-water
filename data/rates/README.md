@@ -17,3 +17,8 @@ The current files are derived from bills: a service charge per meter group, the 
 | `fees` | Each fee with its basis: `per_1000_gallons_above_included`, `per_1000_gallons`, or `per_bill`. |
 | `taxes` | Rate and which charges it applies to. |
 | `straddle_rule` | How a period crossing a rate change is billed: `prorate`, `rate_at_period_end`, or `null` until known. |
+
+
+## Recommended rates
+
+A rate the City has recommended but not yet adopted has `status: recommended` (for example `2027-02-01.md`). It prices future scenarios only and is never treated as today's rate. Its blocks may include a second surcharge tier whose `limit` is `winter_average_multiple: 1.5`. When the City adopts it, set `status: adopted` and replace any value the ordinance changes.

@@ -1,6 +1,6 @@
 // Numbers several screens share, derived from the data and the engine. No React here.
 import type { SiteData } from '../../scripts/site-data'
-import type { RatePeriod, ReadPeriod } from '../engine/billing'
+import { currentRate, type RatePeriod, type ReadPeriod } from '../engine/billing'
 import { latestBaseline, payback, runScenario, type Baseline, type Change } from '../engine/scenarios'
 import { costFlags, type CostedFlag } from '../components/LeakFlags'
 
@@ -9,7 +9,10 @@ export type Model = ReturnType<typeof buildModel>
 export function buildModel(data: SiteData) {
   const meters = data.meters.map((m) => m.id)
   const rates = data.rates as unknown as RatePeriod[]
-  const latestRate = [...rates].sort((a, b) => a.applies_from_period_end.localeCompare(b.applies_from_period_end)).at(-1) ?? null
+  const byStart = [...data.rates].sort((a, b) => a.applies_from_period_end.localeCompare(b.applies_from_period_end))
+  // Today's prices: the latest rate actually seen on bills. A recommended rate prices future scenarios only.
+  const latestRate = currentRate(rates)
+  const nextRate = (byStart.filter((r) => r.status === 'recommended').at(-1) ?? null) as (RatePeriod & { id: string; effective_start: string | Date | null }) | null
   const periods: Record<string, ReadPeriod[]> = Object.fromEntries(meters.map((m) => [m, (data.billingPeriods[m]?.rows ?? []) as ReadPeriod[]]))
   const baseline = latestBaseline(periods, meters)
   const site = data.config.site as {
@@ -25,7 +28,7 @@ export function buildModel(data: SiteData) {
   )
   const flags = costFlags(data)
   const baseRun = latestRate ? runScenario(baseline, [], latestRate) : null
-  return { meters, rates, latestRate, periods, baseline, target, site, lastBills, runRate, runRateRange, greenspaceMeters, flags, baseRun }
+  return { meters, rates, latestRate, nextRate, periods, baseline, target, site, lastBills, runRate, runRateRange, greenspaceMeters, flags, baseRun }
 }
 
 export type Move = {
