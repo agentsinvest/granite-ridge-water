@@ -87,7 +87,7 @@ export function buildMoves(data: SiteData, m: Model): Move[] {
       confidence: flag.excess_water?.confidence ?? 'low',
       greenspace: false,
       risks: [],
-      link: `#meters/${flag.id}`,
+      link: `#problems/${flag.id}`,
     })
   }
   for (const o of data.options) {
@@ -113,7 +113,7 @@ export function buildMoves(data: SiteData, m: Model): Move[] {
       greenspace: o.touches_greenspace,
       risks,
       howToTest: o.how_to_test,
-      link: `#whatif?o=${o.id}`,
+      link: `#calculator?tab=whatif&o=${o.id}`,
       change,
     })
   }
@@ -133,7 +133,7 @@ export function buildMoves(data: SiteData, m: Model): Move[] {
       confidence: inv.confidence,
       greenspace: false,
       risks: [],
-      link: '#moves',
+      link: '#plan',
     })
   }
   return moves

@@ -159,3 +159,30 @@ export function GridTable({ caption, head, groups, leftCols = [] }: { caption: s
     </div>
   )
 }
+
+/**
+ * The sections of a screen as a row of links. Each tab is its own address (`?tab=`), so it can be shared and the back
+ * button works. The screen name sits above as a label; the open section supplies the page heading.
+ */
+export function ScreenTabs({ screen, route, tabs, current }: { screen: string; route: string; tabs: { id: string; label: string }[]; current: string }) {
+  return (
+    <div className="mb-6 print:hidden">
+      <p className="text-sm font-semibold uppercase tracking-wide text-ink-2">{screen}</p>
+      <nav aria-label={`${screen} sections`} className="mt-2 border-b border-line">
+        <ul className="-mb-px flex flex-wrap gap-x-5 gap-y-1">
+          {tabs.map((t) => (
+            <li key={t.id}>
+              <a
+                href={`#${route}?tab=${t.id}`}
+                aria-current={t.id === current ? 'page' : undefined}
+                className={`inline-block border-b-4 py-2 text-sm ${t.id === current ? 'border-[var(--focus)] font-semibold' : 'border-transparent hover:underline underline-offset-4'}`}
+              >
+                {t.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </div>
+  )
+}

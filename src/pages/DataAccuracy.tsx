@@ -23,7 +23,7 @@ export function DataAccuracy({ data, model }: { data: SiteData; model: Model }) 
   return (
     <article>
       <PageHeader
-        title="Data and accuracy"
+        title="About the data"
         lead="How fresh the numbers are, what is still estimated, and the data that would make the site more accurate. If you can help with any item on the list, tell the board."
       />
       <Stats>

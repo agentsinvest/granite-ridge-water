@@ -91,7 +91,7 @@ export function Overview({ data, model }: { data: SiteData; model: Model }) {
         {allRanked.ranked.length > moves.ranked.length && (
           <p className="mt-3 text-sm text-ink-2">
             {allRanked.ranked.length - moves.ranked.length} more options change watering on the park turf and are listed on{' '}
-            <a className="underline underline-offset-4" href="#moves">Recommended moves</a> with the greenspace toggle on. The largest one there saves about{' '}
+            <a className="underline underline-offset-4" href="#plan">Recommended moves</a> with the greenspace toggle on. The largest one there saves about{' '}
             {allRanked.ranked[0]?.annual ? fmt.usd(allRanked.ranked[0].annual.high) : 'an unknown amount'} a year.
           </p>
         )}
@@ -135,7 +135,7 @@ export function Overview({ data, model }: { data: SiteData; model: Model }) {
         />
         <TableView caption="Last 12 bills by meter" head={['Meter', 'Bills', 'Share']} rows={byMeter.map((r) => [r.meter, fmt.usd(r.total), fmt.pct(r.total / runRate)])} />
         <p className="mt-3 text-sm text-ink-2">
-          {fmt.int(Math.round(gallons / 1000) * 1000)} gallons in all. <a className="underline underline-offset-4" href="#meters">Meters and leaks</a> has each meter's details.
+          {fmt.int(Math.round(gallons / 1000) * 1000)} gallons in all. <a className="underline underline-offset-4" href="#water">Meters and leaks</a> has each meter's details.
         </p>
       </Section>
 
@@ -147,13 +147,13 @@ export function Overview({ data, model }: { data: SiteData; model: Model }) {
             {flags.slice(0, 3).map(({ flag, cost }) => (
               <li key={flag.id} className="flex flex-wrap items-baseline gap-x-3 gap-y-1 rounded-lg bg-surface px-4 py-3 ring-1 ring-[var(--ring)]">
                 <span aria-hidden="true" className="font-extrabold">!</span>
-                <a href={`#meters/${flag.id}`} className="font-semibold underline underline-offset-4">{flag.title}</a>
+                <a href={`#problems/${flag.id}`} className="font-semibold underline underline-offset-4">{flag.title}</a>
                 <span className="text-sm text-ink-2">{cost?.low != null && cost.high != null ? `about ${dollarRange(cost.low, cost.high)} so far` : 'cost not estimated yet'}</span>
               </li>
             ))}
             {flags.length > 3 && (
               <li className="text-sm">
-                <a href="#meters/leaks-heading" className="underline underline-offset-4">All {flags.length} possible leaks</a>
+                <a href="#problems/leaks-heading" className="underline underline-offset-4">All {flags.length} possible leaks</a>
               </li>
             )}
           </ul>
@@ -168,7 +168,7 @@ export function Overview({ data, model }: { data: SiteData; model: Model }) {
                 <span className="text-xs font-semibold uppercase tracking-wide text-ink-2">
                   {c.kind === 'action' ? 'Needs action' : 'Open question'} · {c.meters.length > 1 ? 'Meters' : 'Meter'} {c.meters.map(meterNumber).join(' and ')}
                 </span>
-                <a href="#meters/checks-heading" className="mt-1 block font-semibold underline underline-offset-4">{c.title}</a>
+                <a href="#problems/checks-heading" className="mt-1 block font-semibold underline underline-offset-4">{c.title}</a>
               </li>
             ))}
           </ul>
@@ -180,7 +180,7 @@ export function Overview({ data, model }: { data: SiteData; model: Model }) {
           <Pill tone="neutral">{running} running</Pill>
           <span className="text-ink-2">
             {experiments.length} on file. Every change the HOA tries is checked against the water use before it.{' '}
-            <a href="#experiments" className="underline underline-offset-4">See experiments</a>
+            <a href="#calculator?tab=did-it-work" className="underline underline-offset-4">See experiments</a>
           </span>
         </p>
       </Section>

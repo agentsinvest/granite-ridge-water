@@ -82,7 +82,7 @@ function QuickWinsBody({ data, model, plan, rate, query }: { data: SiteData; mod
   const [keepTurf, setKeepTurf] = useState(query.get('t') === '1')
   const save = (v: Values, p: typeof prices, t: boolean) => {
     const isDefault = JSON.stringify(v) === JSON.stringify(defaults(plan))
-    setQuery('quickwins', { l: isDefault ? null : enc(v), p: p === 'proposed' ? 'proposed' : null, t: t ? '1' : null })
+    setQuery({ l: isDefault ? null : enc(v), p: p === 'proposed' ? 'proposed' : null, t: t ? '1' : null })
   }
   const update = (v: Values) => {
     setValues(v)
@@ -467,7 +467,7 @@ function QuickWinsBody({ data, model, plan, rate, query }: { data: SiteData; mod
           {turf && (
             <li>
               Turf healthy minimum: {fmt.int(turf.turfAreaSqFt.value)} sq ft of turf at plant factor {turf.plantFactor.value.toFixed(2)} and {fmt.pct(turf.efficiency.value)}{' '}
-              sprinkler efficiency, with average weather. See <a href="#budget/by-meter-month" className="underline underline-offset-4">How much should we use</a>.{' '}
+              sprinkler efficiency, with average weather. See <a href="#water/by-meter-month?tab=budget" className="underline underline-offset-4">How much should we use</a>.{' '}
               <Sure level={turf.confidence} />
             </li>
           )}

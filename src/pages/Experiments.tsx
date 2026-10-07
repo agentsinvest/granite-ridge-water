@@ -35,7 +35,7 @@ export function Experiments({ data, model }: { data: SiteData; model: Model }) {
   return (
     <article>
       <PageHeader
-        title="Experiments"
+        title="Did it work?"
         lead="When the HOA changes something on purpose (a repair, a schedule, a new device), log it here with what we expect to happen. The site then compares daily water use before and after and says whether it went as expected."
       />
       <Stats>

@@ -82,7 +82,7 @@ export function WhatIf({ data, model, query }: { data: SiteData; model: Model; q
       : dec<Scenario>(query.get('s'), { base: 'latest', greenspace: false, changes: [] }),
   )
   const [saved, setSaved] = useState<Saved[]>(() => dec<Saved[]>(query.get('c'), []))
-  useEffect(() => setQuery('whatif', { s: enc(sc), c: saved.length ? enc(saved) : null }), [sc, saved])
+  useEffect(() => setQuery({ s: enc(sc), c: saved.length ? enc(saved) : null }), [sc, saved])
 
   const today = model.latestRate
   if (!today) return <PageHeader title="What if" lead="No City rate is on file, so changes cannot be priced yet." />
@@ -192,12 +192,12 @@ export function WhatIf({ data, model, query }: { data: SiteData; model: Model; q
           <summary className="cursor-pointer font-semibold">Investments (controllers, sensors, nozzles)</summary>
           <p className="mt-2 text-ink-2">
             These are added to scenarios once a quote or a cited savings figure is on file. To test one with your own numbers now, use{' '}
-            <a href="#invest" className="underline underline-offset-4">Is an investment worth it?</a>
+            <a href="#calculator?tab=invest" className="underline underline-offset-4">Is an investment worth it?</a>
           </p>
           <ul className="mt-2 space-y-1">
             {(data.investments as { id: string; name: string; effect: { value: number | null } }[]).map((inv) => (
               <li key={inv.id} className="flex flex-wrap items-center gap-2">
-                <a href={`#invest?inv=${inv.id}`} className="underline underline-offset-4">{inv.name}</a>
+                <a href={`#calculator?tab=invest&inv=${inv.id}`} className="underline underline-offset-4">{inv.name}</a>
                 {inv.effect.value === null && <Pill tone="neutral">Needs a quote</Pill>}
               </li>
             ))}
@@ -222,7 +222,7 @@ export function WhatIf({ data, model, query }: { data: SiteData; model: Model; q
                 A "keep tree watering" allowance and a "below estimated plant need" check need minimum plant factors from a cited source. They are not on file yet, so
                 this result cannot warn when a cut goes below what plants need.
               </li>
-              <li>Try a change on one meter for a few weeks first and log it on the <a href="#experiments" className="underline underline-offset-4">Experiments</a> screen.</li>
+              <li>Try a change on one meter for a few weeks first and log it on the <a href="#calculator?tab=did-it-work" className="underline underline-offset-4">Experiments</a> screen.</li>
             </ul>
           </Card>
         )}

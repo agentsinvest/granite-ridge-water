@@ -3,6 +3,7 @@ import type { SiteData } from '../../scripts/site-data'
 import { currentRate, type RatePeriod, type ReadPeriod } from '../engine/billing'
 import { breakEvenPercent, evaluate, type Effect, type Outcome } from '../engine/investment'
 import { fmt, meterNumber } from '../lib/data'
+import { setQuery } from '../lib/route'
 
 type Investment = {
   id: string
@@ -40,8 +41,7 @@ function writeForm(f: Form) {
   const q = new URLSearchParams()
   if (f.m.length) q.set('m', f.m.join(','))
   for (const k of KEYS) if (f[k] && !(k === 'kind' && f.kind === 'pct')) q.set(k, f[k])
-  const s = q.toString()
-  history.replaceState(null, '', `#invest${s ? `?${s}` : ''}`)
+  setQuery(Object.fromEntries(q))
 }
 
 /** Blank is null; anything else must be a number at or above zero. */

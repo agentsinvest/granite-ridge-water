@@ -95,7 +95,7 @@ export function HowMuch({ data, model }: { data: SiteData; model: Model }) {
           <li>The zone list: what each controller station waters, its plant type, sprinkler type, and square feet.</li>
         </ul>
         <p className="mt-3 text-sm">
-          The full list is on <a href="#data" className="underline underline-offset-4">Data and accuracy</a>.
+          The full list is on <a href="#about" className="underline underline-offset-4">Data and accuracy</a>.
         </p>
       </Section>
     </article>

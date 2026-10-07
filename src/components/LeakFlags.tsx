@@ -75,7 +75,7 @@ function LeakCard({ flag, cost }: CostedFlag) {
           <span aria-hidden="true">!</span>
           {STATUS_TEXT[flag.status]}
         </span>
-        <a href={`#meters/${flag.meter}`} className="text-ink-2 underline underline-offset-4">
+        <a href={`#water/${flag.meter}?tab=meters`} className="text-ink-2 underline underline-offset-4">
           Meter {meterNumber(flag.meter)}
         </a>
       </p>

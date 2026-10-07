@@ -354,7 +354,7 @@ export function HowWeGotHere({ data, model }: { data: SiteData; model: Model }) 
           </ol>
         )}
         <p className="mt-4 text-sm text-ink-2">
-          Missing events (repairs, schedule changes, overseeding) are on the <a className="underline underline-offset-4" href="#data">Data and accuracy</a> list.
+          Missing events (repairs, schedule changes, overseeding) are on the <a className="underline underline-offset-4" href="#about">Data and accuracy</a> list.
         </p>
       </Section>
     </article>

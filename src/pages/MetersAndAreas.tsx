@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import type { SiteData } from '../../scripts/site-data'
 import { SiteMap } from '../components/SiteMap'
-import { LeakFlags, costFlags, dollarRange } from '../components/LeakFlags'
+import { costFlags, dollarRange } from '../components/LeakFlags'
 import { Bars, METER_COLOR } from '../components/charts'
 import { TableView } from '../components/ui'
 import { fmt, meterNumber } from '../lib/data'
@@ -36,8 +36,6 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
   const billTotal = recentBills.reduce((s, b) => s + b.printed_total, 0)
   const billRange = recentBills.length ? [recentBills.map((b) => b.bill_date).sort()[0], recentBills.map((b) => b.bill_date).sort().at(-1)!] : null
   const grossTotal = data.areas.rows.reduce((s, r) => s + (r['Gross sq ft'] ?? 0), 0)
-  const checks = data.meters.flatMap((m) => (m.checks ?? []).map((c) => ({ ...c, meter: m.id })))
-  checks.sort((a, b) => (a.kind === b.kind ? 0 : a.kind === 'action' ? -1 : 1))
 
   if (data.meters.length === 0 && data.areas.rows.length === 0) {
     return (
@@ -50,7 +48,7 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
 
   return (
     <article>
-      <h1 className="text-2xl font-bold md:text-3xl">Meters, areas, and leaks</h1>
+      <h1 className="text-2xl font-bold md:text-3xl">Meters and map</h1>
       <p className="mt-2 max-w-prose text-ink-2">
         Where the HOA's four City of Mesa water meters are, and what landscape the common areas hold.
       </p>
@@ -82,37 +80,9 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
         />
       </dl>
 
-      <section aria-labelledby="leaks-heading" className="mt-10">
-        <h2 id="leaks-heading" className="text-xl font-bold">
-          Possible leaks
-        </h2>
-        <p className="mt-1 max-w-prose text-sm text-ink-2">
-          Water use that does not look right, most expensive first. Each one says what we saw, roughly what it cost, and what to
-          check next. None are confirmed leaks yet. Costs are estimates; City bills are the official record.
-        </p>
-        <LeakFlags flags={costed} />
-      </section>
-
-      <section aria-labelledby="checks-heading" className="mt-10">
-        <h2 id="checks-heading" className="text-xl font-bold">
-          Watering checks
-        </h2>
-        <p className="mt-1 max-w-prose text-sm text-ink-2">
-          Things in the watering data to raise with the landscaper that are not leaks: water that stopped when it should not
-          have, or watering we cannot explain yet.
-        </p>
-        {checks.length === 0 ? (
-          <p className="mt-3 text-ink-2">Nothing to check right now.</p>
-        ) : (
-          <ul className="mt-4 space-y-3">
-            {checks.map((c) => (
-              <li key={`${c.meter}-${c.title}`}>
-                <Check check={c} meter={c.meter} />
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <p className="mt-4 text-sm">
+        <a href="#problems" className="font-semibold underline underline-offset-4">See what is wrong right now on the Problems screen</a>
+      </p>
 
       <section aria-labelledby="map-heading" className="mt-10">
         <h2 id="map-heading" className="text-xl font-bold">
@@ -273,7 +243,7 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
                       <li key={flag.id} className="flex gap-2 rounded-lg border-2 border-serious px-3 py-2">
                         <span aria-hidden="true" className="font-extrabold">!</span>
                         <span>
-                          <a href={`#meters/${flag.id}`} className="font-semibold underline underline-offset-4">
+                          <a href={`#problems/${flag.id}`} className="font-semibold underline underline-offset-4">
                             {flag.title.replace(/^Meter \d+: (.)/, (_, c: string) => c.toUpperCase())}
                           </a>
                           {cost?.low != null && cost.high != null && <span className="text-ink-2"> (about {dollarRange(cost.low, cost.high)})</span>}
@@ -323,24 +293,6 @@ function MeterBills({ bills }: { bills: SiteData['bills'] }) {
           {unreconciled.length} {unreconciled.length === 1 ? 'bill' : 'bills'} unreconciled
         </p>
       )}
-    </div>
-  )
-}
-
-type MeterCheck = NonNullable<SiteData['meters'][number]['checks']>[number]
-
-function Check({ check, meter }: { check: MeterCheck; meter: string }) {
-  const action = check.kind === 'action'
-  return (
-    <div className={`rounded-xl bg-surface p-4 ring-1 ring-[var(--ring)] ${action ? 'border-l-4 border-serious' : ''}`}>
-      <p className="text-xs font-semibold uppercase tracking-wide text-ink-2">
-        {action ? 'Needs action' : 'Open question'} ·{' '}
-        <a href={`#meters/${meter}`} className="underline underline-offset-4">
-          Meter {meterNumber(meter)}
-        </a>
-      </p>
-      <p className="mt-1 font-semibold">{check.title}</p>
-      <p className="mt-1 max-w-prose text-sm text-ink-2">{check.detail}</p>
     </div>
   )
 }

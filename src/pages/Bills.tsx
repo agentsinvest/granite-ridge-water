@@ -47,7 +47,7 @@ export function Bills({ data, query }: { data: SiteData; query: URLSearchParams 
     return [from <= to ? from : to, from <= to ? to : from]
   })()
   useEffect(() => {
-    setQuery('bills', { p: preset, from: preset === 'custom' ? from : null, to: preset === 'custom' ? to : null, m: picked.length === meters.length ? null : picked.join(',') })
+    setQuery({ p: preset, from: preset === 'custom' ? from : null, to: preset === 'custom' ? to : null, m: picked.length === meters.length ? null : picked.join(',') })
   }, [preset, from, to, picked, meters.length])
 
   if (data.bills.length === 0) {
