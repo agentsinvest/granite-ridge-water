@@ -26,3 +26,8 @@ Water spend fell from $36,340.05 (2020) to $26,016.31 (2023). The cost increase 
 * Hourly AMI is stored as daily totals with `Hours reported` and `Min hour gal` columns so partial days are never treated as full days and the never-zero check still works. The hourly CSV stays in `/raw/`.
 * Meter labels meter-1 to meter-4 are assigned by usage, largest first. Only the last 4 digits of each meter number are stored.
 * The revised accuracy gate (sample bills plus ledger-level reconciliation) was proposed to Jennifer but not yet adopted, so CLAUDE.md still has the original gate.
+
+## Update: map source (2026-10-07)
+
+* Jennifer resent the area map and said it comes from the HOA website. The file is byte-identical to `sources/maps/areas-aerial.webp`, so no square footage changed. Source fields in `areas.md`, `map.md`, `sources/maps/areas-aerial.md`, and `INVENTORY.md` now name the HOA website.
+* Still open: irrigated square footage per zone, and which meter waters each area. The map gives gross areas only.
