@@ -128,6 +128,18 @@ svg a:hover .pin-ring {
   stroke: var(--focus);
   stroke-width: 7;
 }
+/* Map zones: same idea, a heavier focus-colored outline on hover or keyboard focus. */
+svg .map-zone {
+  cursor: pointer;
+}
+svg .map-zone:focus {
+  outline: none;
+}
+svg .map-zone:focus-visible .zone-shape,
+svg .map-zone:hover .zone-shape {
+  stroke: var(--focus);
+  stroke-width: 8;
+}
 
 /* Printing is for the landscaper checklist: plain black on white, no screen chrome. */
 @media print {

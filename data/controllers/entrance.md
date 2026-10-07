@@ -13,7 +13,7 @@ findings:
     source: "Eco Verde assessment, section 3a"
   - text: "The entry lawn was replaced with artificial turf in September 2026. Meter 3 read zero from September 15 to October 1, including the drip nights."
     source: "Jennifer, 2026-10-07; docs/analysis/2026-10-07-controller-run-times-vs-waterfluence.md"
-todo: "Confirm whether the whole controller or only stations 1 to 3 were turned off in September 2026, and the artificial turf install date. Station flow rates (GPM) are not in the report."
+todo: "Confirm whether the whole controller or only stations 1 to 3 were turned off in September 2026, and the artificial turf install date. Station flow rates (GPM) are not in the report: the Eco Verde PDF has only page 4 of the 7-page entrance settings report. Ask Eco Verde or the landscaper for pages 1 to 3 and 5 to 7."
 ---
 
 | Station | Meter | Waters | Type | GPM | Program | Run min | Cycles | Days | Findings | Source |

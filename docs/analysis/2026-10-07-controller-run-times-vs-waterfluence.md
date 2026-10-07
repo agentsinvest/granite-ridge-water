@@ -64,6 +64,8 @@ The weekly total (about 125,000 gallons) matches the City read period 2026-08-13
 
 **What the evening program might be.** The three park drip stations (13, 14, and 15) are the only park stations not accounted for by the morning turf pattern. Meter 1's evening flow (about 40 GPM) fits drip stations 14 and 15 (28 and 11 GPM). Meter 2's evening is more water than drip station 13 (41 GPM) alone: the 11 PM hour runs at about 55 GPM. So it may include a turf station too. If the evening program is drip, it runs 7 nights a week for one to two hours. That is a lot of water for desert trees and shrubs, and Eco Verde found the emitters badly placed at the base of mature trees. The park settings pages would answer this.
 
+**Update after re-reading the HydroPoint alert report (2025).** Its low-flow alerts name the stations: on Tuesday and Friday evenings in March 2025, park station 13 started at about 8 PM and station 14 at about 10 PM (six alerts, all on Tuesdays or Fridays). That is the same pattern as the 2026 Tuesday and Friday evenings above: meter 2 from about 8 to 10 PM and meter 1 from about 10 to 11 PM. So the Tuesday and Friday evening watering is drip station 13 (on meter 2) and drip station 14 (on meter 1). This also supports the station-to-meter split in section 3. At their learned flows (41 and 28 GPM), the 2026 gallons work out to roughly 24 minutes for station 13 and 57 minutes for station 14; this is an estimate, not a printed run time. The bigger evening program on Sunday, Monday, Wednesday, Thursday, and Saturday is still not identified.
+
 ## 3. Which park stations are on which meter
 
 Three things point the same way:

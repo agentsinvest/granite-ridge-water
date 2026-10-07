@@ -241,6 +241,8 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
   const controllerIds = new Set((out.map.controllers ?? []).map((c) => c.id))
   for (const c of out.map.controllers ?? []) for (const m of c.meters) if (!meterIds.has(m)) fail('data/map.md', null, `controller ${c.id}: unknown meter "${m}"`)
   for (const z of out.map.zones ?? []) if (!controllerIds.has(z.controller)) fail('data/map.md', null, `zone ${z.id}: unknown controller "${z.controller}"`)
+  const mapStationIds = new Set(out.controllers.flatMap((c) => c.stations.map((s) => s.station)))
+  for (const z of out.map.zones ?? []) for (const s of z.stations) if (!mapStationIds.has(s)) fail('data/map.md', null, `zone ${z.id}: station "${s}" is not in data/controllers/`)
   for (const b of out.bills) if (!meterIds.has(b.meter)) fail(`data/${b.id}.md`, null, `unknown meter "${b.meter}"`)
   for (const id of Object.keys(out.hourly)) if (!meterIds.has(id)) fail(`data/hourly/${id}`, null, `unknown meter "${id}"`)
   for (const f of out.flags) if (!meterIds.has(f.meter)) fail(`data/flags/${f.id}.md`, null, `unknown meter "${f.meter}"`)

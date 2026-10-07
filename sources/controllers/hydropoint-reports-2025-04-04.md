@@ -53,4 +53,5 @@ All alerts were cleared by the controller.
 ## Notes from this transcription (not in the reports)
 
 * Park drip stations 13 and 14 ran at about half and nine-tenths of their low-flow limits every few nights for three weeks (station 13 at 15 to 17 GPM against a limit of 31; station 14 at 26 to 27 against 29). Low flow on drip usually means a clogged filter, a valve not opening fully, or a closed or crushed line, so those zones were under-watering, not leaking. The Eco Verde settings of 2026-03-29 show station 14's flow was relearned on 2025-07-25 at 28 GPM.
+* Every low-flow alert is on a Tuesday or a Friday (2025-03-11, 03-18, 03-21, 03-25, 03-28, 04-01), with station 13 starting at about 8 PM and station 14 at about 10 PM. So in March 2025 the park ran drip stations 13 and 14 on Tuesday and Friday evenings. The manual run on Monday 2025-03-24 from 10:13 PM went through turf stations 1 to 12.
 * The controllers' flow-sensor totals cannot be compared directly with the City meter reads: the read periods (2025-02-13 to 03-13 and 03-14 to 04-14) do not line up with this report's dates.

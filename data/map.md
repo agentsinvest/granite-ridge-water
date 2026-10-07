@@ -70,6 +70,7 @@ controllers:
     at: [800, 700]
 zones:
   - id: a4
+    stations: [A4]
     controller: A
     label: "A4"
     name: "Drip along McKellips, west of the northwest homes"
@@ -78,6 +79,7 @@ zones:
     parts:
       - [[215, 68], [520, 63], [520, 78], [275, 78], [275, 185], [215, 185]]
   - id: a5
+    stations: [A5]
     controller: A
     label: "A5"
     name: "West wash drip (turned off)"
@@ -86,6 +88,7 @@ zones:
     parts:
       - [[80, 215], [150, 192], [160, 212], [120, 232], [122, 420], [135, 500], [170, 600], [205, 648], [180, 660], [150, 612], [110, 508], [95, 420], [78, 300]]
   - id: a6
+    stations: [A6]
     controller: A
     label: "A6"
     name: "Entry drip"
@@ -94,6 +97,7 @@ zones:
     parts:
       - [[40, 65], [180, 65], [190, 150], [150, 150], [140, 82], [40, 82]]
   - id: b12
+    stations: [B1, B2]
     controller: B
     label: "B1, B2"
     name: "Interior strip south half and the Crismon frontage"
@@ -103,6 +107,7 @@ zones:
       - [[232, 350], [400, 345], [560, 365], [700, 385], [790, 395], [790, 442], [600, 418], [450, 392], [400, 372], [232, 380]]
       - [[912, 300], [955, 300], [955, 735], [818, 735], [818, 700], [912, 700], [912, 435], [820, 432], [820, 400], [912, 400]]
   - id: b3
+    stations: [B3]
     controller: B
     label: "B3"
     name: "Interior strip north half"
@@ -111,6 +116,7 @@ zones:
     parts:
       - [[232, 315], [400, 308], [560, 318], [700, 345], [790, 348], [790, 395], [700, 385], [560, 365], [400, 345], [232, 350]]
   - id: b4
+    stations: [B4]
     controller: B
     label: "B4"
     name: "Northeast corner along McKellips and Crismon"
@@ -119,6 +125,7 @@ zones:
     parts:
       - [[520, 63], [535, 62], [545, 72], [935, 72], [952, 100], [955, 300], [912, 300], [912, 265], [825, 262], [828, 115], [585, 110], [575, 195], [520, 190]]
   - id: c1-12
+    stations: [C1, C2, C3, C4, C5, C6, C7, C8, C9, C10, C11, C12]
     controller: C
     label: "C1 to C12"
     name: "Park lawn (12 turf stations)"
@@ -127,6 +134,7 @@ zones:
     parts:
       - [[368, 665], [400, 635], [450, 628], [520, 645], [600, 665], [700, 680], [770, 690], [785, 700], [785, 770], [740, 775], [660, 760], [600, 780], [520, 790], [450, 770], [400, 740], [370, 700]]
   - id: c13
+    stations: [C13]
     controller: C
     label: "C13"
     name: "South and southwest desert drip"
@@ -135,6 +143,7 @@ zones:
     parts:
       - [[175, 650], [215, 640], [245, 700], [290, 760], [300, 880], [400, 885], [410, 935], [790, 935], [790, 975], [400, 975], [300, 950], [265, 900], [255, 800], [215, 720]]
   - id: c14
+    stations: [C14]
     controller: C
     label: "C14"
     name: "Park east and south edges, and the southeast corner drip"
@@ -145,6 +154,7 @@ zones:
       - [[580, 782], [760, 775], [760, 818], [580, 818]]
       - [[815, 762], [860, 762], [880, 777], [905, 762], [950, 762], [950, 985], [800, 985], [800, 940], [815, 925]]
   - id: c15
+    stations: [C15]
     controller: C
     label: "C15"
     name: "Drip on the north side of the park"
@@ -161,3 +171,5 @@ slope:
 # Site map geometry
 
 Shapes for the schematic map on the website. Edit coordinates here to adjust the drawing; nothing on the site computes square footage from them.
+
+Each zone lists its `stations` (ids from `data/controllers/`). The cost card on the map reads each station's meter from the controller tables, so a zone is only ever shown the cost of the meters it is on. A zone has no meter of its own; its own share of a bill needs station run times and flow rates.
