@@ -12,7 +12,8 @@ import { HowMuch } from './pages/HowMuch'
 import { WhatIf } from './pages/WhatIf'
 import { InvestmentCalculator } from './pages/Investment'
 import { QuickWins } from './pages/QuickWins'
-import { Moves } from './pages/Moves'
+import { Plan } from './pages/Plan'
+import { ActionDetail } from './pages/ActionDetail'
 import { Experiments } from './pages/Experiments'
 import { DataAccuracy } from './pages/DataAccuracy'
 import { Problems } from './pages/Problems'
@@ -21,7 +22,7 @@ import { Checklist } from './pages/Checklist'
 
 type Model = ReturnType<typeof buildModel>
 type Tab = { id: string; label: string; render: (r: Route, m: Model) => ReactNode }
-type Screen = { route: RouteName; name: string; menu: boolean; tabs: Tab[] }
+type Screen = { route: RouteName; name: string; menu: boolean; tabs: Tab[]; parent?: RouteName }
 
 /** Five screens in the menu, plus About the data in the footer. Each screen's tabs reuse the existing views. */
 const SCREENS: Screen[] = [
@@ -31,10 +32,11 @@ const SCREENS: Screen[] = [
     name: 'Action plan',
     menu: true,
     tabs: [
-      { id: 'actions', label: 'Actions', render: (_, m) => <Moves data={data} model={m} /> },
+      { id: 'actions', label: 'Actions', render: (r, m) => <Plan data={data} model={m} query={r.query} /> },
       { id: 'target', label: 'Plan to reach the target', render: (r, m) => <QuickWins data={data} model={m} query={r.query} /> },
     ],
   },
+  { route: 'action', name: 'Action plan', parent: 'plan', menu: false, tabs: [{ id: 'action', label: 'Action', render: (r, m) => <ActionDetail data={data} model={m} id={r.anchor} /> }] },
   { route: 'problems', name: 'Problems', menu: true, tabs: [{ id: 'problems', label: 'Problems', render: (_, m) => <Problems data={data} model={m} /> }] },
   {
     route: 'water',
@@ -76,10 +78,11 @@ export function App() {
   const screen = SCREENS.find((s) => s.route === route.name) ?? SCREENS[0]
   const tab = screen.tabs.find((t) => t.id === route.query.get('tab')) ?? screen.tabs[0]
   useEffect(() => {
-    const el = route.anchor ? document.getElementById(route.anchor) : null
+    const el = route.anchor && route.name !== 'action' ? document.getElementById(route.anchor) : null
     if (el) el.scrollIntoView()
     else window.scrollTo(0, 0)
-    document.title = `${screen.tabs.length > 1 ? `${tab.label} | ` : ''}${screen.name} | Granite Ridge Water`
+    const action = route.name === 'action' ? data.actions.find((a) => a.id === route.anchor) : undefined
+    document.title = `${action ? `${action.title} | ` : screen.tabs.length > 1 ? `${tab.label} | ` : ''}${screen.name} | Granite Ridge Water`
   }, [route.name, route.anchor, tab.id])
 
   return (
@@ -95,8 +98,8 @@ export function App() {
             <li key={s.route}>
               <a
                 href={`#${s.route}`}
-                aria-current={screen.route === s.route ? 'page' : undefined}
-                className={screen.route === s.route ? 'font-semibold text-ink underline decoration-2 underline-offset-4' : 'text-ink underline-offset-4 hover:underline'}
+                aria-current={(screen.parent ?? screen.route) === s.route ? 'page' : undefined}
+                className={(screen.parent ?? screen.route) === s.route ? 'font-semibold text-ink underline decoration-2 underline-offset-4' : 'text-ink underline-offset-4 hover:underline'}
               >
                 {s.name}
               </a>

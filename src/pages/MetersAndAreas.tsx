@@ -306,7 +306,7 @@ function Row({ term, children }: { term: string; children: ReactNode }) {
   )
 }
 
-function DailyDetail({ meter, days }: { meter: string; days: SiteData['usage'][string][string] }) {
+export function DailyDetail({ meter, days }: { meter: string; days: SiteData['usage'][string][string] }) {
   const recent = [...days].sort((a, b) => a.date.localeCompare(b.date)).slice(-60)
   if (recent.length === 0) return <p className="mt-4 text-sm"><Missing what="Daily use" /></p>
   const rows = recent.map((d) => ({

@@ -13,6 +13,7 @@ due: 2026-12-08
 cost: "no purchase"
 cost_source: "Following a public vote and asking the City"
 evidence: [source:sources/city/fy26-27-utility-rates-presentation]
+shows: next-rates
 verify_with: "The adopted 2027 rates are on file, and the City confirms the four accounts are billed as Commercial Landscape."
 updated: 2026-10-07
 history:

@@ -29,6 +29,7 @@ To update an action, change `status`, set `updated` to today, and add a line to 
 | `evidence` | yes | List of `flag:<id>`, `option:<id>`, `investment:<id>`, `experiment:<id>`, or `source:<path without .md>` (a file in `/sources` or `/docs`). Only a source's document name is published. |
 | `verify_with` | yes | How we will know it worked, in plain words. |
 | `verify_experiment` | no | Id of the experiment in `data/experiments/` that checks it. |
+| `shows` | no | `next-rates`: show what the proposed next City rates would add per home per month, from the scenario engine. |
 | `updated` | yes | YYYY-MM-DD of the last change to this file. |
 | `history` | yes | Status changes, oldest first: `{ date, status, note }`. |
 | `todo` | no | Open questions for maintainers. Not shown to homeowners. |

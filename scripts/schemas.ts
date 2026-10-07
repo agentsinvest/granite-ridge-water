@@ -472,6 +472,7 @@ export const actionSchema = z.object({
   evidence: z.array(z.string().regex(/^(flag|source|experiment|option|investment):.+$/)),
   verify_with: z.string().min(1),
   verify_experiment: z.string().nullable().default(null),
+  shows: z.enum(['next-rates']).nullable().default(null),
   updated: isoDate,
   history: z.array(z.object({ date: isoDate, status: actionStatus, note: z.string().optional() })).min(1),
   todo: z.string().optional(),

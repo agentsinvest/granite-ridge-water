@@ -179,3 +179,21 @@ export function whatChanged(data: SiteData, n = 6): Update[] {
 
 /** Cost per home per month for a yearly dollar figure. */
 export const perHomeMonth = (yearly: number, homes: number) => yearly / homes / 12
+
+/** What the proposed next rates add to the same water, from the scenario engine priced at today's and the proposed rates. */
+export function nextRatesImpact(model: Model): { yearly: number; rateStart: string | null } | null {
+  if (!model.latestRate || !model.nextRate) return null
+  const now = runScenario(model.baseline, [], model.latestRate)
+  const next = runScenario(model.baseline, [], model.nextRate)
+  if (!now.ok || !next.ok) return null
+  const start = model.nextRate.effective_start
+  return { yearly: next.baseCost - now.baseCost, rateStart: start ? String(start).slice(0, 10) : null }
+}
+
+export function nextRatesText(data: SiteData, model: Model): string | null {
+  const r = nextRatesImpact(model)
+  if (!r) return null
+  const homes = (data.config.site as { homes: { value: number } }).homes.value
+  const usd = (n: number) => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
+  return `the proposed rates would add about ${usd(r.yearly)} a year for the same water, about ${usd(perHomeMonth(r.yearly, homes))} per home per month.`
+}
