@@ -16,6 +16,8 @@ import { Moves } from './pages/Moves'
 import { Experiments } from './pages/Experiments'
 import { DataAccuracy } from './pages/DataAccuracy'
 import { Problems } from './pages/Problems'
+import { Controllers } from './pages/Controllers'
+import { Checklist } from './pages/Checklist'
 
 type Model = ReturnType<typeof buildModel>
 type Tab = { id: string; label: string; render: (r: Route, m: Model) => ReactNode }
@@ -40,6 +42,7 @@ const SCREENS: Screen[] = [
     menu: true,
     tabs: [
       { id: 'meters', label: 'Meters and map', render: () => <MetersAndAreas data={data} /> },
+      { id: 'controllers', label: 'Controllers and zones', render: (_, m) => <Controllers data={data} model={m} /> },
       { id: 'schedule', label: 'When it waters', render: () => <Schedule data={data} /> },
       { id: 'budget', label: 'How much should we use', render: (_, m) => <HowMuch data={data} model={m} /> },
     ],
@@ -63,6 +66,7 @@ const SCREENS: Screen[] = [
       { id: 'bills', label: 'Bills', render: (r) => <Bills data={data} query={r.query} /> },
     ],
   },
+  { route: 'checklist', name: 'Landscaper checklist', menu: false, tabs: [{ id: 'checklist', label: 'Landscaper checklist', render: () => <Checklist data={data} /> }] },
   { route: 'about', name: 'About the data', menu: false, tabs: [{ id: 'about', label: 'About the data', render: (_, m) => <DataAccuracy data={data} model={m} /> }] },
 ]
 

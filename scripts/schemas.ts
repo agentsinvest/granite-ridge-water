@@ -478,6 +478,36 @@ export const actionSchema = z.object({
 })
 export type Action = z.infer<typeof actionSchema>
 
+export const controllerSchema = z.object({
+  id: z.string().regex(/^[A-Z]$/),
+  name: z.enum(['Park', 'Entrance', 'B']),
+  full_name: z.string().min(1),
+  model: nullableString,
+  serial_last4: last4,
+  meters: z.array(z.string()).min(1),
+  has_flow_sensor: z.boolean().nullable(),
+  source: z.string().min(1),
+  confidence,
+  findings: z.array(z.object({ text: z.string().min(1), source: z.string().min(1) })).default([]),
+  todo: z.string().optional(),
+})
+const blankable = z.string().transform((s) => (s === '' ? null : s))
+export const stationRowSchema = z.object({
+  Station: z.string().regex(/^[A-Z]\d+$/, 'must be the controller letter and station number, like C7'),
+  Meter: z.union([z.literal('').transform(() => null), z.string().regex(/^meter-\d+$/)]),
+  Waters: z.string().min(1),
+  Type: z.union([z.literal('').transform(() => null), z.enum(['spray', 'rotor', 'drip', 'bubbler'])]),
+  GPM: cellNumber,
+  Program: blankable,
+  'Run min': cellNumber,
+  Cycles: cellNumber,
+  Days: blankable,
+  Findings: blankable,
+  Source: z.string().min(1),
+})
+export type Controller = z.infer<typeof controllerSchema>
+export type StationRow = z.infer<typeof stationRowSchema>
+
 export type Meter = z.infer<typeof meterSchema>
 export type AreaRow = z.infer<typeof areaRowSchema>
 export type SiteMap = z.infer<typeof mapSchema>

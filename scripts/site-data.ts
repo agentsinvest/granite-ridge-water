@@ -1,4 +1,4 @@
-import type { Action, AreaRow, Bill, Experiment, Flag, Meter, MoveOption, QuickWinsPlan, Rate, SiteMap } from './schemas'
+import type { Action, AreaRow, Controller, Bill, Experiment, Flag, Meter, MoveOption, QuickWinsPlan, Rate, SiteMap } from './schemas'
 
 export type BillingPeriod = { start: string; end: string; usage: number | null }
 export type DailyUsage = { date: string; gallons: number | null; hours: number | null; minHour: number | null }
@@ -46,5 +46,7 @@ export type SiteData = {
   /** Tracked actions. `body` is the markdown below the front matter; `evidenceLabels` names each `source:` evidence file. */
   actions: (Action & { body: string })[]
   evidenceLabels: Record<string, string>
+  /** Irrigation controllers with one row per station. Blank cells are null and show as unknown. */
+  controllers: (Controller & { stations: { station: string; meter: string | null; waters: string; type: string | null; gpm: number | null; program: string | null; runMin: number | null; cycles: number | null; days: string | null; findings: string | null; source: string }[] })[]
   openTodos: { file: string; todo: string }[]
 }

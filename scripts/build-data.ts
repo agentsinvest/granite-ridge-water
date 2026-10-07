@@ -76,6 +76,7 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
     quickWins: null,
     actions: [],
     evidenceLabels: {},
+    controllers: [],
     openTodos: [],
   }
   for (const abs of walk(dataDir).sort()) {
@@ -166,6 +167,20 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
       if (`options/${o.id}.md` !== rel) fail(file, keyLine(text, 'id'), 'id does not match file name')
       if (o.change.kind === 'turn_down' && o.change.percent === null) fail(file, keyLine(text, 'change'), 'turn_down needs a percent')
       out.options.push(o)
+    } else if (rel.match(/^controllers\/[^/]+\.md$/)) {
+      const c = check(S.controllerSchema, fm, file, text)
+      const table = firstTable(p, ['Station', 'Waters'], file)
+      const r = rows(table, S.stationRowSchema, file)
+      r.forEach((x, i) => {
+        if (!x.Station.startsWith(c.id)) fail(file, table.rows[i].line, `station ${x.Station} is not on controller ${c.id}`)
+        if (r.findIndex((y) => y.Station === x.Station) !== i) fail(file, table.rows[i].line, `station ${x.Station} is listed twice`)
+      })
+      out.controllers.push({
+        ...c,
+        stations: r.map((x) => ({
+          station: x.Station, meter: x.Meter, waters: x.Waters, type: x.Type, gpm: x.GPM, program: x.Program, runMin: x['Run min'], cycles: x.Cycles, days: x.Days, findings: x.Findings, source: x.Source,
+        })),
+      })
     } else if (rel.match(/^actions\/[^/]+\.md$/)) {
       const a = check(S.actionSchema, fm, file, text)
       if (`actions/${a.id}.md` !== rel) fail(file, keyLine(text, 'id'), 'id does not match file name')
@@ -269,6 +284,19 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
       }
     }
   }
+  for (const c of out.controllers) {
+    const where = `data/controllers`
+    for (const m of [...c.meters, ...c.stations.flatMap((s) => (s.meter ? [s.meter] : []))]) if (!meterIds.has(m)) fail(where, null, `controller ${c.id}: unknown meter "${m}"`)
+    for (const s of c.stations) if (s.meter && !c.meters.includes(s.meter)) fail(where, null, `station ${s.station}: meter ${s.meter} is not one of controller ${c.id}'s meters`)
+    const onMap = (out.map.controllers ?? []).find((x) => x.id === c.id)
+    if (!onMap) fail(where, null, `controller ${c.id} is not on the map`)
+  }
+  const stationIds = new Set(out.controllers.flatMap((c) => c.stations.map((s) => s.station)))
+  for (const a of out.actions) {
+    for (const s of a.stations) if (!stationIds.has(s)) fail(`data/actions/${a.id}.md`, null, `unknown station "${s}"`)
+    if (a.controller && out.controllers.length && !out.controllers.some((c) => c.name === a.controller)) fail(`data/actions/${a.id}.md`, null, `unknown controller "${a.controller}"`)
+  }
+  out.controllers.sort((a, b) => a.id.localeCompare(b.id))
   out.actions.sort((a, b) => a.id.localeCompare(b.id))
   out.dataNeeds.sort((a, b) => a.priority - b.priority)
   out.rates.sort((a, b) => a.id.localeCompare(b.id))
