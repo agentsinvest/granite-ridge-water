@@ -1,4 +1,4 @@
-import type { AreaRow, Bill, Experiment, Flag, Meter, MoveOption, Rate, SiteMap } from './schemas'
+import type { AreaRow, Bill, Experiment, Flag, Meter, MoveOption, QuickWinsPlan, Rate, SiteMap } from './schemas'
 
 export type BillingPeriod = { start: string; end: string; usage: number | null }
 export type DailyUsage = { date: string; gallons: number | null; hours: number | null; minHour: number | null }
@@ -30,10 +30,18 @@ export type SiteData = {
     turfAreaSqFt: { value: number; source: string; confidence: string }
     plantFactor: { value: number; source: string; confidence: string }
     efficiency: { value: number; source: string; confidence: string }
+    effectiveRainShare: { value: number; source: string; confidence: string }
     source: string
     confidence: string
-    months: { month: string; kgal: number | null }[]
   } | null
+  monthlyNormals: {
+    etoSource: string
+    etoConfidence: string
+    rainSource: string
+    rainConfidence: string
+    months: { month: string; eto: number | null; rainAvg: number | null; rainDry: number | null; rainWet: number | null }[]
+  } | null
+  quickWins: QuickWinsPlan | null
   budgetCheck: { period: string; source: string; note: string; rows: { scope: string; measure: string; low: number | null; high: number | null; source: string; confidence: string }[] } | null
   openTodos: { file: string; todo: string }[]
 }

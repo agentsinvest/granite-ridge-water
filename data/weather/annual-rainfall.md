@@ -1,8 +1,8 @@
 ---
 unit: inches
-source: "Rainfall totals provided by Jennifer, 2026-10-06 (table headed \"Rain (in)\"). Gauge or station not stated."
+source: "Rainfall totals provided by Jennifer, 2026-10-06 (table headed \"Rain (in)\"). The 2020 (4.57) and 2021 (16.43) totals match NOAA COOP station East Mesa as cited in Jennifer's Zone Plan Model (sources/workbook/zone-plan-model.md), so the totals are most likely from that station."
 confidence: medium
-todo: "Confirm the gauge or station, and the date the 2026 year-to-date total runs through."
+todo: "Confirm the station is NOAA East Mesa for every year, and the date the 2026 year-to-date total runs through."
 ---
 
 # Annual rainfall

@@ -72,6 +72,8 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
     budgetCheck: null,
     meterYears: null,
     turfMinimum: null,
+    monthlyNormals: null,
+    quickWins: null,
     openTodos: [],
   }
   for (const abs of walk(dataDir).sort()) {
@@ -180,11 +182,21 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
       }
     } else if (rel === 'budget/turf-minimum.md') {
       const f = check(S.turfMinimumFrontmatterSchema, fm, file, text)
-      const r = rows(firstTable(p, ['Month', 'Need kgal'], file), S.turfMinimumRowSchema, file)
       out.turfMinimum = {
-        turfAreaSqFt: f.turf_area_sq_ft, plantFactor: f.plant_factor, efficiency: f.efficiency, source: f.source, confidence: f.confidence,
-        months: r.map((x) => ({ month: x.Month, kgal: x['Need kgal'] })),
+        turfAreaSqFt: f.turf_area_sq_ft, plantFactor: f.plant_factor, efficiency: f.efficiency, effectiveRainShare: f.effective_rain_share, source: f.source, confidence: f.confidence,
       }
+    } else if (rel === 'weather/monthly-normals.md') {
+      const f = check(S.monthlyNormalsFrontmatterSchema, fm, file, text)
+      const r = rows(firstTable(p, ['Month', 'ETo in'], file), S.monthlyNormalsRowSchema, file)
+      if (r.map((x) => x.Month).join() !== 'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec') fail(file, null, 'needs one row per month, January to December')
+      out.monthlyNormals = {
+        etoSource: f.eto_source, etoConfidence: f.eto_confidence, rainSource: f.rain_source, rainConfidence: f.rain_confidence,
+        months: r.map((x) => ({ month: x.Month, eto: x['ETo in'], rainAvg: x['Rain avg in'], rainDry: x['Rain 2020 in'], rainWet: x['Rain 2021 in'] })),
+      }
+    } else if (rel === 'scenarios/quick-wins.md') {
+      const plan = check(S.quickWinsPlanSchema, fm, file, text)
+      for (const [k, l] of Object.entries(plan.levers)) if (l.by_year.length !== plan.years.length) fail(file, keyLine(text, k), `${k} needs one value per plan year`)
+      out.quickWins = plan
     } else if (rel === 'config/site.md') {
       out.config.site = check(S.siteConfigSchema, fm, file, text)
     } else if (rel === 'config/plant-factors.md') {
@@ -207,6 +219,10 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
   for (const x of out.experiments) {
     if (!meterIds.has(x.meter)) fail(`data/experiments/${x.id}.md`, null, `unknown meter "${x.meter}"`)
     for (const id of x.linked_flags ?? []) if (!flagIds.has(id)) fail(`data/experiments/${x.id}.md`, null, `unknown flag "${id}"`)
+  }
+  if (out.quickWins) {
+    const ids = new Set(out.investments.map((i) => i.id as string))
+    for (const l of Object.values(out.quickWins.levers)) if (l.investment && !ids.has(l.investment)) fail('data/scenarios/quick-wins.md', null, `unknown investment "${l.investment}"`)
   }
   for (const r of out.meterYears?.rows ?? []) if (!meterIds.has(r.meter)) fail('data/history/by-meter-year.md', null, `unknown meter "${r.meter}"`)
   for (const o of out.options) for (const mid of o.meters) if (!meterIds.has(mid)) fail(`data/options/${o.id}.md`, null, `unknown meter "${mid}"`)

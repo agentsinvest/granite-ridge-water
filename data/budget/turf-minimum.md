@@ -11,26 +11,19 @@ efficiency:
   value: 0.75
   source: "Jennifer's water model workbook, Assumptions: turf sprinkler efficiency after the wet check"
   confidence: low
-source: "Jennifer's water model workbook, Meters and baseline, row Turf need at healthy minimum (sources/workbook/water-model-2026-10-07.md)"
+effective_rain_share:
+  value: 0.50
+  source: "Jennifer's Zone Plan Model, Inputs: share of direct rain plants can use without a basin (sources/workbook/zone-plan-model.md)"
+  confidence: low
+source: "Formula and assumptions from Jennifer's Zone Plan Model, Quick Wins row Turf need at healthy minimum; monthly weather from data/weather/monthly-normals.md"
 confidence: low
-todo: "The workbook does not say which monthly weather demand (ETo) it used. Confirm the station and years, then compute this from data/weather/ instead of copying it. Cite a source for the 0.50 plant factor."
+todo: "Cite a published source for the 0.50 healthy-minimum plant factor (for example a WUCOLS or University of Arizona turf guide)."
 ---
 
 # Turf need at a healthy minimum
 
-Thousand gallons a month the park turf needs to stay green at the plant factor and sprinkler efficiency above: weather demand x plant factor x turf area x 0.623 / efficiency.
+Computed by the app for each month from `data/weather/monthly-normals.md`:
 
-| Month | Need kgal |
-|---|---|
-| Jan | 46 |
-| Feb | 74 |
-| Mar | 143 |
-| Apr | 245 |
-| May | 315 |
-| Jun | 337 |
-| Jul | 305 |
-| Aug | 247 |
-| Sep | 207 |
-| Oct | 165 |
-| Nov | 84 |
-| Dec | 36 |
+thousand gallons = max(0, ETo x plant factor - average rain x effective rain share) x 0.623 / efficiency x turf area / 1,000.
+
+The workbook's own values (46, 74, 143, 245, 315, 337, 305, 247, 207, 165, 84, 36; 2,204 a year) are kept in the tests as a check.

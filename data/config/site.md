@@ -50,6 +50,14 @@ watering_schedule:
     value: 0.8
     source: "Set 2026-10-07: the 'end earlier' estimate measures gallons directly only when at least 80% of watering nights have every hour read. Below that, the nights with every hour read are mostly the short ones (meters 1, 3, and 4 lose late-night reads), so the estimate uses the share of watering hours removed instead."
     confidence: medium
+homes:
+  value: 56
+  source: "Maricopa County Assessor: 56 residential lots in the Granite Ridge subdivision, per Jennifer's Zone Plan Model, Inputs (sources/workbook/zone-plan-model.md)"
+  confidence: high
+small_wins_budget_usd:
+  value: 20000
+  source: "Jennifer, 2026-10-07: the community cannot afford a large investment, but small wins under $20,000 will help if the math works"
+  confidence: high
 post_2027_rate_assumption:
   method: hold_2027_flat
   label: "Years after 2027 assume 2027 City of Mesa rates stay the same. This is an assumption, not a published rate."

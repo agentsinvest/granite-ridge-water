@@ -1,6 +1,7 @@
 import type { SiteData } from '../../scripts/site-data'
 import { Lines } from '../components/charts'
 import { Card, Empty, GridTable, PageHeader, Section, Stat, Stats, Sure, TableView } from '../components/ui'
+import { turfNeedKgal } from '../engine/quickWins'
 import { fmt, meterNumber } from '../lib/data'
 import { MONTHS, type Model } from '../lib/model'
 
@@ -159,7 +160,14 @@ function ByMeterMonth({ data, model }: { data: SiteData; model: Model }) {
   // Months are rounded for display; the year total adds the unrounded values, then rounds.
   const row = (vals: number[]) => [...vals.map((v) => n(Math.round(v))), n(Math.round(vals.reduce((a, b) => a + b, 0)))]
   const turf = data.turfMinimum
-  const turfRow = turf ? mos.map((mo) => turf.months.find((x) => x.month === MONTHS[mo - 1])?.kgal ?? null) : null
+  const normals = data.monthlyNormals
+  const turfRow =
+    turf && normals
+      ? turfNeedKgal(
+          normals.months.map((x) => ({ eto: x.eto, rain: x.rainAvg })),
+          { areaSqFt: turf.turfAreaSqFt.value, plantFactor: turf.plantFactor.value, efficiency: turf.efficiency.value, effectiveRainShare: turf.effectiveRainShare.value },
+        )
+      : null
   const service = (m: string) => model.latestRate?.fixed_charges.find((f) => f.meters.includes(m))?.amount ?? null
   const missing = <span className="italic text-ink-2">Not on file</span>
 
@@ -216,7 +224,7 @@ function ByMeterMonth({ data, model }: { data: SiteData; model: Model }) {
                     {
                       label: 'Turf need at a healthy minimum',
                       muted: true,
-                      cells: turfRow.some((v) => v === null) ? [...turfRow.map((v) => (v === null ? missing : n(v))), missing] : row(turfRow as number[]),
+                      cells: turfRow.some((v) => v === null) ? [...turfRow.map((v) => (v === null ? missing : n(Math.round(v)))), missing] : row(turfRow as number[]),
                     },
                   ],
                 },
@@ -228,8 +236,8 @@ function ByMeterMonth({ data, model }: { data: SiteData; model: Model }) {
         <div className="mt-3 max-w-prose space-y-2 text-sm text-ink-2">
           <p>
             <strong className="text-ink">Turf need at a healthy minimum</strong> is what {fmt.int(turf.turfAreaSqFt.value)} square feet of park turf needs to
-            stay green: monthly weather demand x plant factor {turf.plantFactor.value.toFixed(2)} x area x 0.623, divided by a sprinkler efficiency of{' '}
-            {fmt.pct(turf.efficiency.value)}. It covers the turf only, not shrubs or trees.
+            stay green: average monthly weather demand x plant factor {turf.plantFactor.value.toFixed(2)}, minus {fmt.pct(turf.effectiveRainShare.value)} of
+            average rain, x area x 0.623, divided by a sprinkler efficiency of {fmt.pct(turf.efficiency.value)}. It covers the turf only, not shrubs or trees.
           </p>
           <ul className="list-disc space-y-1 pl-5">
             <li>
@@ -242,7 +250,15 @@ function ByMeterMonth({ data, model }: { data: SiteData; model: Model }) {
               Sprinkler efficiency {fmt.pct(turf.efficiency.value)}: {turf.efficiency.source}. <Sure level={turf.efficiency.confidence} />
             </li>
             <li>
-              Monthly amounts: {turf.source}. <Sure level={turf.confidence} />. The weather data behind them is not confirmed yet.
+              Rain counted as useful, {fmt.pct(turf.effectiveRainShare.value)}: {turf.effectiveRainShare.source}. <Sure level={turf.effectiveRainShare.confidence} />
+            </li>
+            {data.monthlyNormals && (
+              <li>
+                Weather demand: {data.monthlyNormals.etoSource}. Rain: {data.monthlyNormals.rainSource}. <Sure level={data.monthlyNormals.etoConfidence} />
+              </li>
+            )}
+            <li>
+              Method: {turf.source}. <Sure level={turf.confidence} />
             </li>
           </ul>
           <p>Overseeding the park with winter rye in October and November shows up as a spike in the average for those months.</p>
