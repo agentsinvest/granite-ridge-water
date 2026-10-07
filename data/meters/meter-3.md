@@ -13,10 +13,20 @@ service_type: null
 waterfluence_id: "MESA-437"
 location: "Northwest corner, at the entry gate off McKellips Road"
 areas_served: ["perimeter", "west-south-desert"]
-areas_served_note: "Entrance controller: the entry (turf on stations 1 to 3, replaced with artificial turf in September 2026 per Jennifer, 2026-10-07), entry drip (zone 6), drip along McKellips (zone 4, probably the strip east of the entry), and the west wash drip (zone 5), which was set to Off on 2026-03-29."
+areas_served_note: "The entry (now artificial turf), drip for the trees and shrubs at the entry and along McKellips, and the west wash, whose drip is turned off."
 areas_served_source: "Eco Verde assessment map and settings, 2026 (sources/controllers/eco-verde-assessment-2026.md). Matched to this meter by location: its point of connection, master valve MV3, and backflow BF4 are at the entry gate where the Waterfluence Controller Map puts meter-3."
-controller_note: "Entrance controller: WeatherTRAK LC+ (serial ending 6094, 6 stations). On 2026-03-29: stations 1 to 3 pop-up spray turf (program A, Sun, Tue, Thu, Fri, 4 to 5 minutes, 2 cycles), stations 4 and 6 entrance drip (program B, Sun and Thu, 50 minutes), station 5 west wash drip Off. All active stations in User ET mode. Has a master valve and a flow sensor."
-controller_note_source: "Eco Verde assessment, 2026; HydroPoint reports of 2025-04-04 (sources/controllers/)"
+controller:
+  name: "Entrance controller"
+  model: "WeatherTRAK LC+ smart controller"
+  summary: "Stations 1 to 3 watered the entry turf, which became artificial turf in September 2026. Drip stations 4 and 6 water the entry and McKellips trees and shrubs. Station 5 (west wash drip) is set to off. Set to User ET mode. Has a master valve and a flow sensor."
+  source: "Eco Verde irrigation assessment, 2026 (sources/controllers/eco-verde-assessment-2026.md); HydroPoint reports of 2025-04-04; Jennifer, 2026-10-07"
+  confidence: medium
+checks:
+  - kind: action
+    title: "Entrance trees and shrubs have had no water since September 14"
+    detail: "Meter 3 read zero in every reported hour from September 15 to October 1, including the nights the drip should run. The turf is now artificial, but drip stations 4 and 6 still water the entrance trees and shrubs. Ask the landscaper to turn those back on and leave only turf stations 1 to 3 off."
+    source: "data/hourly/meter-3/2026.md; docs/analysis/2026-10-07-controller-run-times-vs-waterfluence.md"
+    confidence: medium
 active_from: null
 active_to: null
 source: "Meter numbers from Waterfluence exports, 2026-09-30. Account last 4 and location from the Waterfluence Controller Map (sources/waterfluence/landscape-and-controller-maps.md). Labels meter-1 to meter-4 are labels only: meter-1 and meter-2 are the two largest users; meter-4 uses slightly more than meter-3 (1,622 vs 1,431 thousand gallons, 2023-09 to 2026-09)."

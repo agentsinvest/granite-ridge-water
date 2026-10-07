@@ -15,6 +15,17 @@ export function Overview({ data, model }: { data: SiteData; model: Model }) {
   const leakLow = pricedLeaks.reduce((s, f) => s + (f.cost!.low ?? 0), 0)
   const leakHigh = pricedLeaks.reduce((s, f) => s + (f.cost!.high ?? 0), 0)
   const gallons = lastBills.reduce((s, b) => s + (b.gallons ?? 0), 0)
+  const checks = [
+    ...data.meters
+      .flatMap((m) => (m.checks ?? []).map((c) => ({ ...c, meter: m.id })))
+      .reduce((byTitle, c) => {
+        const seen = byTitle.get(c.title)
+        if (seen) seen.meters.push(c.meter)
+        else byTitle.set(c.title, { kind: c.kind, title: c.title, meters: [c.meter] })
+        return byTitle
+      }, new Map<string, { kind: 'action' | 'question'; title: string; meters: string[] }>())
+      .values(),
+  ].sort((a, b) => (a.kind === b.kind ? 0 : a.kind === 'action' ? -1 : 1))
   const moves = rankMoves(buildMoves(data, model), false)
   const picks: Move[] = [...moves.leaks.slice(0, 1), ...moves.ranked.slice(0, 2)]
   const top: Move[] = [...picks, ...moves.leaks.filter((l) => !picks.includes(l))].slice(0, 3)
@@ -148,6 +159,21 @@ export function Overview({ data, model }: { data: SiteData; model: Model }) {
           </ul>
         )}
       </Section>
+
+      {checks.length > 0 && (
+        <Section id="checks" title="Watering checks" lead="Not leaks, but worth raising with the landscaper.">
+          <ul className="mt-4 space-y-2">
+            {checks.map((c) => (
+              <li key={c.title} className="rounded-lg bg-surface px-4 py-3 ring-1 ring-[var(--ring)]">
+                <span className="text-xs font-semibold uppercase tracking-wide text-ink-2">
+                  {c.kind === 'action' ? 'Needs action' : 'Open question'} · {c.meters.length > 1 ? 'Meters' : 'Meter'} {c.meters.map(meterNumber).join(' and ')}
+                </span>
+                <a href="#meters/checks-heading" className="mt-1 block font-semibold underline underline-offset-4">{c.title}</a>
+              </li>
+            ))}
+          </ul>
+        </Section>
+      )}
 
       <Section id="exp" title="Experiments">
         <p className="mt-3 flex flex-wrap items-center gap-3">

@@ -36,6 +36,8 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
   const billTotal = recentBills.reduce((s, b) => s + b.printed_total, 0)
   const billRange = recentBills.length ? [recentBills.map((b) => b.bill_date).sort()[0], recentBills.map((b) => b.bill_date).sort().at(-1)!] : null
   const grossTotal = data.areas.rows.reduce((s, r) => s + (r['Gross sq ft'] ?? 0), 0)
+  const checks = data.meters.flatMap((m) => (m.checks ?? []).map((c) => ({ ...c, meter: m.id })))
+  checks.sort((a, b) => (a.kind === b.kind ? 0 : a.kind === 'action' ? -1 : 1))
 
   if (data.meters.length === 0 && data.areas.rows.length === 0) {
     return (
@@ -89,6 +91,27 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
           check next. None are confirmed leaks yet. Costs are estimates; City bills are the official record.
         </p>
         <LeakFlags flags={costed} />
+      </section>
+
+      <section aria-labelledby="checks-heading" className="mt-10">
+        <h2 id="checks-heading" className="text-xl font-bold">
+          Watering checks
+        </h2>
+        <p className="mt-1 max-w-prose text-sm text-ink-2">
+          Things in the watering data to raise with the landscaper that are not leaks: water that stopped when it should not
+          have, or watering we cannot explain yet.
+        </p>
+        {checks.length === 0 ? (
+          <p className="mt-3 text-ink-2">Nothing to check right now.</p>
+        ) : (
+          <ul className="mt-4 space-y-3">
+            {checks.map((c) => (
+              <li key={`${c.meter}-${c.title}`}>
+                <Check check={c} meter={c.meter} />
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <section aria-labelledby="map-heading" className="mt-10">
@@ -195,6 +218,17 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
                     {m.areas_served?.length ? m.areas_served.map((a) => areaNames[a]?.name ?? a).join(', ') : <Missing what="Areas served" />}
                     {m.areas_served_note && <span className="mt-1 block text-ink-2">{m.areas_served_note}</span>}
                   </Row>
+                  <Row term="Controller">
+                    {m.controller ? (
+                      <>
+                        {m.controller.name}
+                        {m.controller.model ? `: ${m.controller.model}` : ''}
+                        <span className="mt-1 block text-ink-2">{m.controller.summary}</span>
+                      </>
+                    ) : (
+                      <Missing what="Controller" />
+                    )}
+                  </Row>
                   <Row term="Mesa account">{m.account_last4 ? `ending ${m.account_last4}` : <Missing what="Account" />}</Row>
                   <Row term="Meter size">{m.size_inches ? `${m.size_inches} inch` : <Missing what="Size" />}</Row>
                 </dl>
@@ -255,6 +289,24 @@ function MeterBills({ bills }: { bills: SiteData['bills'] }) {
           {unreconciled.length} {unreconciled.length === 1 ? 'bill' : 'bills'} unreconciled
         </p>
       )}
+    </div>
+  )
+}
+
+type MeterCheck = NonNullable<SiteData['meters'][number]['checks']>[number]
+
+function Check({ check, meter }: { check: MeterCheck; meter: string }) {
+  const action = check.kind === 'action'
+  return (
+    <div className={`rounded-xl bg-surface p-4 ring-1 ring-[var(--ring)] ${action ? 'border-l-4 border-serious' : ''}`}>
+      <p className="text-xs font-semibold uppercase tracking-wide text-ink-2">
+        {action ? 'Needs action' : 'Open question'} ·{' '}
+        <a href={`#meters/${meter}`} className="underline underline-offset-4">
+          Meter {meterNumber(meter)}
+        </a>
+      </p>
+      <p className="mt-1 font-semibold">{check.title}</p>
+      <p className="mt-1 max-w-prose text-sm text-ink-2">{check.detail}</p>
     </div>
   )
 }

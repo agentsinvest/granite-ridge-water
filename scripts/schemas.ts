@@ -36,6 +36,20 @@ export const meterSchema = z.object({
   areas_served_source: z.string().optional(),
   controller_note: z.string().optional(),
   controller_note_source: z.string().optional(),
+  controller: z
+    .object({ name: z.string(), model: nullableString, summary: z.string(), source: z.string(), confidence })
+    .optional(),
+  checks: z
+    .array(
+      z.object({
+        kind: z.enum(['action', 'question']),
+        title: z.string().min(1),
+        detail: z.string().min(1),
+        source: z.string().min(1),
+        confidence,
+      }),
+    )
+    .optional(),
   active_from: z.union([date, z.date()]).nullable(),
   active_to: z.union([date, z.date()]).nullable(),
   source: nullableString,
