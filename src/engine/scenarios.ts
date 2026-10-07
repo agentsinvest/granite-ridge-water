@@ -57,7 +57,7 @@ export function steadyAllowanceKgal(periods: { end: string; kgal: number }[], in
   return Math.max(Math.round((winter as number[]).reduce((a, b) => a + b, 0) / 3) - includedKgal, 0)
 }
 
-function price(meter: string, periods: { start: string; end: string; kgal: number }[], rate: RatePeriod): number[] | string {
+export function priceYear(meter: string, periods: { start: string; end: string; kgal: number }[], rate: RatePeriod): number[] | string {
   const open: RatePeriod = { ...rate, applies_from_period_end: '0000-01-01', applies_to_period_end: null }
   const allowance = steadyAllowanceKgal(periods, rate.included_kgal_per_bill.value)
   if (allowance === null) return `${meter} is missing a December, January, or February read period`
@@ -76,8 +76,8 @@ export function runScenario(baseline: Baseline, changes: Change[], rate: RatePer
     if (periods.some((p) => p.usage === null)) return { ok: false, reason: `${meter} has a read period with no usage` }
     const base = periods.map((p) => ({ start: p.start, end: p.end, kgal: p.usage as number }))
     const next = periods.map((p) => ({ start: p.start, end: p.end, kgal: applyChanges(meter, p, changes) }))
-    const baseCost = price(meter, base, rate)
-    const newCost = price(meter, next, rate)
+    const baseCost = priceYear(meter, base, rate)
+    const newCost = priceYear(meter, next, rate)
     if (typeof baseCost === 'string') return { ok: false, reason: baseCost }
     if (typeof newCost === 'string') return { ok: false, reason: newCost }
     const rows = periods.map((p, i) => ({ start: p.start, end: p.end, baseKgal: base[i].kgal, newKgal: next[i].kgal, baseCost: baseCost[i], newCost: newCost[i] }))
