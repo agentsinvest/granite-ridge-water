@@ -19,9 +19,9 @@ excess_water:
   method: "Each episode's daily totals minus one normal 2 AM cycle (372 gallons, the median watering day from 2026-07-03 to 09-07). 2026-09-18: 12,626 - 372. 2026-09-22: 8,759 - 372. 2026-10-02 to 10-04: 18,164 - 372. Together about 38,400 gallons. No yearly figure: it is not a steady flow."
   source: "data/usage/meter-4/2026.md"
   confidence: medium
-related_events: []
+related_events: [2026-02-16]
 source: "data/usage/meter-4/2026.md; sources/waterfluence/ami-hourly-meter-4-2026.md (exports of 2026-09-30 and 2026-10-06); sources/waterfluence/daily-chart-2026-10-06.md"
-todo: "Ask the landscaper whether they shut water off on meter-4 on 2026-09-18, 09-22, and 10-04 (about 4 PM), and which valve runs at 2 AM. Have that valve inspected. Confirm which area meter-4 serves."
+todo: "Ask the landscaper whether they shut water off on meter-4 on 2026-09-18, 09-22, and 10-04 (about 4 PM), and which valve runs at 2 AM. Have that valve inspected. Meter-4 is controller B (interior strip, Crismon frontage, northeast corner); in February 2026 Eco Verde found a broken lateral line in zone 3 and a valve at B4 that the controller did not open (repairs 5 and 6). Ask whether those were repaired and whether the 2 AM valve is one of them."
 ---
 
 Raised by hand from the September and October 2026 AMI data, ahead of the Phase 3 leak engine.
