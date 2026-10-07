@@ -1,9 +1,10 @@
-import type { AreaRow, Bill, Experiment, Flag, Meter, MoveOption, QuickWinsPlan, Rate, SiteMap } from './schemas'
+import type { AreaRow, Bill, Experiment, Flag, Meter, MoveAction, MoveOption, QuickWinsPlan, Rate, SiteMap } from './schemas'
 
 export type BillingPeriod = { start: string; end: string; usage: number | null }
 export type DailyUsage = { date: string; gallons: number | null; hours: number | null; minHour: number | null }
 export type HourlyRead = { time: string; gallons: number }
 export type FinancialLine = { account: string; line: string; actual: number | null; budget: number | null }
+export type DailyWeather = { stationId: string; stationName: string; source: string; retrievedOn: string | null; days: { date: string; inches: number | null }[] }
 export type EventRow = { date: string; precision: string; meter: string; type: string; what: string; source: string }
 
 export type SiteData = {
@@ -43,5 +44,10 @@ export type SiteData = {
   } | null
   quickWins: QuickWinsPlan | null
   budgetCheck: { period: string; source: string; note: string; rows: { scope: string; measure: string; low: number | null; high: number | null; source: string; confidence: string }[] } | null
+  /** NOAA gauge daily rain (null inches = missing). */
+  dailyRain: DailyWeather | null
+  /** AZMET daily reference evapotranspiration. */
+  dailyEto: DailyWeather | null
+  actions: (Omit<MoveAction, 'start_date'> & { start_date: string | null })[]
   openTodos: { file: string; todo: string }[]
 }

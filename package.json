@@ -4,13 +4,14 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "build-data": "tsx scripts/build-data.ts",
+    "build-data": "tsx scripts/build-data.ts && tsx scripts/write-rain-csv.ts",
     "dev": "npm run build-data && vite",
     "build": "npm run build-data && tsc --noEmit -p . && vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "typecheck": "tsc --noEmit -p .",
-    "reconcile": "tsx scripts/reconcile.ts"
+    "reconcile": "tsx scripts/reconcile.ts",
+    "fetch-weather": "node scripts/fetch-weather.mjs"
   },
   "dependencies": {
     "react": "^19.3.0",

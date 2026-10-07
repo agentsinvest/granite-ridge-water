@@ -28,3 +28,10 @@ retrieved_on: 2025-01-15
 
 * `annual-rainfall.md`: yearly rainfall totals. Table columns `Year`, `Rain in`, `Complete` (`yes`, or `no` for a partial year).
 * `monthly-normals.md`: average weather by calendar month, for planning when daily weather is not on file. Frontmatter `eto_source`, `eto_confidence`, `rain_source`, `rain_confidence`, optional `todo`. Table columns `Month` (`Jan` to `Dec`), `ETo in`, `Rain avg in`, `Rain 2020 in`, `Rain 2021 in`.
+
+## Daily rain and ETo for the rain check
+
+* `daily-rain/<YYYY>.md`: NOAA ACIS daily rain, COOP station East Mesa. Frontmatter `year`, `station_id`, `station_name`, `source`, `retrieved_on`, `covers`. Table `Date | Rain in | Reported`: `Reported` is exactly what the gauge said; `Rain in` is that number, 0 for a trace (T), and blank for missing (M) or included in a later day (S). Blank is never 0.
+* `daily-eto/<YYYY>.md`: AZMET daily ETo, Queen Creek (az22), field `eto_pen_mon_in`. Same frontmatter. Table `Date | ETo in`; blank where the station did not report.
+
+Both are written by `node scripts/fetch-weather.mjs`; do not edit them by hand.

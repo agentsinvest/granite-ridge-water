@@ -74,6 +74,9 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
     turfMinimum: null,
     monthlyNormals: null,
     quickWins: null,
+    dailyRain: null,
+    dailyEto: null,
+    actions: [],
     openTodos: [],
   }
   for (const abs of walk(dataDir).sort()) {
@@ -146,6 +149,30 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
     } else if (rel === 'weather/annual-rainfall.md') {
       check(S.annualRainFrontmatterSchema, fm, file, text)
       out.annualRainfall = rows(firstTable(p, ['Year', 'Rain in'], file), S.annualRainRowSchema, file).map((r) => ({ year: Number(r.Year), inches: r['Rain in'], complete: r.Complete === 'yes' }))
+    } else if ((m = rel.match(/^weather\/daily-(rain|eto)\/(\d{4})\.md$/))) {
+      const f = check(S.dailyWeatherFrontmatterSchema, fm, file, text)
+      if (String(f.year) !== m[2]) fail(file, keyLine(text, 'year'), 'year does not match file name')
+      const isRain = m[1] === 'rain'
+      const table = firstTable(p, ['Date', isRain ? 'Rain in' : 'ETo in'], file)
+      const days = isRain
+        ? rows(table, S.dailyRainRowSchema, file).map((x, i) => {
+            const rep = x.Reported.toUpperCase()
+            const ok = rep === 'T' ? x['Rain in'] === 0 : rep === 'M' || rep === 'S' ? x['Rain in'] === null : x['Rain in'] !== null && Number.parseFloat(rep) === x['Rain in']
+            if (!ok) fail(file, table.rows[i].line, `"Rain in" does not match what the gauge reported ("${x.Reported}"): a trace is 0, missing is blank`)
+            return { date: x.Date, inches: x['Rain in'] }
+          })
+        : rows(table, S.dailyEtoRowSchema, file).map((x) => ({ date: x.Date, inches: x['ETo in'] }))
+      days.forEach((d, i) => {
+        if (!d.date.startsWith(m![2])) fail(file, table.rows[i].line, `${d.date} is not in ${m![2]}`)
+        if (i > 0 && d.date <= days[i - 1].date) fail(file, table.rows[i].line, 'dates must be in order with no repeats')
+      })
+      const key = isRain ? 'dailyRain' : 'dailyEto'
+      const prev = out[key]
+      out[key] = { stationId: f.station_id, stationName: f.station_name, source: f.source, retrievedOn: f.retrieved_on ? String(f.retrieved_on instanceof Date ? f.retrieved_on.toISOString().slice(0, 10) : f.retrieved_on) : null, days: [...(prev?.days ?? []), ...days] }
+    } else if ((m = rel.match(/^moves\/([^/]+)\.md$/))) {
+      const a = check(S.moveActionSchema, fm, file, text)
+      if (a.id !== m[1]) fail(file, keyLine(text, 'id'), 'id does not match file name')
+      out.actions.push({ ...a, start_date: a.start_date ? String(a.start_date instanceof Date ? a.start_date.toISOString().slice(0, 10) : a.start_date) : null })
     } else if (rel === 'events.md') {
       check(S.eventsFrontmatterSchema, fm, file, text)
       out.events = rows(firstTable(p, ['Date', 'Precision'], file), S.eventRowSchema, file).map((x) => ({
@@ -228,6 +255,9 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
     for (const l of Object.values(out.quickWins.levers)) if (l.investment && !ids.has(l.investment)) fail('data/scenarios/quick-wins.md', null, `unknown investment "${l.investment}"`)
   }
   for (const r of out.meterYears?.rows ?? []) if (!meterIds.has(r.meter)) fail('data/history/by-meter-year.md', null, `unknown meter "${r.meter}"`)
+  for (const a of out.actions) for (const mid of a.verify_meters) if (!meterIds.has(mid)) fail(`data/moves/${a.id}.md`, null, `unknown meter "${mid}"`)
+  for (const r of (out.config.site as { rain_check?: { plant_factors: { value: { meters: string[] }[] } } }).rain_check?.plant_factors.value ?? [])
+    for (const mid of r.meters) if (!meterIds.has(mid)) fail('data/config/site.md', null, `rain_check plant_factors: unknown meter "${mid}"`)
   for (const o of out.options) for (const mid of o.meters) if (!meterIds.has(mid)) fail(`data/options/${o.id}.md`, null, `unknown meter "${mid}"`)
   out.dataNeeds.sort((a, b) => a.priority - b.priority)
   out.rates.sort((a, b) => a.id.localeCompare(b.id))

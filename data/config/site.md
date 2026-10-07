@@ -63,6 +63,60 @@ post_2027_rate_assumption:
   label: "Years after 2027 assume 2027 City of Mesa rates stay the same. This is an assumption, not a published rate."
   source: "Build spec default, Phase 5"
   confidence: low
+rain_check:
+  since:
+    value: "2026-07-01"
+    source: "Jennifer, 2026-10-07: check every rain event from July 1, 2026. Hourly meter data starts July 3, 2026, so events earlier than a week after that show as not checked."
+    confidence: high
+  min_event_inches:
+    value: 0.20
+    source: "Jennifer, 2026-10-07: a rain event is a day with 0.20 in or more at the gauge; back-to-back days merge"
+    confidence: medium
+  usable_share:
+    value: 0.75
+    source: "Jennifer, 2026-10-07: 75% of an event's rain is usable by plants"
+    confidence: low
+  usable_cap_inches:
+    value: 1.5
+    source: "Jennifer, 2026-10-07: usable rain is capped at 1.5 in per event because heavier rain runs off"
+    confidence: low
+  plant_factors:
+    value:
+      - meters: ["meter-1", "meter-2"]
+        months: [4, 5, 6, 7, 8, 9, 10]
+        factor: 0.6
+      - meters: ["meter-1", "meter-2"]
+        months: [11, 12, 1, 2, 3]
+        factor: 0.8
+      - meters: ["meter-3", "meter-4"]
+        months: []
+        factor: 0.3
+    source: "Jennifer, 2026-10-07: park turf meters 0.6 April to October and 0.8 November to March when overseeded; drip meters 0.3 all year. Estimates for this check only; months [] means all year."
+    confidence: low
+  summer_months:
+    value: [4, 5, 6, 7, 8, 9, 10]
+    source: "Jennifer, 2026-10-07: same season split as the park plant factors"
+    confidence: medium
+  max_days_summer:
+    value: 7
+    source: "Jennifer, 2026-10-07: a skip window is never longer than 7 days in summer"
+    confidence: medium
+  max_days_winter:
+    value: 14
+    source: "Jennifer, 2026-10-07: a skip window is never longer than 14 days in winter"
+    confidence: medium
+  already_off_days:
+    value: 7
+    source: "Jennifer, 2026-10-07: a meter that did not water in the 7 days before the rain was already off, and is left out of the counts"
+    confidence: medium
+  night_start_hour:
+    value: 18
+    source: "Set 2026-10-07: only watering that starts between 6 PM and 8 AM counts for the rain check. Every controller program in the hourly data starts between 8 PM and 5 AM. Single daytime hours above the watering threshold on the park meters (171 gallons at 1 PM on Aug 31, 549 at noon on Sep 2, 562 at 9 AM on Jul 15) look like tests or hand watering, not the controller skipping or not skipping rain."
+    confidence: medium
+  night_end_hour:
+    value: 8
+    source: "Set 2026-10-07, see night_start_hour"
+    confidence: medium
 experiment_check:
   min_days_each_side:
     value: 7

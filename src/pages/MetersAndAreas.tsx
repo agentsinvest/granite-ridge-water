@@ -1,6 +1,8 @@
-import type { ReactNode } from 'react'
+import { useMemo, type ReactNode } from 'react'
 import type { SiteData } from '../../scripts/site-data'
 import { SiteMap } from '../components/SiteMap'
+import { WateringAfterRain } from '../components/WateringAfterRain'
+import { buildRainCheck } from '../lib/rainCheck'
 import { LeakFlags, costFlags, dollarRange } from '../components/LeakFlags'
 import { Bars, METER_COLOR } from '../components/charts'
 import { TableView } from '../components/ui'
@@ -19,6 +21,7 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
     | undefined
   const areaNames = Object.fromEntries(data.areas.rows.map((r) => [r['Area id'], { label: r['Map label'], name: r.Name }]))
   const costed = costFlags(data)
+  const rain = useMemo(() => buildRainCheck(data), [data])
   const activeFlags = costed.map((c) => c.flag)
   const priced = costed.filter((c) => c.cost?.low != null && c.cost.high != null)
   const leakLow = priced.reduce((s, c) => s + c.cost!.low!, 0)
@@ -92,6 +95,8 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
         </p>
         <LeakFlags flags={costed} />
       </section>
+
+      <WateringAfterRain data={data} rc={rain} />
 
       <section aria-labelledby="checks-heading" className="mt-10">
         <h2 id="checks-heading" className="text-xl font-bold">

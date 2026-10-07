@@ -1,5 +1,8 @@
 import type { SiteData } from '../../scripts/site-data'
+import { useMemo } from 'react'
 import { Bars, Waterfall } from '../components/charts'
+import { rainSummaryText } from '../components/WateringAfterRain'
+import { buildRainCheck } from '../lib/rainCheck'
 import { dollarRange } from '../components/LeakFlags'
 import { Card, PageHeader, Pill, Section, Stat, Stats, TableView } from '../components/ui'
 import { cutToReach } from '../engine/scenarios'
@@ -30,6 +33,7 @@ export function Overview({ data, model }: { data: SiteData; model: Model }) {
   const picks: Move[] = [...moves.leaks.slice(0, 1), ...moves.ranked.slice(0, 2)]
   const top: Move[] = [...picks, ...moves.leaks.filter((l) => !picks.includes(l))].slice(0, 3)
   const allRanked = rankMoves(buildMoves(data, model), true)
+  const rain = useMemo(() => buildRainCheck(data), [data])
 
   const plYears = Object.entries(data.financials)
     .map(([y, f]) => ({ year: y, total: f.lines.find((l) => l.account === '50110')?.actual ?? null }))
@@ -72,6 +76,12 @@ export function Overview({ data, model }: { data: SiteData; model: Model }) {
         <Stat value={cut === null ? 'Unknown' : `${Math.ceil(cut)}%`} label="less water needed to reach the target at today's prices" />
         <Stat value={pricedLeaks.length ? dollarRange(leakLow, leakHigh) : String(flags.length)} label={`extra charges from ${flags.length} possible leaks so far (where priced)`} flag={flags.length > 0} />
       </Stats>
+
+      <p className="mt-4 rounded-xl bg-surface p-4 text-sm ring-1 ring-[var(--ring)]">
+        <strong>Watering after rain: </strong>
+        {rain && rain.rainDays > 0 ? rainSummaryText(rain) : 'Rain gauge readings are not in yet, so this check has not run.'}{' '}
+        <a className="font-semibold underline underline-offset-4" href="#meters/watering-after-rain">See every rain event</a>
+      </p>
 
       <Section id="first" title="What to do first" lead="The top moves from the Recommended moves screen. Fix leaks first: they cost money and help nothing.">
         <ol className="mt-4 grid gap-3 md:grid-cols-3">

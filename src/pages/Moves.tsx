@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { SiteData } from '../../scripts/site-data'
 import { dollarRange } from '../components/LeakFlags'
+import { RainActions } from '../components/RainAction'
+import { buildRainCheck } from '../lib/rainCheck'
 import { Card, PageHeader, Pill, Section, Sure } from '../components/ui'
 import { fmt, meterNumber } from '../lib/data'
 import { buildMoves, monthsText, rankMoves, type Model, type Move } from '../lib/model'
@@ -11,6 +13,7 @@ export function Moves({ data, model }: { data: SiteData; model: Model }) {
   const [green, setGreen] = useState(false)
   const all = buildMoves(data, model)
   const { ranked, backfires, leaks, needsQuote, hiddenGreenspace } = rankMoves(all, green)
+  const rain = useMemo(() => buildRainCheck(data), [data])
 
   return (
     <article>
@@ -33,7 +36,11 @@ export function Moves({ data, model }: { data: SiteData; model: Model }) {
         )}
       </Section>
 
-      <Section id="ranked" title="2. Watering changes, ranked by yearly savings" lead="Savings are calculated from the last 12 read periods at the City's current prices. The percent in each title is a proposed size, not a promise: test it first.">
+      <Section id="run" title="2. Fix how the system runs" lead="Changes to controller settings and sensors. They do not cut the water the plants need, so they are listed before cuts. Each needs a yes or a quote from the landscaper.">
+        <RainActions data={data} rc={rain} />
+      </Section>
+
+      <Section id="ranked" title="3. Watering changes, ranked by yearly savings" lead="Savings are calculated from the last 12 read periods at the City's current prices. The percent in each title is a proposed size, not a promise: test it first.">
         {ranked.length === 0 ? (
           <p className="mt-3 text-ink-2">{green ? 'No priced options on file.' : 'No priced options outside the greenspace. Turn on the toggle above to see the park options.'}</p>
         ) : (
@@ -57,7 +64,7 @@ export function Moves({ data, model }: { data: SiteData; model: Model }) {
         </Section>
       )}
 
-      <Section id="quotes" title="3. Needs a quote first" lead="Worth pricing. These are not ranked until a quote or a cited savings figure is on file.">
+      <Section id="quotes" title="4. Needs a quote first" lead="Worth pricing. These are not ranked until a quote or a cited savings figure is on file.">
         <ul className="mt-4 grid gap-3 md:grid-cols-2">
           {needsQuote.map((m) => (
             <li key={m.id}>
