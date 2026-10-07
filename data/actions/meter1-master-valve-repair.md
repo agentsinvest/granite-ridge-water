@@ -1,7 +1,7 @@
 ---
 id: meter1-master-valve-repair
 title: "Repair the leaking master valve at the east end of the park"
-problem: "Meter 1 shows a small steady drip between watering cycles, and its late-summer use was up 27% on last year."
+problem: "Meter 1's late-summer use was up 27% on last year, and between watering cycles it shows a small steady drip."
 meter: meter-1
 controller: Park
 stations: []

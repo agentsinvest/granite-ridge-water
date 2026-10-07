@@ -16,3 +16,10 @@ export const fmt = {
     thousand >= 1000 ? `${(thousand / 1000).toFixed(1)} million gallons` : `${Math.round(thousand).toLocaleString('en-US')},000 gallons`,
   month: (iso: string) => new Date(`${iso}T12:00:00`).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
 }
+
+/** "Meter 1 · East park (…8300)": the one way meters are named across the site. Missing parts are left out, never guessed. */
+export function meterLabel(d: { meters: { id: string; name: string | null; meter_number_last4: string | null }[] }, id: string, form: 'full' | 'name' = 'full'): string {
+  const m = d.meters.find((x) => x.id === id)
+  const base = `Meter ${meterNumber(id)}${m?.name ? ` · ${m.name}` : ''}`
+  return form === 'full' && m?.meter_number_last4 ? `${base} (…${m.meter_number_last4})` : base
+}

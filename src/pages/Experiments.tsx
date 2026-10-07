@@ -8,7 +8,7 @@ import type { Model } from '../lib/model'
 
 const STATUS: Record<string, string> = { planned: 'Planned', running: 'Running', done: 'Done', stopped: 'Stopped' }
 
-const VERDICT: Record<CheckResult['verdict'], { text: string; tone: 'good' | 'serious' | 'neutral' }> = {
+export const VERDICT: Record<CheckResult['verdict'], { text: string; tone: 'good' | 'serious' | 'neutral' }> = {
   as_expected: { text: 'Went as expected', tone: 'good' },
   partly: { text: 'Partly worked', tone: 'serious' },
   no_change: { text: 'No clear change', tone: 'serious' },
@@ -17,7 +17,7 @@ const VERDICT: Record<CheckResult['verdict'], { text: string; tone: 'good' | 'se
   not_started: { text: 'Not started', tone: 'neutral' },
 }
 
-function daysFor(data: SiteData, meter: string): Day[] {
+export function daysFor(data: SiteData, meter: string): Day[] {
   return Object.values(data.usage[meter] ?? {})
     .flat()
     .map((d) => ({ date: d.date, gallons: d.gallons, hours: d.hours }))

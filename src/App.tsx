@@ -6,7 +6,7 @@ import { ScreenTabs } from './components/ui'
 import { MetersAndAreas } from './pages/MetersAndAreas'
 import { Bills } from './pages/Bills'
 import { Schedule } from './pages/Schedule'
-import { Overview } from './pages/Overview'
+import { Home } from './pages/Home'
 import { HowWeGotHere } from './pages/HowWeGotHere'
 import { HowMuch } from './pages/HowMuch'
 import { WhatIf } from './pages/WhatIf'
@@ -23,7 +23,7 @@ type Screen = { route: RouteName; name: string; menu: boolean; tabs: Tab[] }
 
 /** Five screens in the menu, plus About the data in the footer. Each screen's tabs reuse the existing views. */
 const SCREENS: Screen[] = [
-  { route: 'home', name: 'Home', menu: true, tabs: [{ id: 'home', label: 'Home', render: (_, m) => <Overview data={data} model={m} /> }] },
+  { route: 'home', name: 'Home', menu: true, tabs: [{ id: 'home', label: 'Home', render: (_, m) => <Home data={data} model={m} /> }] },
   {
     route: 'plan',
     name: 'Action plan',
