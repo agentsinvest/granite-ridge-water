@@ -58,6 +58,8 @@ Days/Times configuration:
 
 The Options column prints one letter per day from Sunday to Saturday with a dash for each off day. Program A prints S, dash, T, dash, T, F, dash; Program B prints S, dash, dash, dash, T, dash, dash. Read by position, A waters Sunday, Tuesday, Thursday, and Friday, and B waters Sunday and Thursday.
 
+The printout is marked "Page 4 of 7" of the Entrance Controller Settings Detail Report. Pages 1 to 3 and 5 to 7 are not in this PDF. For the park report, the station flow rates are on page 3, so the entrance flow rates are probably on one of the missing pages.
+
 Station configuration, Auto mode: no stations.
 
 Station configuration, User mode:
@@ -118,6 +120,8 @@ Chart "Measured Usage per Day: Granite Ridge Park", 2026-02-28 to 2026-03-29 (Si
 
 **3g. Rotors, issues.** Larger turf areas use Hunter and Rain Bird rotors. Some are not nozzled for matched precipitation rate. Example, valve C7: all heads are half circles but nozzle sizes are 8, 15, 8, 6, 10, 10, and 10. Some nozzle retainer screws are turned in too far, diffusing the pattern. Some rotors overspray onto hardscape.
 
+Page 10 is an aerial photo titled "Park Sprinklers": colored dots for every rotor head on valves C1 to C12 with the nozzle size printed next to each dot ("Colored dots represent rotor heads on different valves. White numbers represent nozzle sizes."). Head-by-head sizes are not transcribed here because which dot belongs to which valve is read only by color; the C7 example above is the one the report spells out. Repairs 1 to 4 are marked on it.
+
 **3h. Rotors, solutions.** Eco Verde will train the landscape contractor to nozzle for matched precipitation, adjust retainer screws, and adjust rotors to cut overspray. (The report says "Heritage Pointe" in this paragraph; it appears to be a copy error from another report.)
 
 **3i. Incentives.** None for these items.
@@ -175,6 +179,8 @@ Funding is limited and not guaranteed. Not retroactive before the approval date;
 The HOA is encouraged to use City incentives and "to further explore turf reduction in the Park area and to develop contingency plans for turf reduction" in case of future shortages, higher rates, or restrictions. (Turf reduction is out of scope for this project for now.)
 
 ## Notes from this transcription (not in the report)
+
+* **Re-checked 2026-10-07** against all 31 pages of the PDF: every page is covered above. Pages 23 and 31 are blank, 24 to 28 are Hunter brochures (Pro-Spray PRS40, MP Rotator, SJ swing joint), 29 is the Hunter PGP Ultra and I-20 rotor nozzle performance chart, and 30 is the back cover (the assessment was paid for by the City of Mesa with grant funding from the Water Infrastructure Finance Authority of Arizona).
 
 * **Meters.** The four points of connection match the four meter pins on the Waterfluence Controller Map: entry gate (meter-3), east end of the interior strip (meter-4), west side of the park (meter-2), east side of the park (meter-1). The backflow sizes agree with the meter sizes in Jennifer's workbook if the report's backflows #1 and #2 are the two park devices (1.5 inch, like meter-1 and meter-2) and #3 and #4 are the entrance and the "native walkway" by controller B (1 inch, like meter-3 and meter-4). The report numbers the photos in a different order (front entrance first), so this match is an inference.
 * **Controller B** (meter-4) is not a WeatherTRAK controller: the report says two WeatherTRAK controllers do most of the watering, and the 2025 HydroPoint reports list only the Entrance and Park controllers. Its make, settings, and whether it has a flow sensor are unknown.
