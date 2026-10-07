@@ -1,6 +1,7 @@
 ---
 id: meter-3
-name: null
+name: "Entrance"
+name_source: "Jennifer, redesign brief of 2026-10-07"
 account_last4: "8681"
 meter_number_last4: "4706"
 size_inches: 1

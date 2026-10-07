@@ -68,7 +68,7 @@ export function savingsOf(baseline: Baseline, rate: RatePeriod, changes: Change[
   return r.ok ? r.baseCost - r.newCost : null
 }
 
-/** Every candidate move with what it saves. Ranking happens on the screen so the greenspace toggle can filter. */
+/** Every candidate move with what it saves. Ranking and grouping happen on the screen. */
 export function buildMoves(data: SiteData, m: Model): Move[] {
   const moves: Move[] = []
   for (const { flag, cost } of m.flags as CostedFlag[]) {
@@ -87,7 +87,7 @@ export function buildMoves(data: SiteData, m: Model): Move[] {
       confidence: flag.excess_water?.confidence ?? 'low',
       greenspace: false,
       risks: [],
-      link: `#meters/${flag.id}`,
+      link: `#problems/${flag.id}`,
     })
   }
   for (const o of data.options) {
@@ -113,7 +113,7 @@ export function buildMoves(data: SiteData, m: Model): Move[] {
       greenspace: o.touches_greenspace,
       risks,
       howToTest: o.how_to_test,
-      link: `#whatif?o=${o.id}`,
+      link: `#calculator?tab=whatif&o=${o.id}`,
       change,
     })
   }
@@ -133,7 +133,7 @@ export function buildMoves(data: SiteData, m: Model): Move[] {
       confidence: inv.confidence,
       greenspace: false,
       risks: [],
-      link: '#moves',
+      link: '#plan',
     })
   }
   return moves

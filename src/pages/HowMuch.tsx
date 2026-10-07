@@ -1,8 +1,8 @@
 import type { SiteData } from '../../scripts/site-data'
 import { Lines } from '../components/charts'
-import { Card, Empty, GridTable, PageHeader, Section, Stat, Stats, Sure, TableView } from '../components/ui'
+import { Card, Empty, GridTable, PageHeader, Section, Stat, Stats, Sure, TableView, HowCalculated } from '../components/ui'
 import { turfNeedKgal } from '../engine/quickWins'
-import { fmt, meterNumber } from '../lib/data'
+import { fmt, meterName } from '../lib/data'
 import { MONTHS, type Model } from '../lib/model'
 
 const ORDER = [10, 11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -95,7 +95,7 @@ export function HowMuch({ data, model }: { data: SiteData; model: Model }) {
           <li>The zone list: what each controller station waters, its plant type, sprinkler type, and square feet.</li>
         </ul>
         <p className="mt-3 text-sm">
-          The full list is on <a href="#data" className="underline underline-offset-4">Data and accuracy</a>.
+          The full list is on <a href="#about" className="underline underline-offset-4">About the data</a>.
         </p>
       </Section>
     </article>
@@ -184,7 +184,7 @@ function ByMeterMonth({ data, model }: { data: SiteData; model: Model }) {
         groups={[
           {
             rows: data.meters.map((m) => ({
-              label: `Meter ${meterNumber(m.id)}${m.meter_number_last4 ? ` (...${m.meter_number_last4})` : ''}`,
+              label: meterName(m.id),
               cells: [
                 <span className="block min-w-[12rem] max-w-[18rem] whitespace-normal">{m.location ?? 'Not on file'}</span>,
                 m.size_inches === null ? missing : `${m.size_inches === 1.5 ? '1 1/2' : m.size_inches}"`,
@@ -202,7 +202,7 @@ function ByMeterMonth({ data, model }: { data: SiteData; model: Model }) {
           {
             title: `Last 12 months (${label(window[0])} to ${label(window.at(-1)!)})`,
             rows: [
-              ...model.meters.map((m) => ({ label: `Meter ${meterNumber(m)}`, cells: row(mos.map((mo) => use(m, lastYm(mo))!)) })),
+              ...model.meters.map((m) => ({ label: meterName(m), cells: row(mos.map((mo) => use(m, lastYm(mo))!)) })),
               { label: 'All meters', strong: true, cells: row(mos.map((mo) => model.meters.reduce((t, m) => t + use(m, lastYm(mo))!, 0))) },
             ],
           },
@@ -211,7 +211,7 @@ function ByMeterMonth({ data, model }: { data: SiteData; model: Model }) {
                 {
                   title: `${fullYears.join(' and ')} average`,
                   rows: [
-                    ...model.meters.map((m) => ({ label: `Meter ${meterNumber(m)}`, cells: row(mos.map((mo) => avgRaw(m, mo))) })),
+                    ...model.meters.map((m) => ({ label: meterName(m), cells: row(mos.map((mo) => avgRaw(m, mo))) })),
                     { label: 'All meters', strong: true, cells: row(mos.map((mo) => model.meters.reduce((t, m) => t + avgRaw(m, mo), 0))) },
                   ],
                 },
@@ -233,6 +233,7 @@ function ByMeterMonth({ data, model }: { data: SiteData; model: Model }) {
         ]}
       />
       {turf && (
+        <HowCalculated>
         <div className="mt-3 max-w-prose space-y-2 text-sm text-ink-2">
           <p>
             <strong className="text-ink">Turf need at a healthy minimum</strong> is what {fmt.int(turf.turfAreaSqFt.value)} square feet of park turf needs to
@@ -263,6 +264,7 @@ function ByMeterMonth({ data, model }: { data: SiteData; model: Model }) {
           </ul>
           <p>Overseeding the park with winter rye in October and November shows up as a spike in the average for those months.</p>
         </div>
+        </HowCalculated>
       )}
     </Section>
   )

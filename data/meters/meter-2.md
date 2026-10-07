@@ -1,6 +1,7 @@
 ---
 id: meter-2
-name: null
+name: "West park"
+name_source: "Jennifer, redesign brief of 2026-10-07"
 account_last4: "8671"
 meter_number_last4: "4031"
 size_inches: 1.5
