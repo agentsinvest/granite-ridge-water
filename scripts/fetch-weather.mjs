@@ -55,7 +55,8 @@ async function fetchEto() {
   if (!Array.isArray(list)) throw new Error('AZMET: no data array in the response')
   return list
     .map((r) => {
-      const date = r.date_datetime ? String(r.date_datetime).slice(0, 10) : new Date(Date.UTC(Number(r.date_year), 0, Number(r.date_doy))).toISOString().slice(0, 10)
+      const iso = r.datetime ?? r.date_datetime
+      const date = iso ? String(iso).slice(0, 10) : new Date(Date.UTC(Number(r.date_year), 0, Number(r.date_doy))).toISOString().slice(0, 10)
       const v = r.eto_pen_mon_in
       // AZMET marks missing values with null or large negative sentinels; keep them blank.
       const ok = v !== null && v !== undefined && v !== '' && Number(v) > -99
