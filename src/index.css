@@ -16,6 +16,9 @@
   --pin: #0b0b0b;
   --pin-ink: #ffffff;
   --serious: #ec835a;
+  --zone-a: #1f63c4;
+  --zone-b: #7a3cc0;
+  --zone-c: #007a7a;
   --focus: #2a78d6;
   --bar: #2a78d6;
   --ring: rgba(11, 11, 11, 0.1);
@@ -42,6 +45,9 @@
     --pin: #ffffff;
     --pin-ink: #0b0b0b;
     --serious: #ec835a;
+    --zone-a: #6aa6f2;
+    --zone-b: #b48bea;
+    --zone-c: #3cc4c4;
     --focus: #3987e5;
     --bar: #3987e5;
     --ring: rgba(255, 255, 255, 0.1);
@@ -68,6 +74,9 @@
   --pin: #ffffff;
   --pin-ink: #0b0b0b;
   --serious: #ec835a;
+  --zone-a: #6aa6f2;
+  --zone-b: #b48bea;
+  --zone-c: #3cc4c4;
   --focus: #3987e5;
   --bar: #3987e5;
   --ring: rgba(255, 255, 255, 0.1);

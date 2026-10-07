@@ -26,3 +26,11 @@
 * Recorded the likely park station split (1 to 7, 14, 15 on meter-1; 8 to 12, 13 on meter-2) in the meter files as medium confidence, based on valve locations, station names, and flow. Not added as zone files yet, because square footage and run times are still unknown.
 * Logged that meter-3 had no water at all from 2026-09-15, drip included, as a `schedule` event, and asked for the entrance drip to be turned back on. Not raised as a leak flag, because it is missing water, not extra water.
 * The park's every-night 10 PM program (about a third of summer park water) goes into the open questions rather than into an option or saving, because its stations and minutes are unknown.
+
+## Update: zones and controllers on the site map (2026-10-07)
+
+* Added optional `controllers` and `zones` to `data/map.md` and the map schema. Zones are traced by hand onto the site map's own canvas from the Eco Verde map, following the area outlines already drawn, instead of transforming the Eco Verde image: an affine fit between the two maps was off by up to about 20 pixels, enough to put narrow drip strips on top of houses.
+* Zone labels use the controller letter plus station (A4, B3, C13). The letter is printed on the map, in the legend, and in a table under the map, so color is never the only cue. The turned-off west wash zone is drawn with a dashed outline.
+* Controller markers sit near, not exactly on, each controller so they do not hide the meter pins.
+* The entry turf stations (A1 to A3) are not drawn: their outline is not on the Eco Verde map, and the entry is artificial turf since September 2026.
+* A checkbox hides the zones for anyone who wants the simpler area map.
