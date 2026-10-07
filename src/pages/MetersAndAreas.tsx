@@ -1,12 +1,10 @@
-import { useMemo, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import type { SiteData } from '../../scripts/site-data'
 import { SiteMap } from '../components/SiteMap'
-import { WateringAfterRain } from '../components/WateringAfterRain'
-import { buildRainCheck } from '../lib/rainCheck'
-import { LeakFlags, costFlags, dollarRange } from '../components/LeakFlags'
+import { costFlags, dollarRange } from '../components/LeakFlags'
 import { Bars, METER_COLOR } from '../components/charts'
-import { TableView } from '../components/ui'
-import { fmt, meterNumber } from '../lib/data'
+import { TableView, HowCalculated } from '../components/ui'
+import { fmt, meterNumber, meterName } from '../lib/data'
 import { recentUsage, shares } from '../engine/usage'
 
 const RECENT_PERIODS = 12
@@ -21,7 +19,6 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
     | undefined
   const areaNames = Object.fromEntries(data.areas.rows.map((r) => [r['Area id'], { label: r['Map label'], name: r.Name }]))
   const costed = costFlags(data)
-  const rain = useMemo(() => buildRainCheck(data), [data])
   const activeFlags = costed.map((c) => c.flag)
   const priced = costed.filter((c) => c.cost?.low != null && c.cost.high != null)
   const leakLow = priced.reduce((s, c) => s + c.cost!.low!, 0)
@@ -39,8 +36,6 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
   const billTotal = recentBills.reduce((s, b) => s + b.printed_total, 0)
   const billRange = recentBills.length ? [recentBills.map((b) => b.bill_date).sort()[0], recentBills.map((b) => b.bill_date).sort().at(-1)!] : null
   const grossTotal = data.areas.rows.reduce((s, r) => s + (r['Gross sq ft'] ?? 0), 0)
-  const checks = data.meters.flatMap((m) => (m.checks ?? []).map((c) => ({ ...c, meter: m.id })))
-  checks.sort((a, b) => (a.kind === b.kind ? 0 : a.kind === 'action' ? -1 : 1))
 
   if (data.meters.length === 0 && data.areas.rows.length === 0) {
     return (
@@ -53,7 +48,7 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
 
   return (
     <article>
-      <h1 className="text-2xl font-bold md:text-3xl">Meters, areas, and leaks</h1>
+      <h1 className="text-2xl font-bold md:text-3xl">Meters and map</h1>
       <p className="mt-2 max-w-prose text-ink-2">
         Where the HOA's four City of Mesa water meters are, and what landscape the common areas hold.
       </p>
@@ -85,39 +80,9 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
         />
       </dl>
 
-      <section aria-labelledby="leaks-heading" className="mt-10">
-        <h2 id="leaks-heading" className="text-xl font-bold">
-          Possible leaks
-        </h2>
-        <p className="mt-1 max-w-prose text-sm text-ink-2">
-          Water use that does not look right, most expensive first. Each one says what we saw, roughly what it cost, and what to
-          check next. None are confirmed leaks yet. Costs are estimates; City bills are the official record.
-        </p>
-        <LeakFlags flags={costed} />
-      </section>
-
-      <WateringAfterRain data={data} rc={rain} />
-
-      <section aria-labelledby="checks-heading" className="mt-10">
-        <h2 id="checks-heading" className="text-xl font-bold">
-          Watering checks
-        </h2>
-        <p className="mt-1 max-w-prose text-sm text-ink-2">
-          Things in the watering data to raise with the landscaper that are not leaks: water that stopped when it should not
-          have, or watering we cannot explain yet.
-        </p>
-        {checks.length === 0 ? (
-          <p className="mt-3 text-ink-2">Nothing to check right now.</p>
-        ) : (
-          <ul className="mt-4 space-y-3">
-            {checks.map((c) => (
-              <li key={`${c.meter}-${c.title}`}>
-                <Check check={c} meter={c.meter} />
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <p className="mt-4 text-sm">
+        <a href="#problems" className="font-semibold underline underline-offset-4">See what is wrong right now on the Problems screen</a>
+      </p>
 
       <section aria-labelledby="map-heading" className="mt-10">
         <h2 id="map-heading" className="text-xl font-bold">
@@ -202,7 +167,7 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
                     <td className="tabular px-4 py-3 text-right">{r['Gross sq ft'] === null ? <Missing what="Size" /> : fmt.int(r['Gross sq ft'])}</td>
                     <td className="tabular px-4 py-3 text-right">{r['Turf sq ft'] === null ? '' : `about ${fmt.int(r['Turf sq ft'])}`}</td>
                     <td className="px-4 py-3">
-                      {metersFor(r['Area id']).length ? metersFor(r['Area id']).map((id) => `Meter ${meterNumber(id)}`).join(', ') : <Missing what="Meter" />}
+                      {metersFor(r['Area id']).length ? metersFor(r['Area id']).map((id) => meterName(id)).join(', ') : <Missing what="Meter" />}
                     </td>
                   </tr>
                 ))}
@@ -218,11 +183,13 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
           </div>
         )}
         {wf && (
+          <HowCalculated>
           <p className="mt-3 max-w-prose text-sm text-ink-2">
             Waterfluence measures {fmt.int(wf.shrub_sq_ft)} sq ft of irrigated shrub and desert landscape and{' '}
             {fmt.int(wf.turf_overseed_sq_ft)} sq ft of overseeded turf. Those figures do not split by area and are a little higher
             than the HOA map; which set the water budget uses is still open.
           </p>
+          </HowCalculated>
         )}
       </section>
 
@@ -230,10 +197,12 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
         <h2 id="meters-heading" className="text-xl font-bold">
           Meters
         </h2>
+        <HowCalculated>
         <p className="mt-1 text-sm text-ink-2">
           Meter numbers are labels used on this site. Water use is metered usage from Waterfluence for the last{' '}
           {RECENT_PERIODS} City read periods.
         </p>
+        </HowCalculated>
         <ul className="mt-4 grid gap-4 md:grid-cols-2">
           {data.meters.map((m) => {
             const s = summaries.find((x) => x.meter === m.id)
@@ -242,7 +211,7 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
             return (
               <li key={m.id} id={m.id} className="scroll-mt-6 rounded-xl bg-surface p-5 ring-1 ring-[var(--ring)]">
                 <h3 className="flex items-baseline gap-3">
-                  <span className="text-lg font-bold">Meter {meterNumber(m.id)}</span>
+                  <span className="text-lg font-bold">{meterName(m.id)}</span>
                   <span className="text-sm text-ink-2">meter number ending {m.meter_number_last4 ?? '????'}</span>
                 </h3>
                 <MeterBills bills={billsFor(m.id)} />
@@ -278,7 +247,7 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
                       <li key={flag.id} className="flex gap-2 rounded-lg border-2 border-serious px-3 py-2">
                         <span aria-hidden="true" className="font-extrabold">!</span>
                         <span>
-                          <a href={`#meters/${flag.id}`} className="font-semibold underline underline-offset-4">
+                          <a href={`#problems/${flag.id}`} className="font-semibold underline underline-offset-4">
                             {flag.title.replace(/^Meter \d+: (.)/, (_, c: string) => c.toUpperCase())}
                           </a>
                           {cost?.low != null && cost.high != null && <span className="text-ink-2"> (about {dollarRange(cost.low, cost.high)})</span>}
@@ -332,24 +301,6 @@ function MeterBills({ bills }: { bills: SiteData['bills'] }) {
   )
 }
 
-type MeterCheck = NonNullable<SiteData['meters'][number]['checks']>[number]
-
-function Check({ check, meter }: { check: MeterCheck; meter: string }) {
-  const action = check.kind === 'action'
-  return (
-    <div className={`rounded-xl bg-surface p-4 ring-1 ring-[var(--ring)] ${action ? 'border-l-4 border-serious' : ''}`}>
-      <p className="text-xs font-semibold uppercase tracking-wide text-ink-2">
-        {action ? 'Needs action' : 'Open question'} ·{' '}
-        <a href={`#meters/${meter}`} className="underline underline-offset-4">
-          Meter {meterNumber(meter)}
-        </a>
-      </p>
-      <p className="mt-1 font-semibold">{check.title}</p>
-      <p className="mt-1 max-w-prose text-sm text-ink-2">{check.detail}</p>
-    </div>
-  )
-}
-
 function Row({ term, children }: { term: string; children: ReactNode }) {
   return (
     <div className="grid grid-cols-[7.5rem_1fr] gap-2">
@@ -359,7 +310,7 @@ function Row({ term, children }: { term: string; children: ReactNode }) {
   )
 }
 
-function DailyDetail({ meter, days }: { meter: string; days: SiteData['usage'][string][string] }) {
+export function DailyDetail({ meter, days }: { meter: string; days: SiteData['usage'][string][string] }) {
   const recent = [...days].sort((a, b) => a.date.localeCompare(b.date)).slice(-60)
   if (recent.length === 0) return <p className="mt-4 text-sm"><Missing what="Daily use" /></p>
   const rows = recent.map((d) => ({

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { GLOSSARY } from '../lib/glossary'
 
 export function PageHeader({ title, lead }: { title: string; lead: ReactNode }) {
   return (
@@ -157,5 +158,57 @@ export function GridTable({ caption, head, groups, leftCols = [] }: { caption: s
         ))}
       </table>
     </div>
+  )
+}
+
+/**
+ * The sections of a screen as a row of links. Each tab is its own address (`?tab=`), so it can be shared and the back
+ * button works. The screen name sits above as a label; the open section supplies the page heading.
+ */
+export function ScreenTabs({ screen, route, tabs, current }: { screen: string; route: string; tabs: { id: string; label: string }[]; current: string }) {
+  return (
+    <div className="mb-6 print:hidden">
+      <p className="text-sm font-semibold uppercase tracking-wide text-ink-2">{screen}</p>
+      <nav aria-label={`${screen} sections`} className="mt-2 border-b border-line">
+        <ul className="-mb-px flex flex-wrap gap-x-5 gap-y-1">
+          {tabs.map((t) => (
+            <li key={t.id}>
+              <a
+                href={`#${route}?tab=${t.id}`}
+                aria-current={t.id === current ? 'page' : undefined}
+                className={`inline-block border-b-4 py-2 text-sm ${t.id === current ? 'border-[var(--focus)] font-semibold' : 'border-transparent hover:underline underline-offset-4'}`}
+              >
+                {t.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </div>
+  )
+}
+
+/** A word with its plain definition on hover, focus, or tap. The full list is on About the data. */
+export function Term({ k, children }: { k: import('../lib/glossary').GlossaryKey; children: ReactNode }) {
+  const g = GLOSSARY[k]
+  return (
+    <span className="group relative inline">
+      <button type="button" className="cursor-help underline decoration-dotted underline-offset-4" aria-describedby={`term-${k}`} onClick={(e) => e.currentTarget.focus()}>
+        {children}
+      </button>
+      <span id={`term-${k}`} role="tooltip" className="invisible absolute bottom-full left-0 z-20 mb-1 w-64 rounded-lg bg-surface p-3 text-sm font-normal text-ink shadow-lg ring-1 ring-[var(--ring)] group-focus-within:visible group-hover:visible">
+        {g.def}
+      </span>
+    </span>
+  )
+}
+
+/** Method notes and caveats, folded away so each screen shows at most one short caveat line. */
+export function HowCalculated({ children, title = 'How this is calculated' }: { children: ReactNode; title?: string }) {
+  return (
+    <details className="mt-3 text-sm">
+      <summary className="cursor-pointer font-semibold">{title}</summary>
+      <div className="mt-2 max-w-prose space-y-2 text-ink-2">{children}</div>
+    </details>
   )
 }

@@ -134,7 +134,7 @@ Results show gallons and dollars saved per month and per year, and which meter's
 * Turf zones: note dormancy and recovery time.
 * Zones where the reduction drops water below the plant-factor budget minimum: flag "below estimated plant need."
 
-Turf greenspace zones are excluded from the selector by default; a "include greenspace" toggle unlocks them.
+Turf greenspace zones are never hidden. Every change and action that touches them carries a lawn impact badge (No change to the lawn, Changes lawn watering, Removes lawn), and the default order puts "No change" first. (Changed 2026-10-07, see docs/decisions/2026-10-07-action-first-redesign.md.)
 
 ### Change type B: Investments
 
@@ -171,20 +171,21 @@ Scenarios are saved in the URL for sharing. Scenarios the HOA wants to keep go i
 
 ## Phase 6: Recommended first moves
 
-Ranked automatically from leak flags, the investment catalog, and down or off options: annual savings, upfront cost, payback, effort, confidence, and risk note. Greenspace is excluded unless toggled on. Items with `null` costs or savings show as "needs a quote" instead of being ranked on guesses.
+Ranked automatically from leak flags, the investment catalog, and down or off options: annual savings, upfront cost, payback, effort, confidence, and risk note. Greenspace is shown with a lawn impact badge, never hidden. Items with `null` costs or savings show as "needs a quote" instead of being ranked on guesses.
 
 ## Screens
 
-Left sidebar on desktop, single column on phones. Number first, chart second, explanation on tap.
+Written for homeowners, not the board. Five screens in the menu, plus About the data in the footer. Each tab has its own address (`#screen?tab=`); old hashes redirect (`src/lib/route.ts`).
 
-1. Overview: annual run rate vs $30K target, 5-year cost waterfall, top 3 recommended moves, open leak flags.
-2. How we got here: price vs volume vs fees by year, with event annotations.
-3. Meters: one card per meter with health status, actual vs budget, and active flags; click through to daily detail.
-4. How much should we use: budget vs actual by meter, area, and zone, with the formula explained in one sentence.
-5. What if: scenario builder. Step 1, choose a baseline. Step 2, add changes (turn down or off, or add an investment). Step 3, see results. Saved scenarios and compare view.
-6. Recommended moves: ranked list.
-7. Bills: every bill with its reconciliation badge.
-8. Data freshness: last bill per meter, last weather and usage update, open `todo`, `needs_review`, and "needs a quote" items.
+1. Home: cost per home per month vs the $30K goal, progress bar in three bands (verified, in progress, proposed), up to 3 "Fix now" action cards, what changed, spending by year and by meter.
+2. Action plan: every action in `/data/actions/` grouped by status with owner, meter, and lawn filters; a page per action (`#action/<id>`); the Quick wins plan as a tab; a printable landscaper checklist (`#checklist`).
+3. Problems: leak flags and watering checks.
+4. Where the water goes: meters and map, controllers and zones (`/data/controllers/`), when it waters, how much should we use.
+5. Savings calculator: What if, Is an investment worth it?, Did it work? (experiments).
+6. History and bills: how we got here, every bill with its reconciliation badge.
+7. About the data (footer): freshness, data requests, glossary. Maintainer notes show only with `?maintainer=1`.
+
+Data text shown to homeowners passes through `src/lib/publicText.ts`: no file paths, INVENTORY or CLAUDE references, or jargon in public views.
 
 Design all five states on every screen: populated, first-time empty, filtered empty, loading, error. WCAG 2.2 AA: visible focus rings, 4.5:1 text contrast, status never shown by color alone.
 

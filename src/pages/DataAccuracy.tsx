@@ -1,6 +1,7 @@
 import type { SiteData } from '../../scripts/site-data'
 import { Card, PageHeader, Pill, Section, Stat, Stats } from '../components/ui'
-import { fmt, meterNumber } from '../lib/data'
+import { fmt, maintainer, meterName } from '../lib/data'
+import { GLOSSARY } from '../lib/glossary'
 import type { Model } from '../lib/model'
 
 const longDate = (iso: string) => new Date(`${iso}T12:00:00`).toLocaleDateString('en-US', { dateStyle: 'medium' })
@@ -23,8 +24,8 @@ export function DataAccuracy({ data, model }: { data: SiteData; model: Model }) 
   return (
     <article>
       <PageHeader
-        title="Data and accuracy"
-        lead="How fresh the numbers are, what is still estimated, and the data that would make the site more accurate. If you can help with any item on the list, tell the board."
+        title="About the data"
+        lead="How fresh the numbers are, what is still estimated, and the data that would make the site more accurate. If you can help with any item on the list, tell the HOA."
       />
       <Stats>
         <Stat value={String(needed.length)} label="data requests open" flag={needed.length > 0} />
@@ -79,7 +80,7 @@ export function DataAccuracy({ data, model }: { data: SiteData; model: Model }) 
                 const day = Object.values(data.usage[m] ?? {}).flat().filter((d) => d.gallons !== null).map((d) => d.date).sort().at(-1)
                 return (
                   <tr key={m} className="border-b border-line last:border-0">
-                    <th scope="row" className="px-4 py-3 font-semibold">Meter {meterNumber(m)}</th>
+                    <th scope="row" className="px-4 py-3 font-semibold">{meterName(m)}</th>
                     <td className="px-4 py-3">{bill ? longDate(bill) : 'None'}</td>
                     <td className="px-4 py-3">{period ? `ends ${longDate(period)}` : 'None'}</td>
                     <td className="px-4 py-3">{day ? longDate(day) : 'None'}</td>
@@ -120,26 +121,44 @@ export function DataAccuracy({ data, model }: { data: SiteData; model: Model }) 
         </ul>
       </Section>
 
-      <Section id="todos" title="Open notes in the data files" lead={`${data.openTodos.length} notes, grouped by folder. These are the working to-do list for whoever maintains the data.`}>
-        <div className="mt-4 space-y-2">
-          {[...byFolder.entries()].sort((a, b) => b[1].length - a[1].length).map(([folder, items]) => (
-            <details key={folder} className="rounded-xl bg-surface ring-1 ring-[var(--ring)]">
-              <summary className="cursor-pointer px-4 py-3 font-semibold">
-                {folder} <span className="font-normal text-ink-2">({fmt.int(items.length)})</span>
-              </summary>
-              <ul className="space-y-2 px-4 pb-4 text-sm">
-                {items.slice(0, 50).map((t) => (
-                  <li key={t.file}>
-                    <code className="text-xs text-ink-2">{t.file}</code>
-                    <span className="block">{t.todo}</span>
-                  </li>
-                ))}
-                {items.length > 50 && <li className="text-ink-2">and {items.length - 50} more in the data folder.</li>}
-              </ul>
-            </details>
+      <Section id="glossary" title="Words used on this site">
+        <dl className="mt-3 grid gap-3 text-sm md:grid-cols-2">
+          {Object.entries(GLOSSARY).map(([k, g]) => (
+            <div key={k} className="rounded-lg bg-surface p-3 ring-1 ring-[var(--ring)]">
+              <dt className="font-semibold">
+                {g.term}
+                {'also' in g && <span className="font-normal text-ink-2"> ({g.also})</span>}
+              </dt>
+              <dd className="mt-1">{g.def}</dd>
+            </div>
           ))}
-        </div>
+        </dl>
       </Section>
+
+      {maintainer ? (
+      <Section id="todos" title="Open questions for maintainers" lead={`${data.openTodos.length} notes, grouped by folder. The working to-do list for whoever maintains the data.`}>
+          <div className="mt-4 space-y-2">
+            {[...byFolder.entries()].sort((a, b) => b[1].length - a[1].length).map(([folder, items]) => (
+              <details key={folder} className="rounded-xl bg-surface ring-1 ring-[var(--ring)]">
+                <summary className="cursor-pointer px-4 py-3 font-semibold">
+                  {folder} <span className="font-normal text-ink-2">({fmt.int(items.length)})</span>
+                </summary>
+                <ul className="space-y-2 px-4 pb-4 text-sm">
+                  {items.slice(0, 50).map((t) => (
+                    <li key={t.file}>
+                      <code className="text-xs text-ink-2">{t.file}</code>
+                      <span className="block">{t.todo}</span>
+                    </li>
+                  ))}
+                  {items.length > 50 && <li className="text-ink-2">and {items.length - 50} more in the data folder.</li>}
+                </ul>
+              </details>
+            ))}
+          </div>
+        </Section>
+      ) : (
+        <p className="mt-10 text-sm text-ink-2">Maintainers can add ?maintainer=1 to the address to see the working notes.</p>
+      )}
     </article>
   )
 }

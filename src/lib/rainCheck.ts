@@ -4,7 +4,7 @@ import type { SiteData } from '../../scripts/site-data'
 import type { RatePeriod, ReadPeriod } from '../engine/billing'
 import { checkRain, summarizeRain, wateringNights, type Night, type RainEventCheck, type RainSettings, type RainSummary } from '../engine/rainResponse'
 import type { ScheduleSettings } from '../engine/schedule'
-import { meterNumber } from './data'
+import { meterLabel } from './data'
 
 type Sourced<T> = { value: T; source: string }
 type RainConfig = {
@@ -19,6 +19,8 @@ type RainConfig = {
   already_off_days: Sourced<number>
   night_start_hour: Sourced<number>
   night_end_hour: Sourced<number>
+  action_id: Sourced<string>
+  action_verify_min_inches: Sourced<number>
 }
 
 const MONTH_ABBR = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -37,16 +39,18 @@ export type RainCheck = {
   hourlyFrom: string | null
   /** Every watering night per meter, by the same rule the check uses (for the charts). */
   nightsByMeter: Record<string, Night[]>
-  /** Events after the action's start date where every verify meter paused. */
+  /** The action this check verifies, the date it was done (null if not yet), and the smallest rain that tests it. */
+  action: { id: string; title: string; doneOn: string | null; minInches: number; meters: string[] } | null
+  /** Events after the action was done where every one of its meters paused. */
   actionWorking: Set<string>
 }
 
-/** Plain name and number: "Entry parkway (meter 3)" when the meter has a name, else "Meter 1 (Park controller)". */
+/** The site's meter label without the meter number's last 4, e.g. "Meter 1 · East park". */
 export function meterName(data: SiteData, id: string): string {
-  const m = data.meters.find((x) => x.id === id)
-  if (m?.name) return `${m.name} (meter ${meterNumber(id)})`
-  return m?.controller ? `Meter ${meterNumber(id)} (${m.controller.name})` : `Meter ${meterNumber(id)}`
+  return meterLabel(data, id, 'name')
 }
+
+const metersOf = (scope: string, all: string[]) => (scope === 'all' ? all : scope === 'park' ? ['meter-1', 'meter-2'] : [scope])
 
 export function buildRainCheck(data: SiteData): RainCheck | null {
   const cfg = (data.config.site as { rain_check?: RainConfig }).rain_check
@@ -84,12 +88,19 @@ export function buildRainCheck(data: SiteData): RainCheck | null {
     .filter((m) => data.hourly[m.id])
     .map((m) => ({ meter: m.id, reads: data.hourly[m.id].reads, readPeriods: (data.billingPeriods[m.id]?.rows ?? []) as ReadPeriod[] }))
   const checks = checkRain(rain, eto, meters, settings, schedule, rates)
+  const a = data.actions.find((x) => x.id === cfg.action_id.value) ?? null
+  const action = a && {
+    id: a.id,
+    title: a.title,
+    doneOn: a.history.find((h) => h.status === 'done' || h.status === 'verified')?.date ?? (a.status === 'done' || a.status === 'verified' ? a.updated : null),
+    minInches: cfg.action_verify_min_inches.value,
+    meters: metersOf(a.meter, data.meters.map((m) => m.id)),
+  }
   const actionWorking = new Set<string>()
-  for (const a of data.actions) {
-    if (!a.start_date) continue
+  if (action?.doneOn) {
     for (const e of checks) {
-      if (e.start <= a.start_date || e.inches < a.verify_min_inches) continue
-      if (a.verify_meters.every((id) => e.meters.find((m) => m.meter === id)?.result === 'paused')) actionWorking.add(e.start)
+      if (e.start <= action.doneOn || e.inches < action.minInches) continue
+      if (action.meters.every((id) => e.meters.find((m) => m.meter === id)?.result === 'paused')) actionWorking.add(e.start)
     }
   }
   const firstHourly = Object.values(data.hourly).map((h) => h.reads[0]?.time).filter(Boolean).sort()[0] ?? null
@@ -104,6 +115,7 @@ export function buildRainCheck(data: SiteData): RainCheck | null {
     etoDays: etoBy.size,
     usesNormals: checks.some((e) => e.meters.some((m) => m.etoEstimatedDays > 0)),
     hourlyFrom: firstHourly ? firstHourly.slice(0, 10) : null,
+    action,
     actionWorking,
     nightsByMeter: Object.fromEntries(meters.map((m) => [m.meter, wateringNights(m.reads, schedule, settings)])),
   }

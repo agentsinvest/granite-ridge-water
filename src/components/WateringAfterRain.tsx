@@ -6,7 +6,7 @@ import { fmt } from '../lib/data'
 import { meterName, type RainCheck } from '../lib/rainCheck'
 import { dollarRange } from './LeakFlags'
 import { METER_COLOR } from './charts'
-import { Empty, Pill, TableView } from './ui'
+import { Empty, HowCalculated, Pill, TableView } from './ui'
 
 export const CSV_PATH = 'data/watering-after-rain.csv'
 
@@ -91,7 +91,23 @@ export function WateringAfterRain({ data, rc }: { data: SiteData; rc: RainCheck 
           {rows.length === 0 ? (
             <Empty>No rain of {s.minEventInches.toFixed(2)} in or more since {day(rc.since)}{rc.rainThrough ? ` (gauge readings through ${day(rc.rainThrough)})` : ''}.</Empty>
           ) : (
-            <div className="mt-4 overflow-x-auto rounded-xl bg-surface ring-1 ring-[var(--ring)]">
+            <>
+            {/* Phones: one card per meter per rain. Wider screens: the full table. */}
+            <ul className="mt-4 space-y-2 md:hidden">
+              {rows.map(({ e, m }) => (
+                <li key={`${e.start}-${m.meter}`} className="rounded-xl bg-surface p-3 text-sm ring-1 ring-[var(--ring)]">
+                  <p className="font-semibold">{eventDates(e)}, {e.inches.toFixed(2)} in · {meterName(data, m.meter)}</p>
+                  <p className="mt-1"><ResultChip m={m} /></p>
+                  {rc.actionWorking.has(e.start) && m.meter === e.meters[0].meter && <p className="mt-1"><Pill tone="good">The rain fix worked</Pill></p>}
+                  <p className="mt-1 text-ink-2">
+                    Rain covered {days(m.daysCovered)}
+                    {counted(m) && m.firstWatering ? `. Watered again ${day(m.firstWatering)} (${m.daysAfter === 0 ? 'night of the rain' : `${days(m.daysAfter!)} after`})` : ''}
+                    {counted(m) && m.gallons > 0 ? `. Extra: ${m.partial ? 'at least ' : ''}${fmt.int(m.gallons)} gallons, ${costText(m.cost)}` : ''}.
+                  </p>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-4 hidden overflow-x-auto rounded-xl bg-surface ring-1 ring-[var(--ring)] md:block">
               <table className="w-full min-w-[56rem] text-left text-sm">
                 <caption className="sr-only">Watering after each rain event, by meter, newest first</caption>
                 <thead className="border-b border-line text-ink-2">
@@ -109,7 +125,7 @@ export function WateringAfterRain({ data, rc }: { data: SiteData; rc: RainCheck 
                         <span className="block text-ink-2">{e.inches.toFixed(2)} in</span>
                         {rc.actionWorking.has(e.start) && m.meter === e.meters[0].meter && <span className="mt-1 block"><Pill tone="good">The rain fix worked</Pill></span>}
                       </th>
-                      <td className="px-3 py-2">{meterName(data, m.meter)}</td>
+                      <td className="min-w-[10rem] px-3 py-2">{meterName(data, m.meter)}</td>
                       <td className="tabular px-3 py-2">{days(m.daysCovered)}</td>
                       <td className="whitespace-nowrap px-3 py-2"><ResultChip m={m} /></td>
                       <td className="whitespace-nowrap px-3 py-2">
@@ -123,6 +139,7 @@ export function WateringAfterRain({ data, rc }: { data: SiteData; rc: RainCheck 
                 </tbody>
               </table>
             </div>
+            </>
           )}
           {rows.some(({ m }) => m.partial) && (
             <p className="mt-2 text-sm text-ink-2">"At least" means some night hours are missing from the meter data, so the real number may be higher.</p>
@@ -132,9 +149,20 @@ export function WateringAfterRain({ data, rc }: { data: SiteData; rc: RainCheck 
         </>
       )}
 
-      <details className="mt-4 text-sm">
-        <summary className="cursor-pointer font-semibold">How this is calculated</summary>
-        <div className="mt-2 max-w-prose space-y-2 text-ink-2">
+      {rc.action && (
+        <p className="mt-4 text-sm">
+          <span className="font-semibold">What we are doing about it: </span>
+          <a className="underline underline-offset-4" href={`#action/${rc.action.id}`}>{rc.action.title}</a>
+          {rc.action.doneOn
+            ? rc.actionWorking.size
+              ? `. Done ${day(rc.action.doneOn)}, and it has worked after ${rc.actionWorking.size} ${rc.actionWorking.size === 1 ? 'rain' : 'rains'} so far.`
+              : `. Done ${day(rc.action.doneOn)}. Waiting for the next rain of ${rc.action.minInches} in or more to check it.`
+            : '. Not done yet.'}
+        </p>
+      )}
+
+      <HowCalculated>
+        <div className="space-y-2">
           <p>
             A rain event is a day with {s.minEventInches.toFixed(2)} in of rain or more at the NOAA rain gauge in East Mesa. Rainy days in a row count as one
             event. We count {fmt.pct(s.usableShare)} of the rain as usable by plants, up to {s.usableCapInches} in, because heavy rain runs off.
@@ -162,7 +190,7 @@ export function WateringAfterRain({ data, rc }: { data: SiteData; rc: RainCheck 
           </ul>
           <p>So treat each row as a strong signal, not a bill line. City bills are the official record.</p>
         </div>
-      </details>
+      </HowCalculated>
     </section>
   )
 }
@@ -191,7 +219,7 @@ function MeterChart({ data, rc, meter }: { data: SiteData; rc: RainCheck; meter:
         <figcaption className="sr-only">{label}</figcaption>
         <div style={{ height: 240 }} role="img" aria-label={label}>
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={rows} margin={{ top: 34, right: 8, left: 0, bottom: 0 }} barCategoryGap={1}>
+            <BarChart data={rows} margin={{ top: 46, right: 8, left: 0, bottom: 0 }} barCategoryGap={1}>
               <CartesianGrid vertical={false} stroke="var(--grid)" />
               <XAxis dataKey="label" {...axis} minTickGap={24} />
               <YAxis {...axis} width={52} tickFormatter={(v) => (v >= 1000 ? `${Number((v / 1000).toFixed(1))}k` : String(v))} />
@@ -209,8 +237,8 @@ function MeterChart({ data, rc, meter }: { data: SiteData; rc: RainCheck; meter:
                 ) : null
               })}
               {events.map((e, i) => (
-                // Alternate label heights so rains a few days apart do not print on top of each other.
-                <ReferenceLine key={`r-${e.start}`} x={day(e.start)} stroke="var(--ink)" strokeDasharray="3 3" label={{ value: `${e.inches.toFixed(2)} in`, position: 'top', offset: i % 2 ? 4 : 18, fill: 'var(--ink)', fontSize: 11 }} />
+                // Three label heights so rains a few days apart do not print on top of each other.
+                <ReferenceLine key={`r-${e.start}`} x={day(e.start)} stroke="var(--ink)" strokeDasharray="3 3" label={{ value: `${e.inches.toFixed(2)} in`, position: 'top', offset: 4 + (i % 3) * 13, fill: 'var(--ink)', fontSize: 11 }} />
               ))}
               <Bar dataKey="gallons" name="Gallons" fill={METER_COLOR[meter] ?? 'var(--s1)'} radius={[3, 3, 0, 0]} isAnimationActive={false} />
             </BarChart>

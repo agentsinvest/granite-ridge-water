@@ -117,6 +117,14 @@ rain_check:
     value: 8
     source: "Set 2026-10-07, see night_start_hour"
     confidence: medium
+  action_id:
+    value: "rain-response"
+    source: "The action in data/actions/ that this check verifies"
+    confidence: high
+  action_verify_min_inches:
+    value: 0.25
+    source: "Jennifer, 2026-10-07: after the rain fix is done, a rain of 0.25 in or more where both park meters pause counts as the fix working"
+    confidence: medium
 experiment_check:
   min_days_each_side:
     value: 7

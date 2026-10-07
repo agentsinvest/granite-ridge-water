@@ -173,7 +173,7 @@ export function SiteMap({ map, areaNames, flaggedMeters }: Props) {
           const n = meterNumber(pin.meter)
           const flagged = flaggedMeters.has(pin.meter)
           return (
-            <a key={pin.meter} href={`#meters/${pin.meter}`} aria-label={`Meter ${n}${flagged ? ', has a leak flag' : ''}. Go to details.`}>
+            <a key={pin.meter} href={`#water/${pin.meter}?tab=meters`} aria-label={`Meter ${n}${flagged ? ', has a leak flag' : ''}. Go to details.`}>
               <g transform={`translate(${pin.at[0]} ${pin.at[1]})`} className="map-pin">
                 <circle r={34} fill="transparent" />
                 <circle className="pin-ring" r={24} fill="var(--pin)" stroke="var(--surface)" strokeWidth={4} />

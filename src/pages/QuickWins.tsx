@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import type { SiteData } from '../../scripts/site-data'
 import { Bars } from '../components/charts'
-import { Card, GridTable, PageHeader, Pill, Section, Stat, Stats, Sure } from '../components/ui'
+import { Card, GridTable, PageHeader, Pill, Section, Stat, Stats, Sure, Term } from '../components/ui'
 import { runPlan, turfNeedKgal, turfWaterKgal, type YearLevers } from '../engine/quickWins'
-import { fmt, meterNumber } from '../lib/data'
+import { fmt, meterNumber, meterName } from '../lib/data'
 import { RISK, type Model } from '../lib/model'
 import { setQuery } from '../lib/route'
 
@@ -82,7 +82,7 @@ function QuickWinsBody({ data, model, plan, rate, query }: { data: SiteData; mod
   const [keepTurf, setKeepTurf] = useState(query.get('t') === '1')
   const save = (v: Values, p: typeof prices, t: boolean) => {
     const isDefault = JSON.stringify(v) === JSON.stringify(defaults(plan))
-    setQuery('quickwins', { l: isDefault ? null : enc(v), p: p === 'proposed' ? 'proposed' : null, t: t ? '1' : null })
+    setQuery({ l: isDefault ? null : enc(v), p: p === 'proposed' ? 'proposed' : null, t: t ? '1' : null })
   }
   const update = (v: Values) => {
     setValues(v)
@@ -302,7 +302,7 @@ function QuickWinsBody({ data, model, plan, rate, query }: { data: SiteData; mod
                   rows: data.meters.map((m) => {
                     const base = y1.result.ok ? y1.result.meters.find((x) => x.meter === m.id)?.baseCost : undefined
                     return {
-                      label: `Meter ${meterNumber(m.id)}${m.turf_share_percent?.value ? ` (${m.turf_share_percent.value}% turf)` : ''}`,
+                      label: `${meterName(m.id)}${m.turf_share_percent?.value ? ` (${m.turf_share_percent.value}% turf)` : ''}`,
                       cells: [
                         base === undefined ? missing : fmt.usd(base),
                         ...out.map((y) => {
@@ -461,13 +461,13 @@ function QuickWinsBody({ data, model, plan, rate, query }: { data: SiteData; mod
           )}
           <li>{(model.site as unknown as { post_2027_rate_assumption: { label: string } }).post_2027_rate_assumption.label} {plan.notes}</li>
           <li>
-            The City's winter allowance comes from December to February use, so each year is priced as if its steps had been in place all year, including last
+            The City's <Term k="allowance">lower-price allowance</Term> comes from December to February use, so each year is priced as if its steps had been in place all year, including last
             winter.
           </li>
           {turf && (
             <li>
               Turf healthy minimum: {fmt.int(turf.turfAreaSqFt.value)} sq ft of turf at plant factor {turf.plantFactor.value.toFixed(2)} and {fmt.pct(turf.efficiency.value)}{' '}
-              sprinkler efficiency, with average weather. See <a href="#budget/by-meter-month" className="underline underline-offset-4">How much should we use</a>.{' '}
+              sprinkler efficiency, with average weather. See <a href="#water/by-meter-month?tab=budget" className="underline underline-offset-4">How much should we use</a>.{' '}
               <Sure level={turf.confidence} />
             </li>
           )}

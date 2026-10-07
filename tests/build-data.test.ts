@@ -1,4 +1,4 @@
-import { mkdtempSync, mkdirSync, writeFileSync, cpSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, writeFileSync, cpSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
@@ -54,5 +54,25 @@ describe('buildData', () => {
     const dir = copyOfData()
     writeFileSync(join(dir, 'flags', 'x.md'), '---\nid: x\n---\nA — B\n')
     expect(() => buildData(dir)).toThrow(/em dash/)
+  })
+
+  it('reads action files and names their evidence documents', () => {
+    const d = buildData()
+    expect(d.actions).toHaveLength(12)
+    expect(d.evidenceLabels['sources/controllers/eco-verde-assessment-2026']).toMatch(/Eco Verde/)
+  })
+
+  it('fails on an action that points at a flag that does not exist', () => {
+    const dir = copyOfData()
+    const f = join(dir, 'actions', 'meter4-valve-repair.md')
+    writeFileSync(f, readFileSync(f, 'utf8').replace('savings_from: flag:2026-09-meter-4-step-change', 'savings_from: flag:no-such-flag'))
+    expect(() => buildData(dir)).toThrow(/actions\/meter4-valve-repair\.md: unknown flag "no-such-flag"/)
+  })
+
+  it('fails on an unknown action status with file and line', () => {
+    const dir = copyOfData()
+    const f = join(dir, 'actions', 'meter4-valve-repair.md')
+    writeFileSync(f, readFileSync(f, 'utf8').replace('status: not-started\nurgent', 'status: maybe\nurgent'))
+    expect(() => buildData(dir)).toThrow(/meter4-valve-repair\.md:\d+: status/)
   })
 })

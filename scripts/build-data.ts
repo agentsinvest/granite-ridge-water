@@ -77,6 +77,8 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
     dailyRain: null,
     dailyEto: null,
     actions: [],
+    evidenceLabels: {},
+    controllers: [],
     openTodos: [],
   }
   for (const abs of walk(dataDir).sort()) {
@@ -169,10 +171,6 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
       const key = isRain ? 'dailyRain' : 'dailyEto'
       const prev = out[key]
       out[key] = { stationId: f.station_id, stationName: f.station_name, source: f.source, retrievedOn: f.retrieved_on ? String(f.retrieved_on instanceof Date ? f.retrieved_on.toISOString().slice(0, 10) : f.retrieved_on) : null, days: [...(prev?.days ?? []), ...days] }
-    } else if ((m = rel.match(/^moves\/([^/]+)\.md$/))) {
-      const a = check(S.moveActionSchema, fm, file, text)
-      if (a.id !== m[1]) fail(file, keyLine(text, 'id'), 'id does not match file name')
-      out.actions.push({ ...a, start_date: a.start_date ? String(a.start_date instanceof Date ? a.start_date.toISOString().slice(0, 10) : a.start_date) : null })
     } else if (rel === 'events.md') {
       check(S.eventsFrontmatterSchema, fm, file, text)
       out.events = rows(firstTable(p, ['Date', 'Precision'], file), S.eventRowSchema, file).map((x) => ({
@@ -191,6 +189,29 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
       if (`options/${o.id}.md` !== rel) fail(file, keyLine(text, 'id'), 'id does not match file name')
       if (o.change.kind === 'turn_down' && o.change.percent === null) fail(file, keyLine(text, 'change'), 'turn_down needs a percent')
       out.options.push(o)
+    } else if (rel.match(/^controllers\/[^/]+\.md$/)) {
+      const c = check(S.controllerSchema, fm, file, text)
+      const table = firstTable(p, ['Station', 'Waters'], file)
+      const r = rows(table, S.stationRowSchema, file)
+      r.forEach((x, i) => {
+        if (!x.Station.startsWith(c.id)) fail(file, table.rows[i].line, `station ${x.Station} is not on controller ${c.id}`)
+        if (r.findIndex((y) => y.Station === x.Station) !== i) fail(file, table.rows[i].line, `station ${x.Station} is listed twice`)
+      })
+      out.controllers.push({
+        ...c,
+        stations: r.map((x) => ({
+          station: x.Station, meter: x.Meter, waters: x.Waters, type: x.Type, gpm: x.GPM, program: x.Program, runMin: x['Run min'], cycles: x.Cycles, days: x.Days, findings: x.Findings, source: x.Source,
+        })),
+      })
+    } else if (rel.match(/^actions\/[^/]+\.md$/)) {
+      const a = check(S.actionSchema, fm, file, text)
+      if (`actions/${a.id}.md` !== rel) fail(file, keyLine(text, 'id'), 'id does not match file name')
+      if (a.savings_from && a.savings_per_year) fail(file, keyLine(text, 'savings_per_year'), 'use savings_from or savings_per_year, not both')
+      if (a.savings_per_year && !a.savings_source) fail(file, keyLine(text, 'savings_per_year'), 'savings_per_year needs a savings_source')
+      if (a.savings_per_year && a.savings_per_year[0] > a.savings_per_year[1]) fail(file, keyLine(text, 'savings_per_year'), 'low is above high')
+      if (a.history.at(-1)!.date > a.updated) fail(file, keyLine(text, 'updated'), 'updated is before the last history entry')
+      for (let i = 1; i < a.history.length; i++) if (a.history[i].date < a.history[i - 1].date) fail(file, keyLine(text, 'history'), 'history must be oldest first')
+      out.actions.push({ ...a, body: p.body.trim() })
     } else if (rel === 'data-needs.md') {
       check(S.dataNeedsFrontmatterSchema, fm, file, text)
       out.dataNeeds = rows(firstTable(p, ['Priority', 'Need'], file), S.dataNeedRowSchema, file).map((r) => ({
@@ -255,10 +276,52 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
     for (const l of Object.values(out.quickWins.levers)) if (l.investment && !ids.has(l.investment)) fail('data/scenarios/quick-wins.md', null, `unknown investment "${l.investment}"`)
   }
   for (const r of out.meterYears?.rows ?? []) if (!meterIds.has(r.meter)) fail('data/history/by-meter-year.md', null, `unknown meter "${r.meter}"`)
-  for (const a of out.actions) for (const mid of a.verify_meters) if (!meterIds.has(mid)) fail(`data/moves/${a.id}.md`, null, `unknown meter "${mid}"`)
   for (const r of (out.config.site as { rain_check?: { plant_factors: { value: { meters: string[] }[] } } }).rain_check?.plant_factors.value ?? [])
     for (const mid of r.meters) if (!meterIds.has(mid)) fail('data/config/site.md', null, `rain_check plant_factors: unknown meter "${mid}"`)
   for (const o of out.options) for (const mid of o.meters) if (!meterIds.has(mid)) fail(`data/options/${o.id}.md`, null, `unknown meter "${mid}"`)
+  const optionIds = new Set(out.options.map((o) => o.id))
+  const investmentIds = new Set(out.investments.map((i) => i.id as string))
+  const experimentIds = new Set(out.experiments.map((x) => x.id))
+  const actionIds = new Set(out.actions.map((a) => a.id))
+  for (const a of out.actions) {
+    const where = `data/actions/${a.id}.md`
+    if (a.meter.startsWith('meter-') && !meterIds.has(a.meter)) fail(where, null, `unknown meter "${a.meter}"`)
+    for (const id of a.after) if (!actionIds.has(id)) fail(where, null, `after: unknown action "${id}"`)
+    if (a.verify_experiment && !experimentIds.has(a.verify_experiment)) fail(where, null, `unknown experiment "${a.verify_experiment}"`)
+    for (const ref of [...a.evidence, ...(a.savings_from ? [a.savings_from] : [])]) {
+      const [kind, id] = [ref.slice(0, ref.indexOf(':')), ref.slice(ref.indexOf(':') + 1)]
+      const known = kind === 'flag' ? flagIds : kind === 'option' ? optionIds : kind === 'investment' ? investmentIds : kind === 'experiment' ? experimentIds : null
+      if (known && !known.has(id)) fail(where, null, `unknown ${kind} "${id}"`)
+      if (kind === 'source') {
+        // Evidence documents live in /sources or /docs. Only their title is published, never the path or the text.
+        const path = join(root, `${id}.md`)
+        let doc: string
+        try {
+          doc = readFileSync(path, 'utf8')
+        } catch {
+          fail(where, null, `evidence file not found: ${id}.md`)
+        }
+        const docFm = parseMarkdown(doc).frontmatter
+        const title = typeof docFm.document === 'string' ? docFm.document : doc.match(/^# (.+)$/m)?.[1]
+        if (!title) fail(where, null, `${id}.md has no document name or heading to show`)
+        out.evidenceLabels[id] = title
+      }
+    }
+  }
+  for (const c of out.controllers) {
+    const where = `data/controllers`
+    for (const m of [...c.meters, ...c.stations.flatMap((s) => (s.meter ? [s.meter] : []))]) if (!meterIds.has(m)) fail(where, null, `controller ${c.id}: unknown meter "${m}"`)
+    for (const s of c.stations) if (s.meter && !c.meters.includes(s.meter)) fail(where, null, `station ${s.station}: meter ${s.meter} is not one of controller ${c.id}'s meters`)
+    const onMap = (out.map.controllers ?? []).find((x) => x.id === c.id)
+    if (!onMap) fail(where, null, `controller ${c.id} is not on the map`)
+  }
+  const stationIds = new Set(out.controllers.flatMap((c) => c.stations.map((s) => s.station)))
+  for (const a of out.actions) {
+    for (const s of a.stations) if (!stationIds.has(s)) fail(`data/actions/${a.id}.md`, null, `unknown station "${s}"`)
+    if (a.controller && out.controllers.length && !out.controllers.some((c) => c.name === a.controller)) fail(`data/actions/${a.id}.md`, null, `unknown controller "${a.controller}"`)
+  }
+  out.controllers.sort((a, b) => a.id.localeCompare(b.id))
+  out.actions.sort((a, b) => a.id.localeCompare(b.id))
   out.dataNeeds.sort((a, b) => a.priority - b.priority)
   out.rates.sort((a, b) => a.id.localeCompare(b.id))
   out.bills.sort((a, b) => a.id.localeCompare(b.id))

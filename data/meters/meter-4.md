@@ -1,6 +1,7 @@
 ---
 id: meter-4
-name: null
+name: "East side near June St"
+name_source: "Jennifer, redesign brief of 2026-10-07"
 account_last4: "8661"
 meter_number_last4: "5793"
 size_inches: 1
