@@ -1,6 +1,7 @@
 import type { SiteData } from '../../scripts/site-data'
 import { Bars, METER_COLOR, Waterfall } from '../components/charts'
 import { PageHeader, Section, Stat, Stats, TableView } from '../components/ui'
+import { splitUsageCharge } from '../engine/billing'
 import { decomposeYears, summarize } from '../engine/history'
 import { fmt, meterNumber } from '../lib/data'
 import type { Model } from '../lib/model'
@@ -10,6 +11,35 @@ const EVENT_TYPE: Record<string, string> = {
 }
 
 const longDate = (iso: string) => new Date(`${iso}T12:00:00`).toLocaleDateString('en-US', { dateStyle: 'medium' })
+
+/** Each month's usage charges split into water at the lower price and water above the winter allowance at the higher price. */
+function surchargeByMonth(data: SiteData, model: Model) {
+  const r2 = (x: number) => Math.round(x * 100) / 100
+  const priced = data.bills.filter((b) => b.gallons !== null && b.period_start && b.period_end && model.rates.some((r) => b.period_end! >= r.applies_from_period_end))
+  const months = [...new Set(priced.map((b) => b.bill_date.slice(0, 7)))].sort()
+  const rows = months.map((ym) => {
+    const bills = priced.filter((b) => b.bill_date.startsWith(ym))
+    const row = { month: fmt.month(`${ym}-15`), lower: 0, higher: 0, premium: 0, drought: 0, lowerKgal: 0, higherKgal: 0, bills: bills.length, unsplit: 0, prices: new Set<string>() }
+    for (const b of bills) {
+      const usage = b.lineItems.find((l) => l.name === 'Excess usage charge')?.amount ?? null
+      const s = usage === null ? null : splitUsageCharge(b.meter, b.period_start!, b.period_end!, b.gallons!, usage, model.rates, model.periods[b.meter])
+      if (!s) {
+        row.unsplit++
+        continue
+      }
+      row.lower += s.lowerDollars
+      row.higher += s.higherDollars
+      row.premium += s.premium
+      row.lowerKgal += s.lowerKgal
+      row.higherKgal += s.higherKgal
+      row.drought += b.lineItems.find((l) => l.name === 'Water drought')?.amount ?? 0
+      row.prices.add(`$${s.lowerPrice.toFixed(2)} / $${s.higherPrice.toFixed(2)}`)
+    }
+    return { ...row, lower: r2(row.lower), higher: r2(row.higher), premium: r2(row.premium), drought: r2(row.drought), prices: [...row.prices].join(', ') }
+  })
+  const firstPriced = [...model.rates].map((r) => r.applies_from_period_end).sort()[0] ?? null
+  return { rows, firstPriced }
+}
 
 /** Twelve-month windows of read periods ending October to September, so every window is a full year. */
 function waterYears(model: Model) {
@@ -64,6 +94,7 @@ export function HowWeGotHere({ data, model }: { data: SiteData; model: Model }) 
     ['2023', '2024'],
     ['2024', '2025'],
   ].map(([a, b]) => decomposeYears(data.bills, a, b)).filter((d) => d.matched > 0)
+  const surcharge = surchargeByMonth(data, model)
   const events = [...data.events].sort((a, b) => a.date.localeCompare(b.date))
   const evDate = (e: (typeof events)[number]) =>
     e.precision === 'year' ? e.date.slice(0, 4) : e.precision === 'month' ? fmt.month(e.date) : new Date(`${e.date}T12:00:00`).toLocaleDateString('en-US', { dateStyle: 'medium' })
@@ -138,6 +169,55 @@ export function HowWeGotHere({ data, model }: { data: SiteData; model: Model }) 
           height={220}
         />
         <TableView caption="Cost per thousand gallons" head={['Year', 'Per 1,000 gallons', 'Bills used']} rows={price.map((r) => [r.year, `$${r.s.costPerKgal!.toFixed(2)}`, r.s.billsWithGallons])} />
+      </Section>
+
+      <Section
+        id="surcharge"
+        title="Water above the winter allowance, by month"
+        lead="The City prices each meter's water in two steps. Water up to the meter's winter allowance (its December to February average) costs the lower price. Water above it costs the higher price."
+      >
+        {surcharge.rows.length === 0 ? (
+          <p className="mt-3 text-ink-2">No City prices on file yet, so no bills can be split.</p>
+        ) : (
+          <>
+            <Stats>
+              <Stat value={fmt.usd(surcharge.rows.reduce((t, r) => t + r.higher, 0))} label={`billed at the higher price, ${surcharge.rows[0].month} to ${surcharge.rows.at(-1)!.month}`} />
+              <Stat value={fmt.usd(surcharge.rows.reduce((t, r) => t + r.premium, 0))} label="extra paid because that water was above the allowance" />
+              <Stat value={fmt.usd(surcharge.rows.reduce((t, r) => t + r.drought, 0))} label="water drought charge over the same months" />
+            </Stats>
+            <Bars
+              data={surcharge.rows.map((r) => ({ month: r.month, lower: r.lower, higher: r.higher }))}
+              x="month"
+              stacked
+              series={[
+                { key: 'lower', name: 'Water at the lower price', color: 'var(--s1)' },
+                { key: 'higher', name: 'Water above the allowance, higher price', color: 'var(--s2)' },
+              ]}
+              label="Usage charges by bill month, split into the lower price and the higher price above the winter allowance"
+              money
+            />
+            <TableView
+              caption="Usage charges by bill month, all meters"
+              head={['Bill month', 'Lower price', 'Higher price', 'Extra from higher price', 'Water drought', 'Thousand gallons above allowance', 'Price per 1,000 gallons (lower / higher)', 'Bills']}
+              rows={surcharge.rows.map((r) => [
+                r.month,
+                fmt.usd(r.lower),
+                fmt.usd(r.higher),
+                fmt.usd(r.premium),
+                `$${r.drought.toFixed(2)}`,
+                fmt.int(r.higherKgal),
+                r.prices || 'Unknown',
+                r.unsplit ? `${r.bills - r.unsplit} of ${r.bills} split` : r.bills,
+              ])}
+            />
+            <p className="mt-3 max-w-prose text-sm text-ink-2">
+              "Extra from higher price" is the gallons above the allowance times the difference between the two prices: what that water cost beyond the lower
+              price. Prices are worked out from the bills and match each bill's usage charge to the cent; a bill they do not match is left out and counted in the
+              Bills column. The first 3,000 gallons on each bill carry no usage charge. Prices before read periods ending{' '}
+              {surcharge.firstPriced ? fmt.month(surcharge.firstPriced) : 'the first rate on file'} are not on file yet, so earlier months are not shown.
+            </p>
+          </>
+        )}
       </Section>
 
       <Section id="split" title="Water, price, or fees?" lead="Each chart compares only the meter bills on file for the same month in both years, so the three pieces add up exactly to the change.">

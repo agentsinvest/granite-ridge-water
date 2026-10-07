@@ -91,3 +91,53 @@ export function calculateBill(
   const total = all.reduce((s, i) => s + i.c, 0)
   return { ok: true, lineItems: all.map((i) => ({ name: i.name, amount: dollars(i.c) })), total: dollars(total), allowanceKgal: allowance, rate }
 }
+
+export type UsageSplit = {
+  /** Thousand gallons billed at the lower (block 1) price, inside the winter allowance. */
+  lowerKgal: number
+  /** Thousand gallons billed at the higher (block 2) price, above the winter allowance. */
+  higherKgal: number
+  lowerPrice: number
+  higherPrice: number
+  lowerDollars: number
+  higherDollars: number
+  /** What the higher-price gallons cost beyond the lower price: higherKgal x (higher price - lower price). */
+  premium: number
+  allowanceKgal: number
+}
+
+/**
+ * Splits a bill's excess usage charge into the part billed at the lower price and the part above the winter allowance
+ * billed at the higher price. Returns null when no rate covers the period or the split does not reproduce the printed
+ * usage charge to the cent, so a derived split is never shown for a bill it does not match.
+ */
+export function splitUsageCharge(
+  meter: string,
+  periodStart: string,
+  periodEnd: string,
+  gallons: number,
+  printedUsageCharge: number,
+  rates: RatePeriod[],
+  readPeriods: ReadPeriod[],
+): UsageSplit | null {
+  const bill = calculateBill(meter, periodStart, periodEnd, gallons, rates, readPeriods)
+  if (!bill.ok) return null
+  const computed = bill.lineItems.find((l) => l.name === 'Excess usage charge')?.amount
+  if (computed === undefined || cents(computed) !== cents(printedUsageCharge)) return null
+  const [b1, b2] = [...bill.rate.volumetric.blocks].sort((a, b) => a.block - b.block)
+  const excess = Math.max(gallons / 1000 - bill.rate.included_kgal_per_bill.value, 0)
+  const lowerKgal = Math.min(excess, bill.allowanceKgal)
+  const higherKgal = excess - lowerKgal
+  const higherDollars = dollars(cents(higherKgal * b2.price))
+  return {
+    lowerKgal,
+    higherKgal,
+    lowerPrice: b1.price,
+    higherPrice: b2.price,
+    // The lower part is the printed charge minus the higher part, so the two always add up to the bill.
+    lowerDollars: dollars(cents(printedUsageCharge) - cents(higherDollars)),
+    higherDollars,
+    premium: dollars(cents(higherKgal * (b2.price - b1.price))),
+    allowanceKgal: bill.allowanceKgal,
+  }
+}

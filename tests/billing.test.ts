@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { calculateBill, selectRate, winterAllowanceKgal, type RatePeriod, type ReadPeriod } from '../src/engine/billing'
+import { calculateBill, selectRate, splitUsageCharge, winterAllowanceKgal, type RatePeriod, type ReadPeriod } from '../src/engine/billing'
 import { buildData } from '../scripts/build-data'
 import { reconcileAll, renderReport } from '../scripts/reconcile'
 
@@ -89,5 +89,42 @@ describe('reconciliation gate', () => {
       const bill = data.bills.find((b) => b.id === c.id)
       expect(bill?.reconciled, c.id).toBe(!c.priced ? 'unpriced' : c.pass ? 'pass' : 'fail')
     }
+  })
+})
+
+describe('splitUsageCharge', () => {
+  const rate: RatePeriod = {
+    applies_from_period_end: '2025-01-01',
+    applies_to_period_end: null,
+    fixed_charges: [{ meters: ['m'], amount: 10 }],
+    included_kgal_per_bill: { value: 3 },
+    volumetric: { blocks: [{ block: 1, limit: 'winter_allowance', price: 5 }, { block: 2, limit: null, price: 8 }] },
+    fees: [],
+    taxes: [],
+  }
+  it('splits gallons at the allowance and prices the premium by hand', () => {
+    // 53,000 gallons: 50 above the included 3. Allowance 20 -> 20 at $5 = $100, 30 at $8 = $240, premium 30 x $3 = $90.
+    const s = splitUsageCharge('m', '2025-05-01', '2025-05-30', 53000, 340, [rate], [], )
+    expect(s).toBeNull() // no winter history, so no allowance and no split
+    const p: ReadPeriod[] = [
+      { start: '2024-11-15', end: '2024-12-14', usage: 23 },
+      { start: '2024-12-15', end: '2025-01-14', usage: 23 },
+      { start: '2025-01-15', end: '2025-02-14', usage: 23 },
+    ]
+    const t = splitUsageCharge('m', '2025-05-01', '2025-05-30', 53000, 340, [rate], p)!
+    expect(t).toMatchObject({ lowerKgal: 20, higherKgal: 30, lowerDollars: 100, higherDollars: 240, premium: 90 })
+  })
+  it('refuses to split a bill whose printed usage charge it does not reproduce', () => {
+    const p: ReadPeriod[] = ['2024-12-14', '2025-01-14', '2025-02-14'].map((end) => ({ start: end, end, usage: 23 }))
+    expect(splitUsageCharge('m', '2025-05-01', '2025-05-30', 53000, 341, [rate], p)).toBeNull()
+  })
+  it('reproduces every reconciled bill on file that has a rate', () => {
+    const priced = data.bills.filter((b) => b.reconciled === 'pass' && b.gallons !== null)
+    const split = priced.map((b) => {
+      const usage = b.lineItems.find((l) => l.name === 'Excess usage charge')?.amount ?? null
+      return usage === null ? null : splitUsageCharge(b.meter, b.period_start!, b.period_end!, b.gallons!, usage, rates, periods(b.meter))
+    })
+    expect(priced.length).toBeGreaterThan(0)
+    expect(split.filter((s) => s === null)).toHaveLength(0)
   })
 })
