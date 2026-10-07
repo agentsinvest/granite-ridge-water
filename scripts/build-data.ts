@@ -70,6 +70,8 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
     options: [],
     dataNeeds: [],
     budgetCheck: null,
+    meterYears: null,
+    turfMinimum: null,
     openTodos: [],
   }
   for (const abs of walk(dataDir).sort()) {
@@ -169,6 +171,20 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
       const f = check(S.budgetCheckFrontmatterSchema, fm, file, text)
       const r = rows(firstTable(p, ['Scope', 'Measure'], file), S.budgetCheckRowSchema, file)
       out.budgetCheck = { period: f.period, source: f.source, note: f.note, rows: r.map((x) => ({ scope: x.Scope, measure: x.Measure, low: x['Low kgal'], high: x['High kgal'], source: x.Source, confidence: x.Confidence })) }
+    } else if (rel === 'history/by-meter-year.md') {
+      const f = check(S.historyFrontmatterSchema, fm, file, text)
+      const r = rows(firstTable(p, ['Year', 'Meter'], file), S.historyRowSchema, file)
+      out.meterYears = {
+        source: f.source, confidence: f.confidence, covers: f.covers, note: f.note ?? '',
+        rows: r.map((x) => ({ year: Number(x.Year), meter: x.Meter, kgal: x['Gallons kgal'], peakSurcharge: x['Peak surcharge'], complete: x.Complete === 'yes' })),
+      }
+    } else if (rel === 'budget/turf-minimum.md') {
+      const f = check(S.turfMinimumFrontmatterSchema, fm, file, text)
+      const r = rows(firstTable(p, ['Month', 'Need kgal'], file), S.turfMinimumRowSchema, file)
+      out.turfMinimum = {
+        turfAreaSqFt: f.turf_area_sq_ft, plantFactor: f.plant_factor, efficiency: f.efficiency, source: f.source, confidence: f.confidence,
+        months: r.map((x) => ({ month: x.Month, kgal: x['Need kgal'] })),
+      }
     } else if (rel === 'config/site.md') {
       out.config.site = check(S.siteConfigSchema, fm, file, text)
     } else if (rel === 'config/plant-factors.md') {
@@ -192,6 +208,7 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
     if (!meterIds.has(x.meter)) fail(`data/experiments/${x.id}.md`, null, `unknown meter "${x.meter}"`)
     for (const id of x.linked_flags ?? []) if (!flagIds.has(id)) fail(`data/experiments/${x.id}.md`, null, `unknown flag "${id}"`)
   }
+  for (const r of out.meterYears?.rows ?? []) if (!meterIds.has(r.meter)) fail('data/history/by-meter-year.md', null, `unknown meter "${r.meter}"`)
   for (const o of out.options) for (const mid of o.meters) if (!meterIds.has(mid)) fail(`data/options/${o.id}.md`, null, `unknown meter "${mid}"`)
   out.dataNeeds.sort((a, b) => a.priority - b.priority)
   out.rates.sort((a, b) => a.id.localeCompare(b.id))

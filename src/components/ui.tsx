@@ -114,3 +114,48 @@ export function TableView({ caption, head, rows }: { caption: string; head: stri
     </details>
   )
 }
+
+export type GridRow = { label: ReactNode; cells: ReactNode[]; strong?: boolean; muted?: boolean }
+
+/** An always-visible table with optional row groups, a header row, and bold total rows. Wide tables scroll sideways. */
+export function GridTable({ caption, head, groups, leftCols = [] }: { caption: string; head: string[]; groups: { title?: string; rows: GridRow[] }[]; leftCols?: number[] }) {
+  return (
+    <div className="mt-4 overflow-x-auto rounded-xl bg-surface ring-1 ring-[var(--ring)]">
+      <table className="w-full text-left text-sm">
+        <caption className="sr-only">{caption}</caption>
+        <thead className="border-b border-line text-ink-2">
+          <tr>
+            {head.map((h, i) => (
+              <th key={i} scope="col" className={`whitespace-nowrap px-3 py-2 font-semibold ${!i ? 'sticky left-0 bg-surface' : leftCols.includes(i) ? '' : 'text-right'}`}>
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        {groups.map((g, gi) => (
+          <tbody key={gi} className="border-b-2 border-line last:border-0">
+            {g.title && (
+              <tr>
+                <th scope="colgroup" colSpan={head.length} className="sticky left-0 bg-surface px-3 pb-1 pt-3 text-left font-semibold">
+                  {g.title}
+                </th>
+              </tr>
+            )}
+            {g.rows.map((r, i) => (
+              <tr key={i} className={`border-b border-line last:border-0 ${r.strong ? 'font-semibold' : ''} ${r.muted ? 'italic text-ink-2' : ''}`}>
+                <th scope="row" className={`sticky left-0 min-w-[9rem] bg-surface px-3 py-2 ${r.strong ? 'font-semibold' : 'font-normal'}`}>
+                  {r.label}
+                </th>
+                {r.cells.map((c, j) => (
+                  <td key={j} className={`tabular whitespace-nowrap px-3 py-2 ${leftCols.includes(j + 1) ? '' : 'text-right'}`}>
+                    {c}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        ))}
+      </table>
+    </div>
+  )
+}

@@ -1,6 +1,6 @@
 import type { SiteData } from '../../scripts/site-data'
 import { Bars, METER_COLOR, Waterfall } from '../components/charts'
-import { PageHeader, Section, Stat, Stats, TableView } from '../components/ui'
+import { GridTable, PageHeader, Section, Stat, Stats, Sure, TableView } from '../components/ui'
 import { splitUsageCharge } from '../engine/billing'
 import { decomposeYears, summarize } from '../engine/history'
 import { fmt, meterNumber } from '../lib/data'
@@ -39,6 +39,73 @@ function surchargeByMonth(data: SiteData, model: Model) {
   })
   const firstPriced = [...model.rates].map((r) => r.applies_from_period_end).sort()[0] ?? null
   return { rows, firstPriced }
+}
+
+/** Gallons, peak surcharge, total bill, and all-in cost per 1,000 gallons, by meter and year. */
+function MeterHistory({ data, spend }: { data: SiteData; spend: { year: string; total: number; partial: number }[] }) {
+  const h = data.meterYears!
+  const years = [...new Set(h.rows.map((r) => r.year))].sort()
+  const partial = new Set(h.rows.filter((r) => !r.complete).map((r) => r.year))
+  const head = ['', ...years.map((y) => (partial.has(y) ? `${y} so far` : String(y)))]
+  const cell = (y: number, m: string) => h.rows.find((r) => r.year === y && r.meter === m) ?? null
+  const sum = (y: number, k: 'kgal' | 'peakSurcharge') => {
+    const vals = data.meters.map((m) => cell(y, m.id)?.[k] ?? null)
+    return vals.some((v) => v === null) ? null : (vals as number[]).reduce((a, b) => a + b, 0)
+  }
+  const missing = <span className="italic text-ink-2">Not on file</span>
+  const meterLabel = (m: SiteData['meters'][number]) => (
+    <>
+      Meter {meterNumber(m.id)}
+      {m.meter_number_last4 ? ` (...${m.meter_number_last4})` : ''}
+      {m.location && <span className="block min-w-[10rem] max-w-[16rem] whitespace-normal text-xs text-ink-2">{m.location}</span>}
+    </>
+  )
+  const total = (y: number) => spend.find((s) => s.year.startsWith(String(y)))?.total ?? null
+  return (
+    <Section id="by-meter" title="Bill history by meter" lead={`Thousands of gallons and peak surcharge by meter and year, from the City bills. ${h.covers}`}>
+      <GridTable
+        caption="Gallons, peak surcharge, and total water bill by meter and year"
+        head={head}
+        groups={[
+          {
+            title: 'Gallons (1,000s)',
+            rows: [
+              ...data.meters.map((m) => ({ label: meterLabel(m), cells: years.map((y) => (cell(y, m.id)?.kgal == null ? missing : fmt.int(cell(y, m.id)!.kgal!))) })),
+              { label: 'All meters', strong: true, cells: years.map((y) => (sum(y, 'kgal') === null ? missing : fmt.int(sum(y, 'kgal')!))) },
+            ],
+          },
+          {
+            title: 'Peak surcharge paid ($)',
+            rows: [
+              ...data.meters.map((m) => ({ label: `Meter ${meterNumber(m.id)}`, cells: years.map((y) => (cell(y, m.id)?.peakSurcharge == null ? missing : fmt.usd(cell(y, m.id)!.peakSurcharge!))) })),
+              { label: 'All meters', strong: true, cells: years.map((y) => (sum(y, 'peakSurcharge') === null ? missing : fmt.usd(sum(y, 'peakSurcharge')!))) },
+            ],
+          },
+          {
+            rows: [
+              { label: 'Total HOA water bill', strong: true, cells: years.map((y) => (total(y) === null ? missing : fmt.usd(total(y)!))) },
+              {
+                label: 'Cost per 1,000 gallons, all in',
+                muted: true,
+                cells: years.map((y) => (total(y) === null || !sum(y, 'kgal') ? missing : `$${(total(y)! / sum(y, 'kgal')!).toFixed(2)}`)),
+              },
+            ],
+          },
+        ]}
+      />
+      <div className="mt-3 max-w-prose space-y-2 text-sm text-ink-2">
+        <p>
+          Peak surcharge is what the HOA paid because water went above each meter's winter allowance: the gallons above it times the difference between the
+          higher and lower price. Total bill is the HOA's year-end books, and City bills for the year so far. Cost per 1,000 gallons is the total bill divided
+          by all-meter gallons.
+        </p>
+        {h.note && <p>{h.note}</p>}
+        <p>
+          Source: {h.source}. <Sure level={h.confidence} />
+        </p>
+      </div>
+    </Section>
+  )
 }
 
 /** Twelve-month windows of read periods ending October to September, so every window is a full year. */
@@ -152,6 +219,8 @@ export function HowWeGotHere({ data, model }: { data: SiteData; model: Model }) 
           })()}
         </p>
       </Section>
+
+      {data.meterYears && <MeterHistory data={data} spend={spend} />}
 
       <Section id="gallons" title="How much water we used" lead="Gallons metered in each 12-month stretch of City read periods (October to September), by meter. Earlier years are not exported from Waterfluence yet.">
         {wy.length === 0 ? (

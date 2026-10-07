@@ -26,6 +26,8 @@ export const meterSchema = z.object({
   account_last4: last4,
   meter_number_last4: last4,
   size_inches: z.number().nullable(),
+  size_source: z.string().optional(),
+  turf_share_percent: z.object({ value: z.number().min(0).max(100), source: z.string(), confidence }).optional(),
   service_type: nullableString,
   waterfluence_id: nullableString,
   location: nullableString,
@@ -327,6 +329,31 @@ export const dataNeedRowSchema = z.object({
   Status: z.enum(['needed', 'partly in', 'in hand']),
 })
 
+export const historyFrontmatterSchema = z.object({
+  source: z.string(),
+  confidence,
+  covers: z.string(),
+  note: z.string().optional(),
+  checks: z.string().optional(),
+  todo: z.string().optional(),
+})
+export const historyRowSchema = z.object({
+  Year: z.string().regex(/^\d{4}$/),
+  Meter: z.string().regex(/^meter-\d+$/),
+  'Gallons kgal': cellNumber,
+  'Peak surcharge': cellNumber,
+  Complete: z.enum(['yes', 'no']),
+})
+const sourcedNumber = z.object({ value: z.number(), source: z.string(), confidence })
+export const turfMinimumFrontmatterSchema = z.object({
+  turf_area_sq_ft: sourcedNumber,
+  plant_factor: sourcedNumber,
+  efficiency: sourcedNumber,
+  source: z.string(),
+  confidence,
+  todo: z.string().optional(),
+})
+export const turfMinimumRowSchema = z.object({ Month: z.enum(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']), 'Need kgal': cellNumber })
 export const budgetCheckFrontmatterSchema = z.object({ period: z.string(), source: z.string(), confidence, note: z.string(), todo: z.string().optional() })
 export const budgetCheckRowSchema = z.object({
   Scope: z.string().min(1),

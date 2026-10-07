@@ -1,7 +1,7 @@
 import type { SiteData } from '../../scripts/site-data'
 import { Lines } from '../components/charts'
-import { Card, Empty, PageHeader, Section, Stat, Stats, Sure, TableView } from '../components/ui'
-import { fmt } from '../lib/data'
+import { Card, Empty, GridTable, PageHeader, Section, Stat, Stats, Sure, TableView } from '../components/ui'
+import { fmt, meterNumber } from '../lib/data'
 import { MONTHS, type Model } from '../lib/model'
 
 const ORDER = [10, 11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -86,6 +86,8 @@ export function HowMuch({ data, model }: { data: SiteData; model: Model }) {
         </p>
       </Section>
 
+      <ByMeterMonth data={data} model={model} />
+
       <Section id="next" title="What a full budget needs" lead="A monthly, per-zone budget (and a fair comparison for each meter) needs two things we do not have yet.">
         <ul className="mt-3 list-disc space-y-1 pl-5 text-sm">
           <li>Daily weather from the nearest AZMET station (weather demand and rain), 2021 to now.</li>
@@ -135,5 +137,117 @@ function RangeGroup({ scope, rows }: { scope: string; rows: NonNullable<SiteData
         })}
       </ul>
     </Card>
+  )
+}
+
+/** Monthly use per meter for the latest 12 read months and the average of the last two full calendar years, next to the turf's healthy minimum. */
+function ByMeterMonth({ data, model }: { data: SiteData; model: Model }) {
+  const use = (m: string, ym: string) => model.periods[m].find((p) => p.end.slice(0, 7) === ym)?.usage ?? null
+  const ymsOnFile = [...new Set(Object.values(model.periods).flat().map((p) => p.end.slice(0, 7)))].sort()
+  const full = (ym: string) => model.meters.every((m) => use(m, ym) !== null)
+  const lastFull = [...ymsOnFile].reverse().find(full) ?? null
+  if (!lastFull) return null
+  const window = ymsOnFile.filter((ym) => ym <= lastFull).slice(-12)
+  if (window.length < 12 || !window.every(full)) return null
+  const monthOf = (ym: string) => Number(ym.slice(5, 7))
+  const lastYm = (mo: number) => window.find((ym) => monthOf(ym) === mo)!
+  const fullYears = [...new Set(ymsOnFile.map((ym) => ym.slice(0, 4)))].filter((y) => MONTHS.every((_, i) => full(`${y}-${String(i + 1).padStart(2, '0')}`))).slice(-2)
+  const avgRaw = (m: string, mo: number) => fullYears.reduce((t, y) => t + use(m, `${y}-${String(mo).padStart(2, '0')}`)!, 0) / fullYears.length
+  const label = (ym: string) => fmt.month(`${ym}-15`)
+  const n = (v: number) => fmt.int(v)
+  const mos = MONTHS.map((_, i) => i + 1)
+  // Months are rounded for display; the year total adds the unrounded values, then rounds.
+  const row = (vals: number[]) => [...vals.map((v) => n(Math.round(v))), n(Math.round(vals.reduce((a, b) => a + b, 0)))]
+  const turf = data.turfMinimum
+  const turfRow = turf ? mos.map((mo) => turf.months.find((x) => x.month === MONTHS[mo - 1])?.kgal ?? null) : null
+  const service = (m: string) => model.latestRate?.fixed_charges.find((f) => f.meters.includes(m))?.amount ?? null
+  const missing = <span className="italic text-ink-2">Not on file</span>
+
+  return (
+    <Section
+      id="by-meter-month"
+      title="Water use by meter and month"
+      lead={`Thousands of gallons, by the month each City read period ends. "Last 12 months" is ${label(window[0])} to ${label(window.at(-1)!)}.${fullYears.length ? ` The average is ${fullYears.join(' and ')}.` : ''}`}
+    >
+      <GridTable
+        caption="Meters: location, size, service charge, and turf share"
+        leftCols={[1]}
+        head={['Meter', 'Location', 'Size', 'Service charge per bill', 'Turf share of water']}
+        groups={[
+          {
+            rows: data.meters.map((m) => ({
+              label: `Meter ${meterNumber(m.id)}${m.meter_number_last4 ? ` (...${m.meter_number_last4})` : ''}`,
+              cells: [
+                <span className="block min-w-[12rem] max-w-[18rem] whitespace-normal">{m.location ?? 'Not on file'}</span>,
+                m.size_inches === null ? missing : `${m.size_inches === 1.5 ? '1 1/2' : m.size_inches}"`,
+                service(m.id) === null ? missing : `$${service(m.id)!.toFixed(2)}`,
+                m.turf_share_percent ? `${m.turf_share_percent.value}%` : missing,
+              ],
+            })),
+          },
+        ]}
+      />
+      <GridTable
+        caption="Thousand gallons by meter and month, with the turf healthy minimum"
+        head={['', ...MONTHS, 'Year']}
+        groups={[
+          {
+            title: `Last 12 months (${label(window[0])} to ${label(window.at(-1)!)})`,
+            rows: [
+              ...model.meters.map((m) => ({ label: `Meter ${meterNumber(m)}`, cells: row(mos.map((mo) => use(m, lastYm(mo))!)) })),
+              { label: 'All meters', strong: true, cells: row(mos.map((mo) => model.meters.reduce((t, m) => t + use(m, lastYm(mo))!, 0))) },
+            ],
+          },
+          ...(fullYears.length
+            ? [
+                {
+                  title: `${fullYears.join(' and ')} average`,
+                  rows: [
+                    ...model.meters.map((m) => ({ label: `Meter ${meterNumber(m)}`, cells: row(mos.map((mo) => avgRaw(m, mo))) })),
+                    { label: 'All meters', strong: true, cells: row(mos.map((mo) => model.meters.reduce((t, m) => t + avgRaw(m, mo), 0))) },
+                  ],
+                },
+              ]
+            : []),
+          ...(turfRow
+            ? [
+                {
+                  rows: [
+                    {
+                      label: 'Turf need at a healthy minimum',
+                      muted: true,
+                      cells: turfRow.some((v) => v === null) ? [...turfRow.map((v) => (v === null ? missing : n(v))), missing] : row(turfRow as number[]),
+                    },
+                  ],
+                },
+              ]
+            : []),
+        ]}
+      />
+      {turf && (
+        <div className="mt-3 max-w-prose space-y-2 text-sm text-ink-2">
+          <p>
+            <strong className="text-ink">Turf need at a healthy minimum</strong> is what {fmt.int(turf.turfAreaSqFt.value)} square feet of park turf needs to
+            stay green: monthly weather demand x plant factor {turf.plantFactor.value.toFixed(2)} x area x 0.623, divided by a sprinkler efficiency of{' '}
+            {fmt.pct(turf.efficiency.value)}. It covers the turf only, not shrubs or trees.
+          </p>
+          <ul className="list-disc space-y-1 pl-5">
+            <li>
+              Turf area {fmt.int(turf.turfAreaSqFt.value)} sq ft: {turf.turfAreaSqFt.source}. <Sure level={turf.turfAreaSqFt.confidence} />
+            </li>
+            <li>
+              Plant factor {turf.plantFactor.value.toFixed(2)}: {turf.plantFactor.source}. <Sure level={turf.plantFactor.confidence} />
+            </li>
+            <li>
+              Sprinkler efficiency {fmt.pct(turf.efficiency.value)}: {turf.efficiency.source}. <Sure level={turf.efficiency.confidence} />
+            </li>
+            <li>
+              Monthly amounts: {turf.source}. <Sure level={turf.confidence} />. The weather data behind them is not confirmed yet.
+            </li>
+          </ul>
+          <p>Overseeding the park with winter rye in October and November shows up as a spike in the average for those months.</p>
+        </div>
+      )}
+    </Section>
   )
 }

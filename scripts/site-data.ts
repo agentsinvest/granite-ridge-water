@@ -25,6 +25,15 @@ export type SiteData = {
   experiments: Experiment[]
   options: MoveOption[]
   dataNeeds: { priority: number; need: string; why: string; unlocks: string; who: string; status: string }[]
+  meterYears: { source: string; confidence: string; covers: string; note: string; rows: { year: number; meter: string; kgal: number | null; peakSurcharge: number | null; complete: boolean }[] } | null
+  turfMinimum: {
+    turfAreaSqFt: { value: number; source: string; confidence: string }
+    plantFactor: { value: number; source: string; confidence: string }
+    efficiency: { value: number; source: string; confidence: string }
+    source: string
+    confidence: string
+    months: { month: string; kgal: number | null }[]
+  } | null
   budgetCheck: { period: string; source: string; note: string; rows: { scope: string; measure: string; low: number | null; high: number | null; source: string; confidence: string }[] } | null
   openTodos: { file: string; todo: string }[]
 }
