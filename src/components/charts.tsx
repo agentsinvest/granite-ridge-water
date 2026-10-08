@@ -29,7 +29,7 @@ export function ChartFrame({ label, children, height = 260 }: { label: string; c
 type Series = { key: string; name: string; color: string; dimWhen?: string }
 
 export function Bars({
-  data, x, xSub, series, label, money, stacked, target, targetLabel, height,
+  data, x, xSub, series, label, money, stacked, target, targetLabel, height, format, axisFormat,
 }: {
   data: Record<string, string | number | null>[]
   x: string
@@ -42,12 +42,16 @@ export function Bars({
   target?: number
   targetLabel?: string
   height?: number
+  /** Tooltip value format, for units other than whole numbers or dollars. */
+  format?: (v: number) => string
+  /** Y-axis tick format, paired with `format`. */
+  axisFormat?: (v: number) => string
 }) {
-  const fmt = (v: number) => (money ? `$${Math.round(v).toLocaleString('en-US')}` : Math.round(v).toLocaleString('en-US'))
-  const short = (v: number) => {
+  const fmt = format ?? ((v: number) => (money ? `$${Math.round(v).toLocaleString('en-US')}` : Math.round(v).toLocaleString('en-US')))
+  const short = axisFormat ?? ((v: number) => {
     const n = v >= 1000 ? `${Number((v / 1000).toFixed(1))}k` : String(v)
     return money ? `$${n}` : n
-  }
+  })
   return (
     <ChartFrame label={label} height={height}>
       <BarChart data={data} margin={{ top: 16, right: 8, left: 0, bottom: 0 }} barCategoryGap="20%">
