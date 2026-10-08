@@ -42,13 +42,29 @@ export function Home({ data, model }: { data: SiteData; model: Model }) {
     return vals.some((v) => v === null) ? null : (vals as number[]).reduce((a, b) => a + b, 0)
   }
   const lastKgal = lastBills.some((b) => b.gallons === null) ? null : lastBills.reduce((s, b) => s + (b.gallons as number), 0) / 1000
+  // Year to date after the last year-end books: spend from City bills dated that year, water from the Waterfluence
+  // read periods that end that year (the same periods those bills cover). Shown only when every meter has both.
+  const ytdYear = plYears.length ? String(Number(plYears.at(-1)!.year) + 1) : null
+  const ytdBills = ytdYear ? data.bills.filter((b) => b.bill_date.startsWith(ytdYear)) : []
+  const ytdPeriods = ytdYear ? meters.map((m) => model.periods[m].filter((p) => p.end.startsWith(ytdYear))) : []
+  const ytd =
+    ytdYear && meters.every((m) => ytdBills.some((b) => b.meter === m)) && ytdPeriods.every((ps) => ps.length && ps.every((p) => p.usage !== null))
+      ? {
+          label: `${ytdYear} YTD`,
+          total: ytdBills.reduce((s, b) => s + b.printed_total, 0),
+          billsThrough: ytdBills.map((b) => b.bill_date).sort().at(-1)!,
+          kgal: ytdPeriods.flat().reduce((s, p) => s + (p.usage as number), 0),
+          readThrough: ytdPeriods.map((ps) => ps.map((p) => p.end).sort().at(-1)!).sort()[0],
+        }
+      : null
   const spendRows = [
-    ...plYears.map((r) => ({ label: r.year, total: r.total as number, kgal: yearKgal(Number(r.year)) })),
-    ...(runRateRange ? [{ label: 'Last 12 bills', total: runRate, kgal: lastKgal }] : []),
+    ...plYears.map((r) => ({ label: r.year, total: r.total as number, kgal: yearKgal(Number(r.year)), partial: 0 })),
+    ...(ytd ? [{ label: ytd.label, total: ytd.total, kgal: ytd.kgal, partial: 1 }] : []),
+    ...(runRateRange ? [{ label: 'Last 12 bills', total: runRate, kgal: lastKgal, partial: 0 }] : []),
   ]
   const millions = (kgal: number) => `${Number((kgal / 1000).toFixed(1))}M`
   const firstUse = spendRows.find((r) => r.kgal !== null)
-  const lastUse = [...spendRows].reverse().find((r) => r.kgal !== null)
+  const lastUse = [...spendRows].reverse().find((r) => r.kgal !== null && !r.partial)
   const useChange = firstUse && lastUse && firstUse !== lastUse ? (lastUse.kgal! - firstUse.kgal!) / firstUse.kgal! : null
   const byMeter = meters.map((m) => ({ meter: `Meter ${m.replace('meter-', '')}`, full: meterLabel(data, m), total: lastBills.filter((b) => b.meter === m).reduce((s, b) => s + b.printed_total, 0) }))
 
@@ -165,28 +181,38 @@ export function Home({ data, model }: { data: SiteData; model: Model }) {
         </p>
       </Section>
 
-      <Section id="spend" title="Water spending by year" lead="From the HOA's year-end books, plus the last 12 City bills. The dashed line is the goal.">
-        <Bars data={spendRows} x="label" series={[{ key: 'total', name: 'Water spend', color: 'var(--s1)' }]} label="HOA water spending by year with the goal line" money target={target} targetLabel={`Goal ${fmt.usd(target)}`} />
+      <Section
+        id="spend"
+        title="Water spending by year"
+        lead={`From the HOA's year-end books, plus the last 12 City bills.${ytd ? ` ${ytd.label} is the lighter bar: City bills dated ${ytdYear} so far, through ${fmt.month(ytd.billsThrough)}.` : ''} The dashed line is the goal.`}
+      >
+        <Bars data={spendRows} x="label" series={[{ key: 'total', name: 'Water spend', color: 'var(--s1)', dimWhen: 'partial' }]} label="HOA water spending by year with the goal line" wrapLabels money target={target} targetLabel={`Goal ${fmt.usd(target)}`} />
         <h3 className="mt-6 text-lg font-bold">Water used by year</h3>
         <p className="mt-1 max-w-prose text-sm text-ink-2">
           Gallons the City billed on all four meters, in millions.
+          {ytd ? ` ${ytd.label} is the lighter bar: Waterfluence meter reads so far, through ${fmt.month(ytd.readThrough)}.` : ''}
           {useChange !== null && firstUse && lastUse
             ? ` ${lastUse.label === 'Last 12 bills' ? 'The last 12 bills' : lastUse.label} used ${fmt.pct(Math.abs(useChange))} ${useChange <= 0 ? 'less' : 'more'} water than ${firstUse.label}.`
             : ''}
         </p>
         <Bars
-          data={spendRows.map((r) => ({ label: r.label, kgal: r.kgal }))}
+          data={spendRows.map((r) => ({ label: r.label, kgal: r.kgal, partial: r.partial }))}
           x="label"
-          series={[{ key: 'kgal', name: 'Water used', color: 'var(--s2)' }]}
+          series={[{ key: 'kgal', name: 'Water used', color: 'var(--s2)', dimWhen: 'partial' }]}
           label="Gallons of water the HOA used by year, in millions"
           format={(v) => fmt.gallons(v)}
           axisFormat={millions}
+          wrapLabels
         />
         {data.meterYears?.note && <p className="mt-2 max-w-prose text-sm text-ink-2">{publicText(data.meterYears.note)}</p>}
         <TableView
           caption="Water spending and use by year"
           head={['Year', 'Spend', 'Water used']}
-          rows={spendRows.map((r) => [r.label, fmt.usd(r.total), r.kgal === null ? 'Not known' : fmt.gallons(r.kgal)])}
+          rows={spendRows.map((r) => [
+            r.label,
+            r.partial && ytd ? `${fmt.usd(r.total)} (bills through ${fmt.month(ytd.billsThrough)})` : fmt.usd(r.total),
+            r.kgal === null ? 'Not known' : r.partial && ytd ? `${fmt.gallons(r.kgal)} (Waterfluence, through ${fmt.month(ytd.readThrough)})` : fmt.gallons(r.kgal),
+          ])}
         />
         <p className="mt-3 text-sm">
           <a className="underline underline-offset-4" href="#history">
