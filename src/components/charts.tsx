@@ -29,7 +29,7 @@ export function ChartFrame({ label, children, height = 260 }: { label: string; c
 type Series = { key: string; name: string; color: string; dimWhen?: string }
 
 export function Bars({
-  data, x, xSub, series, label, money, stacked, target, targetLabel, height, format, axisFormat,
+  data, x, xSub, series, label, money, stacked, target, targetLabel, height, format, axisFormat, wrapLabels,
 }: {
   data: Record<string, string | number | null>[]
   x: string
@@ -46,6 +46,8 @@ export function Bars({
   format?: (v: number) => string
   /** Y-axis tick format, paired with `format`. */
   axisFormat?: (v: number) => string
+  /** Show every x-axis label, one word per line, so labels like "Last 12 bills" fit on a phone. */
+  wrapLabels?: boolean
 }) {
   const fmt = format ?? ((v: number) => (money ? `$${Math.round(v).toLocaleString('en-US')}` : Math.round(v).toLocaleString('en-US')))
   const short = axisFormat ?? ((v: number) => {
@@ -56,7 +58,7 @@ export function Bars({
     <ChartFrame label={label} height={height}>
       <BarChart data={data} margin={{ top: 16, right: 8, left: 0, bottom: 0 }} barCategoryGap="20%">
         <CartesianGrid vertical={false} stroke="var(--grid)" />
-        {xSub ? (
+        {xSub || wrapLabels ? (
           <XAxis
             dataKey={x}
             {...axis}
@@ -64,7 +66,7 @@ export function Bars({
             height={54}
             tick={(p: { x?: number | string; y?: number | string; payload?: { value?: unknown }; index?: number }) => {
               // Each word of the label on its own line (so "2026 YTD" stacks), then the sub label.
-              const lines = [...String(p.payload?.value ?? '').split(' '), String(data[p.index ?? -1]?.[xSub] ?? '')]
+              const lines = [...String(p.payload?.value ?? '').split(' '), ...(xSub ? [String(data[p.index ?? -1]?.[xSub] ?? '')] : [])]
               return (
                 <text x={p.x} y={p.y} textAnchor="middle" fill="var(--ink-2)" fontSize={12}>
                   {lines.map((l, i) => (
