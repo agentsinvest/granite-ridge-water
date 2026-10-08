@@ -2,7 +2,7 @@
 source: "Jennifer's water model workbook, Bill history by meter sheet, rebuilt from 324 City of Mesa bills in Granite_Ridge_Water_Bills_by_Meter.xlsx (sources/workbook/water-model-2026-10-07.md)"
 confidence: medium
 covers: "Bills dated December 2019 to August 2026. 2026 is January to August."
-note: "2023 is low because the old park meters stopped registering before the City replaced them (see What happened when, below)."
+note: "2023 looks low because the old park meters stopped counting water before the City replaced them."
 checks: "2026 gallons equal the 2026 bills in data/bills/ for every meter, and 2026 peak surcharge equals the billing engine's split of those bills to the dollar (tests/history.test.ts)."
 todo: "Put the bill-by-bill workbook in /raw/ and add the bills it has that data/bills/ is missing, so 2020 to 2025 can be checked bill by bill. City prices before August 2025 are not in data/rates/, so 2020 to 2025 peak surcharge cannot be recomputed yet."
 ---
