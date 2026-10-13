@@ -11,6 +11,8 @@ confidence: medium
 findings:
   - text: "Not one of the two WeatherTRAK smart controllers. Its make, settings, and whether it has a flow sensor or master valve are not on file."
     source: "Eco Verde assessment, section 3a; HydroPoint reports of 2025-04-04"
+  - text: "Not a smart (weather-based) controller, so it does not skip watering for rain on its own."
+    source: "Jennifer, 2026-10-13"
 todo: "Need controller B's make and model, a settings printout (programs, days, start times, run times), station flow rates, and whether it has a flow sensor or master valve."
 ---
 

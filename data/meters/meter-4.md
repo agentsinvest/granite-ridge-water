@@ -19,7 +19,7 @@ areas_served_source: "Interior strip confirmed by Jennifer, 2026-10-13 (the neig
 controller:
   name: "Controller B"
   model: null
-  summary: "Not one of the two WeatherTRAK smart controllers. Make, settings, and whether it has a flow sensor are not recorded yet. In February 2026 the assessor found a broken drip line in the interior strip and a valve this controller did not open."
+  summary: "Not a smart controller (confirmed by Jennifer, 2026-10-13), so it does not skip for rain on its own. Make, settings, and whether it has a flow sensor are not recorded yet. In February 2026 the assessor found a broken drip line in the interior strip and a valve this controller did not open."
   source: "Eco Verde irrigation assessment, 2026 (sources/controllers/eco-verde-assessment-2026.md)"
   confidence: medium
 active_from: null

@@ -22,7 +22,7 @@ excess_water:
   confidence: medium
 related_events: [2026-02-16]
 source: "data/usage/meter-4/2026.md; sources/waterfluence/ami-hourly-meter-4-2026.md (exports of 2026-09-30, 2026-10-06, and 2026-10-12); sources/waterfluence/daily-chart-2026-10-06.md"
-todo: "Ask the landscaper whether they shut water off on meter-4 on 2026-09-18, 09-22, and 10-04 (about 4 PM), what ran on meter-4 from 2 to 5 AM on 2026-10-11 and why the controller did not skip for rain, and which valve runs at 2 AM. Have that valve inspected. Meter-4 is controller B (interior strip, Crismon frontage, northeast corner); in February 2026 Eco Verde found a broken lateral line in zone 3 and a valve at B4 that the controller did not open (repairs 5 and 6). Ask whether those were repaired and whether the 2 AM valve is one of them."
+todo: "Ask the landscaper whether they shut water off on meter-4 on 2026-09-18, 09-22, and 10-04 (about 4 PM), what ran on meter-4 from 2 to 5 AM on 2026-10-11 (controller B is not a smart controller, confirmed by Jennifer 2026-10-13, so it does not skip for rain unless someone turns it off), why that night used several times the usual gallons, and which valve runs at 2 AM. Have that valve inspected. Meter-4 is controller B (interior strip, Crismon frontage, northeast corner); in February 2026 Eco Verde found a broken lateral line in zone 3 and a valve at B4 that the controller did not open (repairs 5 and 6). Ask whether those were repaired and whether the 2 AM valve is one of them."
 ---
 
 Raised by hand from the September and October 2026 AMI data, ahead of the Phase 3 leak engine.
