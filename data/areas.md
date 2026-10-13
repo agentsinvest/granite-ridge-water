@@ -29,7 +29,7 @@ Named parts of the neighborhood. Each zone file names one `area` id from this ta
 | streets | A | Private streets | 146878 | | Street corridors inside the gate (red outline). Irrigated landscape, if any, unknown. | |
 | west-south-desert | B | West and south desert | 383591 | | Desert landscape along the west and south edges (yellow outline). | |
 | perimeter | C | McKellips and Crismon perimeter | 147442 | | Frontage along McKellips Road (north) and Crismon Road (east) (blue outline). | |
-| interior-strip | D | Interior strip | 88708 | | Desert strip between the two interior rows of homes (magenta outline). | |
+| interior-strip | D | Interior strip | 88708 | | Desert strip between the two interior rows of homes (magenta outline). Neighbors call it the desert scape. Watered by meter-4 (confirmed by Jennifer, 2026-10-13). | |
 | park-green | E | Park green | 149862 | 76600 | Central park with turf, ramada, and playground (orange outline). Turf greenspace. Lowest point of the site. | |
 
 Turf square footage for the park green is marked approximate ("~76,600") on the map; confidence medium.
@@ -40,5 +40,5 @@ From the Eco Verde assessment map (2026, `sources/controllers/eco-verde-assessme
 
 * Entry and the McKellips frontage east of it: meter-3 (Entrance controller). The entry turf is now artificial turf (Jennifer, 2026-10-07).
 * West wash, the west edge of the west and south desert: meter-3, station set to Off on 2026-03-29.
-* Interior strip, Crismon frontage, and the northeast corner: meter-4 (controller B).
+* Interior strip, Crismon frontage, and the northeast corner: meter-4 (controller B). Interior strip confirmed by Jennifer, 2026-10-13; the frontage and corner are still from the map.
 * Park green, plus drip zones along the park edges and in the south and southeast desert: meter-1 and meter-2 (Park controller).

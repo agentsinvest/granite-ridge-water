@@ -15,7 +15,7 @@ waterfluence_id: "MESA-437"
 location: "East side, west of the east street, at the east end of the interior strip"
 areas_served: ["interior-strip", "perimeter"]
 areas_served_note: "Drip for the interior strip between the two middle rows of homes, the Crismon frontage, and the northeast corner."
-areas_served_source: "Eco Verde assessment map, 2026 (sources/controllers/eco-verde-assessment-2026.md). Matched to this meter by location: controller B, its point of connection, and backflow BF3 are on the east street at the end of the interior strip, where the Waterfluence Controller Map puts meter-4."
+areas_served_source: "Interior strip confirmed by Jennifer, 2026-10-13 (the neighborhood calls it the desert scape between the two rows of houses). Crismon frontage and northeast corner from the Eco Verde assessment map, 2026 (sources/controllers/eco-verde-assessment-2026.md). Matched to this meter by location: controller B, its point of connection, and backflow BF3 are on the east street at the end of the interior strip, where the Waterfluence Controller Map puts meter-4."
 controller:
   name: "Controller B"
   model: null
