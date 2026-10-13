@@ -41,7 +41,7 @@ describe('actions', () => {
   })
 
   it('counts actions that should save money but have no price', () => {
-    expect(progressBands(priceActions(data, model), model).unpriced).toBe(3)
+    expect(progressBands(priceActions(data, model), model).unpriced).toBe(4)
   })
 
   it('puts trees at risk first, then leaks', () => {

@@ -25,3 +25,7 @@ With the real NOAA rain and AZMET daily ETo (fetched 2026-10-07), and in tests/r
 
 * Behind the cloud session's proxy the script needs `NODE_USE_ENV_PROXY=1`. On a normal machine it runs as is.
 * Sep 15 to 16 storm (2.87 in): the expected "already off" does not follow from the hourly data with a 7-day look-back. Both park meters watered full turf nights on Sep 9 and 10. Meter 1 also ran its short 10 PM program on Sep 11 and 13 and on the night of Sep 15; meter 2 ran short programs on Sep 11 and 13. Decide whether "already off" should ignore the short 10 PM program, or use a shorter look-back.
+
+## Change 2026-10-13: watering on the rain day itself
+
+The gauge reports calendar days, but a watering run that starts after midnight belongs to the night before. So a 2 AM cycle on the rain day was filed under the day before the rain and never counted. On 2026-10-11 (0.39 in) meter-4 watered 2,749 gallons from 2 AM to 5 AM, Jennifer saw it watering in the rain, and the check said "too soon to tell". Now a run that starts after midnight on the first rain day counts as watering on the rain day and is shown under that date. This also adds meter-4 cycles to several earlier events and turns meter-3 on 2026-08-20 from "paused" to "watered through the rain".
