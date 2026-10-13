@@ -101,7 +101,7 @@ export function WateringAfterRain({ data, rc }: { data: SiteData; rc: RainCheck 
                   {rc.actionWorking.has(e.start) && m.meter === e.meters[0].meter && <p className="mt-1"><Pill tone="good">The rain fix worked</Pill></p>}
                   <p className="mt-1 text-ink-2">
                     Rain covered {days(m.daysCovered)}
-                    {counted(m) && m.firstWatering ? `. Watered again ${day(m.firstWatering)} (${m.daysAfter === 0 ? 'night of the rain' : `${days(m.daysAfter!)} after`})` : ''}
+                    {counted(m) && m.firstWatering ? `. Watered again ${day(m.firstWatering)} (${m.daysAfter === 0 ? 'day of the rain' : `${days(m.daysAfter!)} after`})` : ''}
                     {counted(m) && m.gallons > 0 ? `. Extra: ${m.partial ? 'at least ' : ''}${fmt.int(m.gallons)} gallons, ${costText(m.cost)}` : ''}.
                   </p>
                 </li>
@@ -129,7 +129,7 @@ export function WateringAfterRain({ data, rc }: { data: SiteData; rc: RainCheck 
                       <td className="tabular px-3 py-2">{days(m.daysCovered)}</td>
                       <td className="whitespace-nowrap px-3 py-2"><ResultChip m={m} /></td>
                       <td className="whitespace-nowrap px-3 py-2">
-                        {counted(m) && m.firstWatering ? `${day(m.firstWatering)} (${m.daysAfter === 0 ? 'night of the rain' : `${days(m.daysAfter!)} after`})` : counted(m) ? 'Not yet' : ''}
+                        {counted(m) && m.firstWatering ? `${day(m.firstWatering)} (${m.daysAfter === 0 ? 'day of the rain' : `${days(m.daysAfter!)} after`})` : counted(m) ? 'Not yet' : ''}
                       </td>
                       <td className="px-3 py-2">{counted(m) ? (m.nights.length ? `${m.nights.length}: ${m.nights.map((n) => day(n.date)).join(', ')}` : 'None') : ''}</td>
                       <td className="tabular whitespace-nowrap px-3 py-2 text-right">{counted(m) ? `${m.partial && m.gallons > 0 ? 'at least ' : ''}${fmt.int(m.gallons)}` : ''}</td>
@@ -174,7 +174,7 @@ export function WateringAfterRain({ data, rc }: { data: SiteData; rc: RainCheck 
             drip {pf(['meter-3']).map((r) => r.factor).join(', ')}.
           </p>
           <p>
-            Watering on the night of the rain or the first night after counts as watering through the rain. Watering later inside the window counts as
+            Watering on the day of the rain (an early-morning cycle or that evening) or the first night after counts as watering through the rain. Watering later inside the window counts as
             starting again too soon. A meter that did not water in the {s.alreadyOffDays} days before the rain was already off, and is left out of the counts.
             Only watering that starts between {hour(s.nightStartHour)} and {hour(s.nightEndHour)} counts, so a single daytime test is not mistaken for the
             schedule. The cost uses the same method as the leak estimates: what that water added to the City bill, or a range while the bill is not in yet.

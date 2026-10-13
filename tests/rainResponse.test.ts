@@ -131,6 +131,22 @@ describe('checkRain on the real hourly data (test cases from 2026-10-07)', () =>
     expect(at('2026-07-17', 'meter-1').gallons).toBe(0)
   })
 
+  it('Oct 11, 0.39 in: meter 4 watered from 2 AM on the rain day (Jennifer saw it), shown under the rain day', () => {
+    const c = checkRain([{ date: '2026-10-11', inches: 0.39 }], normalEto, meters, settings, schedule, rates)
+    const r = c[0].meters.find((m) => m.meter === 'meter-4')!
+    expect(r.result).toBe('watered-through')
+    expect(r.firstWatering).toBe('2026-10-11')
+    expect(r.daysAfter).toBe(0)
+    expect(r.nights.map((n) => n.date)).toEqual(['2026-10-11'])
+    expect(r.gallons).toBe(2749)
+  })
+
+  it('does not count a run that ended before midnight on the night before the rain', () => {
+    // Meter 1 watered from about 10 PM to midnight on Oct 9; that is before the rain day.
+    const c = checkRain([{ date: '2026-10-10', inches: 0.5 }], normalEto, meters, settings, schedule, rates)
+    expect(c[0].meters.find((m) => m.meter === 'meter-1')!.nights.every((n) => n.date >= '2026-10-10')).toBe(true)
+  })
+
   it('says "already off" when a meter did not water in the 7 days before the rain', () => {
     // Meter 3 has no overnight watering between the nights of Jul 12 and Jul 27 in the hourly data.
     const c = checkRain(season({ '2026-07-24': 0.5 }), normalEto, meters, settings, schedule, rates)

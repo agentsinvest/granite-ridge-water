@@ -29,7 +29,8 @@ export type RainSettings = {
 
 export type RainEvent = { start: string; end: string; inches: number; usableInches: number }
 
-export type Night = { date: string; gallons: number; missingHours: number; lastDate: string }
+/** `date` is the evening the night belongs to; `start` is when its first run started ("YYYY-MM-DD HH:MM"). */
+export type Night = { date: string; start: string; gallons: number; missingHours: number; lastDate: string }
 
 export type RainResult = 'watered-through' | 'too-soon' | 'paused' | 'already-off' | 'not-checked' | 'too-early'
 
@@ -46,7 +47,7 @@ export type MeterRainCheck = {
   daysAfter: number | null
   daysEarly: number | null
   /** Watering nights from the night of the rain to the night before the last covered day (watering then lands on a
-   * covered day). Empty for already-off and not-checked. */
+   * covered day), plus a run that started after midnight on the first rain day. Empty for already-off and not-checked. */
   nights: Night[]
   gallons: number
   partial: boolean
@@ -133,7 +134,7 @@ export function wateringNights(reads: HourlyRead[], schedule: ScheduleSettings, 
     const h = hourOf(r.start)
     if (!(h >= s.nightStartHour || h < s.nightEndHour)) continue
     const date = h >= 12 ? r.start.slice(0, 10) : addDays(r.start.slice(0, 10), -1)
-    const n = byNight.get(date) ?? { date, gallons: 0, missingHours: 0, lastDate: date }
+    const n = byNight.get(date) ?? { date, start: r.start, gallons: 0, missingHours: 0, lastDate: date }
     n.gallons += r.gallons
     n.missingHours += r.missingHours
     if (r.end.slice(0, 10) > n.lastDate) n.lastDate = r.end.slice(0, 10)
@@ -182,8 +183,14 @@ export function checkMeter(
   if (!covered || !firstRead || !lastRead || firstRead > `${lookbackStart} ${String(s.nightStartHour).padStart(2, '0')}:00` || lastRead < `${ev.start} 12:00`) return base
   if (!nights.some((n) => n.date >= lookbackStart && n.date < ev.start)) return { ...base, result: 'already-off' }
 
-  const inWindow = nights.filter((n) => n.date >= ev.start && n.date <= lastNight)
-  const first = nights.find((n) => n.date >= ev.start) ?? null
+  // The gauge reports calendar days, so a run that starts after midnight on the first rain day watered on the rain
+  // day itself, even though it belongs to the night before.
+  const onRainDay = (n: Night) => n.date === addDays(ev.start, -1) && n.start.slice(0, 10) >= ev.start
+  // Shown under the rain day, the day it actually watered.
+  const inWindow = nights
+    .filter((n) => onRainDay(n) || (n.date >= ev.start && n.date <= lastNight))
+    .map((n) => (onRainDay(n) ? { ...n, date: ev.start } : n))
+  const first = inWindow.find((n) => n.date >= ev.start) ?? nights.find((n) => n.date >= ev.start) ?? null
   const daysAfter = first ? Math.max(0, daysBetween(ev.end, first.date)) : null
   const readTimes = new Set(input.reads.map((r) => r.time))
   const wateredDates = new Set(inWindow.map((n) => n.date))
