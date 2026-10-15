@@ -24,7 +24,7 @@ export function Problems({ data, model }: { data: SiteData; model: Model }) {
         <Stat value={String(costed.length)} label={costed.length === 1 ? 'possible leak flagged' : 'possible leaks flagged'} flag={costed.length > 0} />
         <Stat value={priced.length ? dollarRange(low, high) : 'Not priced'} label="extra charges so far, where priced" flag={priced.length > 0} />
         <Stat value={String(checks)} label="watering questions for the landscaper" />
-        <Stat value={String(landscape)} label={landscape === 1 ? 'landscape contract problem' : 'landscape contract problems'} flag={landscape > 0} />
+        <Stat value={String(landscape)} label={landscape === 1 ? 'landscape cost to watch' : 'landscape costs to watch'} flag={landscape > 0} />
       </Stats>
 
       <Section id="leaks" title="Possible leaks" lead="Each one says what we saw, roughly what it cost, and what to check next. None are confirmed leaks yet.">
@@ -35,7 +35,7 @@ export function Problems({ data, model }: { data: SiteData; model: Model }) {
         <WateringChecks data={data} />
       </Section>
 
-      <Section id="landscape" title="Landscape contract" lead="Not leaks, but problems with how the landscaping is contracted and paid for. They explain why leaks go unnoticed and why water work costs extra. Most important first.">
+      <Section id="landscape" title="Landscape" lead="Not leaks, but landscape costs tied to the irrigation system, from the HOA's financial reports.">
         <LandscapeProblems data={data} />
       </Section>
 

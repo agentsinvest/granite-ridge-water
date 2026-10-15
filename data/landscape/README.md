@@ -1,6 +1,6 @@
 # Landscape problems
 
-One file per problem with how the landscape is maintained or contracted, at `landscape/<id>.md`. These are not leaks: they explain why leaks and waste go unnoticed, or why water work costs more. They show on the Problems screen under "Landscape contract", in `rank` order.
+One file per problem with how the landscape is maintained or contracted, at `landscape/<id>.md`. These are not leaks: they explain why leaks and waste go unnoticed, or why water work costs more. They show on the Problems screen under "Landscape", in `rank` order.
 
 | Field | Required | What it holds |
 |---|---|---|
@@ -10,7 +10,7 @@ One file per problem with how the landscape is maintained or contracted, at `lan
 | `summary` | yes | Two or three plain sentences a neighbor can follow. |
 | `status` | yes | `open`, `asked` (raised with the landscaper or Trestle), or `resolved`. |
 | `contract_sections` | no | Contract section numbers, for example `["6b", "7m"]`. |
-| `cost_account` | no | HOA P&L account the cost is booked to, for example `51110`. The site shows the actual amounts from `data/financials/`; dollars are never written here. |
+| `paid` | no | What the HOA paid, one row per period: `{ period, amount, source }`. Amounts come from the HOA financial reports in `/sources/pl/`, each with its source. Partial years say so in `period`, for example `2026 through August`. |
 | `action` | no | Id of the action in `data/actions/` that fixes it. |
 | `related_flags` | no | Ids of leak flags in `data/flags/` this problem helped cause or hide. |
 | `source` | yes | Where the problem comes from. |
@@ -23,16 +23,17 @@ The text below the front matter is shown as the detail, in plain markdown.
 
 ```markdown
 ---
-id: overseeding-billed-extra
-rank: 2
-title: "Winter overseeding is billed on top of the monthly price"
-summary: "Seeding the park lawn with winter rye is not in the monthly price."
+id: example-cost
+rank: 1
+title: "Example: a landscape cost"
+summary: "One plain sentence on what the cost is."
 status: open
-contract_sections: ["2c", "7a"]
-cost_account: "51110"
-action: overseeding-decision
+contract_sections: ["6b"]
+paid:
+  - { period: "2025", amount: 100.00, source: "sources/pl/2025.md, account 51120" }
+action: null
 related_flags: []
-source: "sources/landscape/maintenance-contract-2024-07-17.md, sections 2c and 7a"
+source: "HOA financial reports"
 updated: 2026-10-15
 ---
 

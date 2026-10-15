@@ -319,7 +319,6 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
     const where = `data/landscape/${lp.id}.md`
     if (lp.action && !actionIds.has(lp.action)) fail(where, null, `unknown action "${lp.action}"`)
     for (const id of lp.related_flags) if (!flagIds.has(id)) fail(where, null, `unknown flag "${id}"`)
-    if (lp.cost_account && !Object.values(out.financials).some((y) => y.lines.some((l) => l.account === lp.cost_account))) fail(where, null, `account ${lp.cost_account} is not in data/financials/`)
   }
   out.landscapeProblems.sort((a, b) => a.rank - b.rank || a.id.localeCompare(b.id))
   for (const c of out.controllers) {

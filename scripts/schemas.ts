@@ -504,7 +504,7 @@ export const landscapeProblemSchema = z.object({
   summary: z.string().min(1),
   status: z.enum(['open', 'asked', 'resolved']),
   contract_sections: z.array(z.string().min(1)).default([]),
-  cost_account: z.string().regex(/^\d{5}$/).nullable().default(null),
+  paid: z.array(z.object({ period: z.string().min(1), amount: z.number().nonnegative(), source: z.string().min(1) })).default([]),
   action: z.string().nullable().default(null),
   related_flags: z.array(z.string()).default([]),
   source: z.string().min(1),

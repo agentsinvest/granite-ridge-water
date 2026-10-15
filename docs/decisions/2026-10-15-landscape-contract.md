@@ -25,3 +25,10 @@ Jennifer asked that every landscape-related problem be listed on the Problems sc
 * Dollar amounts are never written in these files. A problem names its P&L account (51110 overseeding, 51120 irrigation repairs) and the page reads the actuals from `data/financials/`.
 * Problems screen: a "Landscape contract" section after Watering checks, plus a count in the stats row. Seven problems: no check or leak reporting duty, overseeding billed extra, repairs billed extra with no price list, manual watering billed extra, one-way liability, conflicting fertilizer and weed control terms, and the unsigned copy on file.
 * The site is public. The cards describe contract terms factually and never name the landscaper.
+
+## Narrowed to irrigation repairs only (same day)
+
+Jennifer decided not to publish the contract review on the public site. The Problems screen's landscape section now has one card: irrigation repairs of $2,555.00 (2024), $3,214.00 (2025), and $1,456.00 for 2026 through August, from the HOA financial reports (account 51120). The other six contract problems were removed from `data/landscape/`; the review notes stay in `sources/landscape/` (private, not deployed).
+
+* Amounts are written in the card's `paid` list with a source per row, instead of being read from `data/financials/`. The 2026 figure comes from the August 2026 monthly report (`sources/pl/2026-08.md`), a partial year. Adding it to `data/financials/` would have made Home, History, and Quick wins treat it as a full year.
+* The section is titled "Landscape" with neutral wording, and the card does not link to the contract action.
