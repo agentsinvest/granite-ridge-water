@@ -10,7 +10,7 @@ change:
 touches_greenspace: false
 has_trees: null
 upfront_cost: 0
-upfront_cost_source: "Seasonal adjust change by the current landscaper; assumes their contract covers it (to confirm)"
+upfront_cost_source: "Seasonal adjust change by the current landscaper; covered by the landscape maintenance contract (2024-07-17), section 6a: schedule adjustments are in the monthly price"
 effort: low
 source: "data/flags/2025-meter-4-winter-use-high.md"
 confidence: low

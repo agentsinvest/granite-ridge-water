@@ -13,4 +13,5 @@ Complete markdown copies of every document Jennifer has shared, so the originals
 | `waterfluence/` | Waterfluence exports (read-period usage, hourly AMI per meter) and a description of the dashboard chart |
 | `controllers/` | Irrigation controller reports: the Eco Verde 2026 irrigation assessment (with its zone and valve map, address redacted) and the HydroPoint WeatherTRAK alert and usage reports of 2025-04-04 |
 | `maps/` | Annotated common-area map and its legend |
+| `landscape/` | The landscape maintenance contract (Schnepf Landscape Co., dated 2024-07-17), with review notes on what it covers for irrigation |
 | `workbook/` | Jennifer's workbooks: the water model (assumptions, monthly baseline by meter, bill history by meter by year) and the Zone Plan Model (quick wins plan, weather normals, rate notes) |

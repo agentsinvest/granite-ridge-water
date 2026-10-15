@@ -1,5 +1,5 @@
 ---
-updated: 2026-10-06
+updated: 2026-10-15
 ---
 
 # Data that would make the numbers more accurate
@@ -13,7 +13,7 @@ Ranked by how much each item improves the answers on the site. Edit `Status` as 
 | 3 | Daily weather (AZMET ETo and rain), 2021 to now | Without it, use cannot be compared with what the weather called for, month by month | The monthly water budget, weather-adjusted experiment results, the over-budget leak rule | Public (AZMET); blocked from the build environment, needs a manual export | needed |
 | 4 | Meter 4 valve: was water shut off by hand on 2026-09-18, 09-22, and 10-04, and has the 2 AM valve been inspected | Confirms the largest current leak and when it stopped | Closing or confirming the flag; starts the valve-repair experiment | Landscaper | needed |
 | 5 | Which meter waters which area (west and south desert, perimeter, interior strip). Mostly in from the Eco Verde map (2026), matched by location; needs confirmation and the meter-1 versus meter-2 split of park stations | Costs and budgets cannot be split by area until this is known | Results by area on every screen | Landscaper or controller map | partly in |
-| 6 | Quotes for repairs and upgrades (valve repair, flow sensor and master valve, nozzles, audit, the proposed $6,000 controller) | Investments show as "needs a quote" until costs are in | Payback and 5-year net for every investment | Landscaper, vendors | needed |
+| 6 | Quotes for repairs and upgrades (valve repair, flow sensor and master valve, nozzles, audit, the proposed $6,000 controller), plus the landscaper's irrigation repair labor rate (the contract bills all repairs extra but lists no rate) | Investments show as "needs a quote" until costs are in | Payback and 5-year net for every investment | Landscaper, vendors | needed |
 | 7 | City of Mesa published water rate schedule, 2025 to 2027 | Rates are derived from our own bills. The FY 26/27 recommended rates are in data/rates/2027-02-01.md; the adopted ordinance (after the December 8, 2026 vote) and older schedules are still needed | Independent rate check, 2027 projections | City of Mesa | partly in |
 | 8 | Event history: leak repairs, controller or schedule changes, overseed dates, the 2024 reserve irrigation project | Explains past jumps and keeps the leak rules from flagging known changes | How we got here annotations, fewer false leak flags | Board, management company, landscaper | needed |
 | 9 | Waterfluence read-period export back to 2021 and its monthly budget numbers | Gallons before September 2023 are only read by eye from a chart | Price vs volume split for 2021 to 2023 | Waterfluence account | needed |

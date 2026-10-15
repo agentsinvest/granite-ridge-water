@@ -12,14 +12,15 @@ status: not-started
 due: null
 after: [meter4-valve-repair]
 cost: 0
-cost_source: "A setting change on the existing controller; assumes the landscaper's contract covers it (to confirm)"
+cost_source: "A setting change on the existing controller; covered by the landscape maintenance contract (2024-07-17), section 6a: schedule adjustments are in the monthly price"
 savings_from: option:meter-4-winter-seasonal-adjust
 savings_note: "As written (30% less from November to February) this would cost a little more, not less, because of how the City sets the cheaper price block from winter use. Pair it with a summer cut, or size it after the valve repair shows the true winter use."
 evidence: [option:meter-4-winter-seasonal-adjust, flag:2025-meter-4-winter-use-high]
 verify_with: "Logged as an experiment: November daily use against October, after the valve repair."
-updated: 2026-10-07
+updated: 2026-10-15
 history:
   - { date: 2026-10-07, status: not-started, note: "Added to the action plan" }
+  - { date: 2026-10-15, status: not-started, note: "Cost source updated from the landscape maintenance contract" }
 ---
 
 Do this only after the 2 AM valve is repaired, so the stuck valve does not hide the result.

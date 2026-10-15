@@ -11,14 +11,15 @@ owner: Landscaper
 status: not-started
 due: null
 cost: 0
-cost_source: "A setting change on the existing controller; assumes the landscaper's contract covers it (to confirm)"
+cost_source: "A setting change on the existing controller; covered by the landscape maintenance contract (2024-07-17), section 6a: schedule adjustments are in the monthly price"
 savings_from: option:park-controller-tune-up
 savings_note: "The yearly figure is for keeping the 10% cut on both park meters all year, if the 4-week test goes well."
 evidence: [option:park-controller-tune-up, source:docs/analysis/2026-10-06-are-we-overwatering]
 verify_with: "Logged as an experiment: daily use on the test meter drops about 10% against the 4 weeks before, with the lawn still green."
-updated: 2026-10-07
+updated: 2026-10-15
 history:
   - { date: 2026-10-07, status: not-started, note: "Added to the action plan" }
+  - { date: 2026-10-15, status: not-started, note: "Cost source updated from the landscape maintenance contract" }
 ---
 
 Lower the weather adjustment on the park controller by 10 points on one park meter for four weeks, then compare daily water use before and after. Get the settings printout first so the change can be undone exactly.

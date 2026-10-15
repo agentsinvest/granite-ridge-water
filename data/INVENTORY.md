@@ -33,6 +33,7 @@ Full transcriptions of every file below are in `/sources/` (see `sources/README.
 | (screenshot in chat) | Waterfluence Summary of 1 Sites: landscape characteristics and annual performance | all | last 12 months | `sources/waterfluence/summary-landscape-and-annual-performance.md` | Applied 2.8 ft vs budget 3.0 ft (95%) |
 | `controllers/Granite_Ridge_Final_Report_PDF_1.pdf` (31 pages) | Eco Verde Irrigation full irrigation assessment: zone and valve map, Entrance controller settings, Park station flow rates, recommendations, repairs, City incentives | all 4 | assessment 2026-02-16, settings 2026-03-29 | `sources/controllers/eco-verde-assessment-2026.md`; meters, events, flags, investments | Park run times not included (only page 3 of 9 of the Park settings report). Meter for each point of connection inferred from location |
 | `controllers/MultiCtrlr_Alert_2025-04-04.pdf`, `MultiCtrlr_MeasuredUsage_2025-04-04.pdf` | HydroPoint WeatherTRAK alerts and flow-sensor gallons for the Entrance and Park controllers | meters 1 to 3 | 2025-03-06 to 2025-04-04 | `sources/controllers/hydropoint-reports-2025-04-04.md`; `events.md` | Park drip stations 13 and 14 low-flow alerts on six nights |
+| `landscape/Granite_Ridge_2025_-_Landscape_Maintenance_Contract_2.pdf` (5 pages, shared 2026-10-15) | Landscape maintenance contract specifications, terms, and price ($3,442.00 a month) | all | dated 2024-07-17, month to month; price matches the 2025 P&L | `sources/landscape/maintenance-contract-2024-07-17.md`; option and action cost sources, action `landscape-contract-irrigation-duties` | Schedule adjustments are in the monthly price (6a); irrigation repairs, controller work, manual watering, and overseeding are extra. HOA signature blank on this copy |
 | `maps/areas-aerial.webp` | Aerial with 5 named areas (A to E), square footages, slope note. Published on the HOA website | n/a | n/a | `areas.md` | Gross common-area square footage (no homeowner lots, confirmed by Jennifer 2026-10-06); not irrigated area |
 
 The P&Ls also contain bank account digits and owner names (construction deposits). Those were not copied into `/data/`.
@@ -114,8 +115,8 @@ Ranked by what unblocks the most.
 6. Which taxes and fees appear on the bills, and which charges are they applied to? (Partly answered: water drought, Superfund, $7.32 other fees, and about 8.29% taxes. The exact tax split needs one full City bill.)
 7. Does Waterfluence calculate its own water budget, and which weather source does it use? (Answered: yes, Landscape Coefficient Method with AZMET Encanto weather. See `config/plant-factors.md`.)
 8. Which AZMET station is closest and representative for Granite Ridge? (Partly answered: Waterfluence uses Encanto, in central Phoenix. Check for a closer station once azmet.arizona.edu is reachable.)
-9. The P&Ls show overseeding every year ($2,520.00 to $4,137.00). Is the turf Bermuda overseeded with winter rye, and in which months does overseed watering run?
-10. Who is the landscaper, and do they have a zone map with square footage? (Name stays out of `/data/`; we only need the map.)
+9. The P&Ls show overseeding every year ($2,520.00 to $4,137.00). Is the turf Bermuda overseeded with winter rye, and in which months does overseed watering run? (Partly answered: the landscape contract confirms Bermuda overseeded with perennial rye, billed separately from the monthly price. The watering months are still unknown.)
+10. Who is the landscaper, and do they have a zone map with square footage? (Partly answered: the 2024-07-17 contract is in `sources/landscape/`. Name stays out of `/data/`. The zone map is still needed; the contract does not include one.)
 11. Which plant factor and efficiency source does the HOA want to treat as authoritative (for example WUCOLS, ADWR, AMWUA, or the landscaper)?
 12. Does the management company report the P&L on a cash or accrual basis? (Decides whether P&L water totals should match bill service periods.)
 13. What was the 2022 "Landscape Irrigation Equipment Incentives" rebate for (controllers, nozzles, something else), and when was it installed?
@@ -133,6 +134,8 @@ Ranked by what unblocks the most.
 25. What were the $120.51 extra on meter-1's 2025-09-26 bill and the $3.25 extra on its 2025-10-24 bill? (Answered from the City bills: a late fee of $111.27 plus $9.24 tax, and a $3.00 delinquent letter charge plus $0.25 tax.)
 26. What are Waterfluence's "Lost $" ($3.6k) and "Score" (98)?
 27. Was a leak fixed or a zone changed on meter-4 in late 2024 (its year-round flow stopped then)?
+28. Was the HOA billed for the 6-hour manual park watering on 2025-03-24? The landscape contract lists manual watering as an extra charge (section 7n).
+29. Is there a signed copy of the 2024-07-17 landscape contract, and does section 8 (included services) override the conflicting exclusions in section 7 (fertilizer, pre-emergent)?
 
 ## Unknown values in /data/ right now
 
