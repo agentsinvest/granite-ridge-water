@@ -1,0 +1,103 @@
+import type { SiteData } from '../../scripts/site-data'
+import { fmt } from '../lib/data'
+import { Markdown } from './Markdown'
+
+type Problem = SiteData['landscapeProblems'][number]
+
+const STATUS_TEXT: Record<Problem['status'], string> = {
+  open: 'Not raised yet',
+  asked: 'Raised, waiting on an answer',
+  resolved: 'Resolved',
+}
+
+export const activeLandscapeProblems = (data: SiteData) => data.landscapeProblems.filter((p) => p.status !== 'resolved')
+
+/** What the HOA paid on a P&L account, latest years first, from data/financials/. */
+function paid(data: SiteData, account: string): { year: string; actual: number }[] {
+  return Object.entries(data.financials)
+    .flatMap(([year, f]) => {
+      const line = f.lines.find((l) => l.account === account)
+      return line?.actual != null ? [{ year, actual: line.actual }] : []
+    })
+    .sort((a, b) => b.year.localeCompare(a.year))
+    .slice(0, 4)
+}
+
+/** Problems with how the landscape is maintained or contracted, in rank order. Not leaks: they explain why leaks and waste go unnoticed or cost more. */
+export function LandscapeProblems({ data }: { data: SiteData }) {
+  const problems = activeLandscapeProblems(data)
+  if (problems.length === 0) return <p className="mt-3 text-ink-2">No open landscape problems right now.</p>
+  return (
+    <ul className="mt-4 space-y-4">
+      {problems.map((p) => (
+        <Card key={p.id} p={p} data={data} />
+      ))}
+    </ul>
+  )
+}
+
+function Card({ p, data }: { p: Problem; data: SiteData }) {
+  const headingId = `landscape-${p.id}-heading`
+  const action = p.action ? data.actions.find((a) => a.id === p.action) : undefined
+  const flags = p.related_flags.map((id) => data.flags.find((f) => f.id === id)).filter((f) => f != null)
+  const costs = p.cost_account ? paid(data, p.cost_account) : []
+  return (
+    <li id={`landscape-${p.id}`} aria-labelledby={headingId} className="scroll-mt-6 rounded-xl border-l-4 border-serious bg-surface p-5 ring-1 ring-[var(--ring)]">
+      <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+        <span className="inline-flex items-center gap-1.5 rounded-md border-2 border-serious px-2 py-0.5 font-semibold">
+          <span aria-hidden="true">!</span>
+          {STATUS_TEXT[p.status]}
+        </span>
+        {p.contract_sections.length > 0 && (
+          <span className="text-ink-2">
+            Contract {p.contract_sections.length === 1 ? 'section' : 'sections'} {p.contract_sections.join(', ')}
+          </span>
+        )}
+      </p>
+      <h3 id={headingId} className="mt-3 text-lg font-bold">
+        {p.title}
+      </h3>
+      {costs.length > 0 && (
+        <p className="mt-2 font-semibold">
+          HOA paid {costs.map((c) => `${fmt.usd(c.actual)} in ${c.year}`).join(', ')}
+        </p>
+      )}
+      <p className="mt-3 max-w-prose">{p.summary}</p>
+      {p.body && (
+        <div className="mt-3 max-w-prose text-sm text-ink-2">
+          <Markdown text={p.body} />
+        </div>
+      )}
+      {(action || flags.length > 0) && (
+        <dl className="mt-4 space-y-2 text-sm">
+          {action && (
+            <div>
+              <dt className="inline font-semibold">What we are doing: </dt>
+              <dd className="inline">
+                <a href={`#action/${action.id}`} className="underline underline-offset-4">
+                  {action.title}
+                </a>
+              </dd>
+            </div>
+          )}
+          {flags.length > 0 && (
+            <div>
+              <dt className="inline font-semibold">Related leaks: </dt>
+              <dd className="inline">
+                {flags.map((f, i) => (
+                  <span key={f.id}>
+                    {i > 0 && '; '}
+                    <a href={`#problems/${f.id}`} className="underline underline-offset-4">
+                      {f.title}
+                    </a>
+                  </span>
+                ))}
+              </dd>
+            </div>
+          )}
+        </dl>
+      )}
+      <p className="mt-3 text-sm text-ink-2">Source: {p.source}</p>
+    </li>
+  )
+}
