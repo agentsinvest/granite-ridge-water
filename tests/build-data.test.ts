@@ -56,6 +56,15 @@ describe('buildData', () => {
     expect(() => buildData(dir)).toThrow(/em dash/)
   })
 
+  it('reads landscape problems in rank order and checks their links', () => {
+    const d = buildData()
+    expect(d.landscapeProblems.map((p) => p.rank)).toEqual([...d.landscapeProblems.map((p) => p.rank)].sort((a, b) => a - b))
+    expect(d.landscapeProblems.map((p) => p.id)).toEqual(['irrigation-repairs-billed-extra'])
+    expect(d.landscapeProblems[0].paid.map((x) => x.amount)).toEqual([2555, 3214, 1456])
+    const actionIds = new Set(d.actions.map((a) => a.id))
+    for (const p of d.landscapeProblems) if (p.action) expect(actionIds.has(p.action)).toBe(true)
+  })
+
   it('reads action files and names their evidence documents', () => {
     const d = buildData()
     expect(d.actions).toHaveLength(13)

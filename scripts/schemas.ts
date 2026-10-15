@@ -496,6 +496,22 @@ export const actionSchema = z.object({
 })
 export type Action = z.infer<typeof actionSchema>
 
+/** A problem with how the landscape is maintained or contracted (landscape/<id>.md). Not a leak: these explain why leaks and waste go unnoticed or cost more. */
+export const landscapeProblemSchema = z.object({
+  id: z.string().regex(/^[a-z0-9-]+$/),
+  rank: z.number().int().positive(),
+  title: z.string().min(1),
+  summary: z.string().min(1),
+  status: z.enum(['open', 'asked', 'resolved']),
+  paid: z.array(z.object({ period: z.string().min(1), amount: z.number().nonnegative(), source: z.string().min(1) })).default([]),
+  action: z.string().nullable().default(null),
+  related_flags: z.array(z.string()).default([]),
+  source: z.string().min(1),
+  updated: isoDate,
+  todo: z.string().optional(),
+})
+export type LandscapeProblem = z.infer<typeof landscapeProblemSchema>
+
 export const controllerSchema = z.object({
   id: z.string().regex(/^[A-Z]$/),
   name: z.enum(['Park', 'Entrance', 'B']),

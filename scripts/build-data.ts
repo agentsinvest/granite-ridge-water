@@ -78,6 +78,7 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
     dailyEto: null,
     actions: [],
     evidenceLabels: {},
+    landscapeProblems: [],
     controllers: [],
     openTodos: [],
   }
@@ -212,6 +213,10 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
       if (a.history.at(-1)!.date > a.updated) fail(file, keyLine(text, 'updated'), 'updated is before the last history entry')
       for (let i = 1; i < a.history.length; i++) if (a.history[i].date < a.history[i - 1].date) fail(file, keyLine(text, 'history'), 'history must be oldest first')
       out.actions.push({ ...a, body: p.body.trim() })
+    } else if (rel.match(/^landscape\/[^/]+\.md$/)) {
+      const lp = check(S.landscapeProblemSchema, fm, file, text)
+      if (`landscape/${lp.id}.md` !== rel) fail(file, keyLine(text, 'id'), 'id does not match file name')
+      out.landscapeProblems.push({ ...lp, body: p.body.trim() })
     } else if (rel === 'data-needs.md') {
       check(S.dataNeedsFrontmatterSchema, fm, file, text)
       out.dataNeeds = rows(firstTable(p, ['Priority', 'Need'], file), S.dataNeedRowSchema, file).map((r) => ({
@@ -310,6 +315,12 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
       }
     }
   }
+  for (const lp of out.landscapeProblems) {
+    const where = `data/landscape/${lp.id}.md`
+    if (lp.action && !actionIds.has(lp.action)) fail(where, null, `unknown action "${lp.action}"`)
+    for (const id of lp.related_flags) if (!flagIds.has(id)) fail(where, null, `unknown flag "${id}"`)
+  }
+  out.landscapeProblems.sort((a, b) => a.rank - b.rank || a.id.localeCompare(b.id))
   for (const c of out.controllers) {
     const where = `data/controllers`
     for (const m of [...c.meters, ...c.stations.flatMap((s) => (s.meter ? [s.meter] : []))]) if (!meterIds.has(m)) fail(where, null, `controller ${c.id}: unknown meter "${m}"`)

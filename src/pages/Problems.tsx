@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import type { SiteData } from '../../scripts/site-data'
 import { LeakFlags, dollarRange } from '../components/LeakFlags'
+import { LandscapeProblems, activeLandscapeProblems } from '../components/LandscapeProblems'
 import { WateringAfterRain } from '../components/WateringAfterRain'
 import { WateringChecks } from '../components/WateringChecks'
 import { WinterBaseSection } from '../components/WinterBase'
@@ -15,6 +16,7 @@ export function Problems({ data, model }: { data: SiteData; model: Model }) {
   const high = priced.reduce((s, c) => s + c.cost!.high!, 0)
   const rain = useMemo(() => buildRainCheck(data), [data])
   const checks = data.meters.reduce((n, m) => n + (m.checks?.length ?? 0), 0)
+  const landscape = activeLandscapeProblems(data).length
   return (
     <article>
       <PageHeader title="Problems" lead="What looks broken or wasteful in the water use right now, most expensive first." />
@@ -22,6 +24,7 @@ export function Problems({ data, model }: { data: SiteData; model: Model }) {
         <Stat value={String(costed.length)} label={costed.length === 1 ? 'possible leak flagged' : 'possible leaks flagged'} flag={costed.length > 0} />
         <Stat value={priced.length ? dollarRange(low, high) : 'Not priced'} label="extra charges so far, where priced" flag={priced.length > 0} />
         <Stat value={String(checks)} label="watering questions for the landscaper" />
+        <Stat value={String(landscape)} label={landscape === 1 ? 'landscape cost to watch' : 'landscape costs to watch'} flag={landscape > 0} />
       </Stats>
 
       <Section id="leaks" title="Possible leaks" lead="Each one says what we saw, roughly what it cost, and what to check next. None are confirmed leaks yet.">
@@ -30,6 +33,10 @@ export function Problems({ data, model }: { data: SiteData; model: Model }) {
 
       <Section id="checks" title="Watering checks" lead="Not leaks, but worth raising with the landscaper: water that stopped when it should not have, or watering we cannot explain yet.">
         <WateringChecks data={data} />
+      </Section>
+
+      <Section id="landscape" title="Landscape" lead="Not leaks, but landscape costs tied to the irrigation system, from the HOA's financial reports.">
+        <LandscapeProblems data={data} />
       </Section>
 
       <WinterBaseSection data={data} model={model} />
