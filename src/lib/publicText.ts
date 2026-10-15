@@ -16,7 +16,6 @@ const NAMES: [RegExp, string][] = [
   [/^sources\/city/, 'City of Mesa documents'],
   [/^sources\/(pl|bills)/, 'HOA financial records'],
   [/^sources\/maps/, 'the HOA area map'],
-  [/^sources\/landscape/, 'the landscape maintenance contract'],
   [/^docs\/analysis/, "the HOA's water analysis notes"],
 ]
 

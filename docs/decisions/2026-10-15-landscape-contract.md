@@ -36,3 +36,4 @@ Jennifer decided not to publish the contract review on the public site. The Prob
 ## Contract changes withdrawn from public data (same day)
 
 Jennifer asked to remove the rest of the contract work from anything the site shows. Reverted to their state before this decision: the cost sources on four options and five actions (back to "assumes the landscaper's contract covers it (to confirm)"), the overseeding decision text, the rain-response evidence, and the quotes row in `data-needs.md`. Removed the action `landscape-contract-irrigation-duties`. What stays: the private contract copy and notes in `sources/landscape/`, `INVENTORY.md` (not published), and the irrigation repairs card.
+* Later the same day: the card's contract mentions were removed too (summary, source, and the `contract_sections` field, now dropped from the schema), and the `sources/landscape` label in `publicText.ts` was reverted. The card cites only the HOA financial reports.

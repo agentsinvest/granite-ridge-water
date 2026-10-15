@@ -36,11 +36,6 @@ function Card({ p, data }: { p: Problem; data: SiteData }) {
           <span aria-hidden="true">!</span>
           {STATUS_TEXT[p.status]}
         </span>
-        {p.contract_sections.length > 0 && (
-          <span className="text-ink-2">
-            Contract {p.contract_sections.length === 1 ? 'section' : 'sections'} {p.contract_sections.join(', ')}
-          </span>
-        )}
       </p>
       <h3 id={headingId} className="mt-3 text-lg font-bold">
         {p.title}
