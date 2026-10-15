@@ -32,3 +32,7 @@ Jennifer decided not to publish the contract review on the public site. The Prob
 
 * Amounts are written in the card's `paid` list with a source per row, instead of being read from `data/financials/`. The 2026 figure comes from the August 2026 monthly report (`sources/pl/2026-08.md`), a partial year. Adding it to `data/financials/` would have made Home, History, and Quick wins treat it as a full year.
 * The section is titled "Landscape" with neutral wording, and the card does not link to the contract action.
+
+## Contract changes withdrawn from public data (same day)
+
+Jennifer asked to remove the rest of the contract work from anything the site shows. Reverted to their state before this decision: the cost sources on four options and five actions (back to "assumes the landscaper's contract covers it (to confirm)"), the overseeding decision text, the rain-response evidence, and the quotes row in `data-needs.md`. Removed the action `landscape-contract-irrigation-duties`. What stays: the private contract copy and notes in `sources/landscape/`, `INVENTORY.md` (not published), and the irrigation repairs card.

@@ -67,9 +67,8 @@ describe('buildData', () => {
 
   it('reads action files and names their evidence documents', () => {
     const d = buildData()
-    expect(d.actions).toHaveLength(14)
+    expect(d.actions).toHaveLength(13)
     expect(d.evidenceLabels['sources/controllers/eco-verde-assessment-2026']).toMatch(/Eco Verde/)
-    expect(d.evidenceLabels['sources/landscape/maintenance-contract-2024-07-17']).toBeTruthy()
   })
 
   it('fails on an action that points at a flag that does not exist', () => {

@@ -10,7 +10,7 @@ change:
 touches_greenspace: true
 has_trees: true
 upfront_cost: 0
-upfront_cost_source: "Controller setting change by the current landscaper; covered by the landscape maintenance contract (2024-07-17), section 6a: schedule adjustments are in the monthly price"
+upfront_cost_source: "Controller setting change by the current landscaper; assumes their contract covers it (to confirm)"
 effort: low
 source: "sources/waterfluence/monthly-chart-2021-2026.md (summer peaks read by eye); docs/analysis/2026-10-06-are-we-overwatering.md, finding 5"
 confidence: low

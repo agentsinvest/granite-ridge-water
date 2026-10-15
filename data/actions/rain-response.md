@@ -11,13 +11,12 @@ owner: Landscaper
 status: not-started
 due: null
 cost: "needs quote"
-cost_source: "Setting a rain pause is a schedule change covered by the landscape maintenance contract (2024-07-17), section 6a. Moving the rain sensor is irrigation repair work, billed extra (sections 6b and 7m); no quote on file"
+cost_source: "Moving the rain sensor and setting a rain pause need a quote or a yes from the landscaper"
 evidence: [source:sources/controllers/eco-verde-assessment-2026, investment:weathertrak-auto-mode]
 verify_with: "after the next rain of 0.25 in or more, meters 1 and 2 do not water through the rain or start again before the skip window ends"
-updated: 2026-10-15
+updated: 2026-10-07
 history:
   - { date: 2026-10-07, status: not-started, note: "Added to the action plan" }
-  - { date: 2026-10-15, status: not-started, note: "Cost source updated from the landscape maintenance contract" }
 ---
 
 Eco Verde's February 2026 assessment found two likely causes: every park station runs on run times the landscaper sets by hand, and the rain sensor is poorly placed. The "Watering after rain" section on the Problems screen lists every rain since July 2026 and what each meter did.
