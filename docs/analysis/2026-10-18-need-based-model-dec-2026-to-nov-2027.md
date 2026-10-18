@@ -9,7 +9,7 @@ Revised the same day after Jennifer's review:
 * Overseed watering is now modeled as a few weeks of germination plus watering the established rye, at a leaner rye plant factor.
 * The City's 2027 rates are assumed to pass as recommended (Council vote December 8, 2026).
 
-Short answer: **there is enough data for a planning model with honest ranges, not for a firm zone-by-zone budget.** On plant need, the next 12 bills should total about **2.8 to 3.6 million gallons without overseeding, against 6.4 million at today's pace: 43% to 56% less water.** That costs about **$34,000 to $43,000**, against about **$63,500 if nothing changes.** Overseeding adds about 0.4 to 0.8 million gallons and $1,900 to $3,100 in water, plus the $4,137 overseed charge.
+Short answer: **there is enough data for a planning model with honest ranges, not for a firm zone-by-zone budget.** On plant need, the next 12 bills should total about **2.8 to 3.6 million gallons without overseeding, against 6.4 million at today's pace: 43% to 56% less water.** That costs about **$34,000 to $43,000**, against about **$63,500 if nothing changes.** Overseeding adds about 0.4 to 0.8 million gallons and $1,900 to $3,100 in water, plus the overseed charge. That charge was $4,137 a year when it included the entry turf; it should be lower now (about $3,700 if priced by turf area, not yet quoted).
 
 Three findings matter most:
 
@@ -116,7 +116,7 @@ The bill ending November 2027 includes the October 2027 germination.
 | B cautious, overseed | 4.37 | $46,100 | $69 |
 | B cautious, no overseed, winter water kept at last year's level | 4.29 | $40,200 | $60 |
 
-Overseed charges ($4,137 a year on the P&Ls) are not in these water costs.
+Overseed charges are not in these water costs. The P&L charge of $4,137 a year included the entry turf, which is now artificial.
 
 ## Overseeding: how much water it really adds
 
@@ -130,8 +130,10 @@ The larger part is watering the established rye through the winter. Bermuda goin
 | Established rye, November to March | about 310,000 | about 620,000 |
 | **Total extra water** | **about 420,000** | **about 770,000** |
 | Extra water cost | $1,855 | $3,080 |
-| Overseed charge | $4,137 | $4,137 |
-| **Total cost of overseeding** | **about $6,000** | **about $7,200** |
+| Overseed charge, park only (estimate) | about $3,700 | about $3,700 |
+| **Total cost of overseeding** | **about $5,500** | **about $6,800** |
+
+The park-only charge is an estimate: $4,137 x 76,600 / 86,354 sq ft, treating the difference between Jennifer's map and Waterfluence's turf area as the old entry turf. That split is not confirmed; the landscaper's park-only price replaces it.
 
 The water cost looks small for the gallons because rye water also raises the winter base, and that lowers the price of summer water.
 
@@ -208,3 +210,4 @@ The bill calculator mirrors `src/engine/billing.ts` and reproduces meter 1's bil
 3. The adopted 2027 rate ordinance after December 8, 2026.
 4. A catch-can audit on 2 or 3 park turf zones, to replace the 0.70 to 0.75 efficiency guess.
 5. The overseed and winter-watering decision, by about November 13, 2026.
+6. The landscaper's park-only overseed price, now that the entry turf is gone.
