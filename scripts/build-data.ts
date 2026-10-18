@@ -72,6 +72,7 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
     budgetCheck: null,
     meterYears: null,
     turfMinimum: null,
+    needModel: null,
     monthlyNormals: null,
     quickWins: null,
     dailyRain: null,
@@ -238,6 +239,15 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
       out.turfMinimum = {
         turfAreaSqFt: f.turf_area_sq_ft, plantFactor: f.plant_factor, efficiency: f.efficiency, effectiveRainShare: f.effective_rain_share, source: f.source, confidence: f.confidence,
       }
+    } else if (rel === 'budget/need-model.md') {
+      const f = check(S.needModelFrontmatterSchema, fm, file, text)
+      const r = rows(firstTable(p, ['Meter', 'Turf share'], file), S.needModelRowSchema, file)
+      out.needModel = {
+        ...f,
+        meters: r.map((x) => ({
+          meter: x.Meter, turfShare: x['Turf share'], desertSqFt: x['Desert sq ft'], dripShare: x["Drip share of today's use"], todayKept: x["Today's use kept"], source: x.Source, confidence: x.Confidence,
+        })),
+      }
     } else if (rel === 'weather/monthly-normals.md') {
       const f = check(S.monthlyNormalsFrontmatterSchema, fm, file, text)
       const r = rows(firstTable(p, ['Month', 'ETo in'], file), S.monthlyNormalsRowSchema, file)
@@ -281,6 +291,11 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
   if (out.quickWins) {
     const ids = new Set(out.investments.map((i) => i.id as string))
     for (const l of Object.values(out.quickWins.levers)) if (l.investment && !ids.has(l.investment)) fail('data/scenarios/quick-wins.md', null, `unknown investment "${l.investment}"`)
+  }
+  if (out.needModel) {
+    for (const r of out.needModel.meters) if (!meterIds.has(r.meter)) fail('data/budget/need-model.md', null, `unknown meter "${r.meter}"`)
+    const turf = out.needModel.meters.reduce((s, r) => s + (r.turfShare ?? 0), 0)
+    if (Math.abs(turf - 1) > 0.001) fail('data/budget/need-model.md', null, `turf shares add to ${turf}, not 1`)
   }
   for (const r of out.meterYears?.rows ?? []) if (!meterIds.has(r.meter)) fail('data/history/by-meter-year.md', null, `unknown meter "${r.meter}"`)
   for (const r of (out.config.site as { rain_check?: { plant_factors: { value: { meters: string[] }[] } } }).rain_check?.plant_factors.value ?? [])

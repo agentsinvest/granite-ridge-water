@@ -565,3 +565,44 @@ export const dailyWeatherFrontmatterSchema = z.object({
 export const dailyRainRowSchema = z.object({ Date: cellDate, 'Rain in': cellNumber, Reported: z.string().min(1, 'copy what the gauge reported') })
 export const dailyEtoRowSchema = z.object({ Date: cellDate, 'ETo in': cellNumber })
 
+
+const needCase = z.object({
+  label: z.string().min(1),
+  description: z.string().min(1),
+  turf_area_sq_ft: sourcedNumber,
+  bermuda_plant_factor: sourcedNumber,
+  rye_plant_factor: sourcedNumber,
+  seeding_weeks: sourcedNumber,
+  seeding_plant_factor: sourcedNumber,
+  turf_efficiency: sourcedNumber,
+  desert_plant_factor: sourcedNumber,
+  drip_efficiency: sourcedNumber,
+  cap_drip_at_current_use: z.boolean(),
+})
+export type NeedCase = z.infer<typeof needCase>
+const monthNumber = z.number().int().min(1).max(12)
+export const needModelFrontmatterSchema = z.object({
+  title: z.string(),
+  first_bill_month: z.string().regex(/^\d{4}-\d{2}$/, 'must be YYYY-MM'),
+  bills: z.number().int().min(1).max(24),
+  bill_end_day: sourcedNumber,
+  rain_share: sourcedNumber,
+  rye_months: z.array(monthNumber),
+  rye_months_source: z.string(),
+  seeding_month: monthNumber,
+  seeding_note: z.string(),
+  rates_note: z.string(),
+  cases: z.object({ lean: needCase, cautious: needCase }),
+  source: z.string(),
+  confidence,
+  todo: z.string().optional(),
+})
+export const needModelRowSchema = z.object({
+  Meter: z.string().regex(/^meter-\d+$/),
+  'Turf share': cellNumber,
+  'Desert sq ft': cellNumber,
+  "Drip share of today's use": cellNumber,
+  "Today's use kept": cellNumber,
+  Source: z.string().min(1),
+  Confidence: confidence,
+})

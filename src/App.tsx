@@ -19,6 +19,7 @@ import { DataAccuracy } from './pages/DataAccuracy'
 import { Problems } from './pages/Problems'
 import { Controllers } from './pages/Controllers'
 import { Checklist } from './pages/Checklist'
+import { NextYear } from './pages/NextYear'
 
 type Model = ReturnType<typeof buildModel>
 type Tab = { id: string; label: string; render: (r: Route, m: Model) => ReactNode }
@@ -47,6 +48,7 @@ const SCREENS: Screen[] = [
       { id: 'controllers', label: 'Controllers and zones', render: (_, m) => <Controllers data={data} model={m} /> },
       { id: 'schedule', label: 'When it waters', render: () => <Schedule data={data} /> },
       { id: 'budget', label: 'How much should we use', render: (_, m) => <HowMuch data={data} model={m} /> },
+      { id: 'next-year', label: 'Next year: need and cost', render: (r) => <NextYear data={data} query={r.query} /> },
     ],
   },
   {
