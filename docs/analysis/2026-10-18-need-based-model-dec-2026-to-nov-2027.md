@@ -137,6 +137,21 @@ The park-only charge is an estimate: $4,137 x 76,600 / 86,354 sq ft, treating th
 
 The water cost looks small for the gallons because rye water also raises the winter base, and that lowers the price of summer water.
 
+### Check against the fall 2025 overseed
+
+The HOA overseeded in fall 2025 (Jennifer, 2026-10-18), so last winter's park bills show what an overseeded winter actually used.
+
+| Park meters 1 and 2, thousand gallons | Nov | Dec | Jan | Feb | Mar | Total |
+|---|---|---|---|---|---|---|
+| Actual, bills ending Nov 2025 to Mar 2026 (overseeded) | 367 | 161 | 173 | 244 | 254 | 1,199 |
+| Modeled need, rye, Case A | 252 | 69 | 51 | 72 | 124 | 568 |
+| Modeled need, rye, Case B | 372 | 133 | 98 | 131 | 232 | 966 |
+| Modeled need, dormant Bermuda, Case A | 110 | 18 | 0 | 0 | 49 | 177 |
+
+* **Germination was small, as Jennifer said.** The bill covering late October to early November 2025 (367) was lower than the bill before it (542).
+* **The rye was watered well above need.** Last winter used about 2.1 times Case A's rye need and 1.2 times Case B's. So the model does not overstate rye water; last winter's watering was above it. Part of the gap is the park drip and the nightly 10 PM program, which also run in winter.
+* So the saving from skipping overseed, measured against what was actually used last winter, is larger than the model's 420,000 to 770,000 gallons: about 1.0 million (1,199 actual minus 177 dormant need). About half of that is overwatering the rye, which could be cut even if the HOA keeps overseeding.
+
 ## The winter base trade-off
 
 From the February 2027 bill, each meter's water is priced in three steps (plus drought charge and tax):
