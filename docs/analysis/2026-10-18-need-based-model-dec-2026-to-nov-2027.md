@@ -145,6 +145,23 @@ Total: about **237,000 gallons.**
 | Fee | | $7.32 |
 | **Bill** | | **$2,628.20** |
 
+### How much of the cost is surcharge
+
+Every bill in the tables is priced through the City's blocks, so the surcharge above the winter base is already included. Over the 12 bills:
+
+| Thousand gallons billed at | Case A | Case B |
+|---|---|---|
+| Included (first 3,000 a bill) | 121 | 131 |
+| Base price, up to the winter average ($5.95, then $6.84) | 696 | 1,372 |
+| Tier 1 surcharge, up to 1.5 times the average ($10.28; $8.94 on the December and January bills) | 312 | 567 |
+| Tier 2 surcharge, above 1.5 times the average ($10.58) | 2,114 | 2,304 |
+| **Surcharge paid above the base price** | **about $9,000** | **about $10,600** |
+
+About two-thirds of the water lands in Tier 2, because the winter average is low:
+
+* **Park meters (rye watered to need):** meter 1 averages 40,000 (A) to 74,000 (B) gallons on the December to February bills, and meter 2 averages 24,000 to 46,000.
+* **Meters 3 and 4 (desert drip):** both average about zero in winter. Desert drip needs almost no winter water, so all of their spring and summer water pays $10.58.
+
 ## The two cases
 
 | | Case A: lean | Case B: cautious |
