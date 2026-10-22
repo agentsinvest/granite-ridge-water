@@ -180,7 +180,7 @@ Written for homeowners, not the board. Five screens in the menu, plus About the 
 1. Home: cost per home per month vs the $30K goal, progress bar in three bands (verified, in progress, proposed), up to 3 "Fix now" action cards, what changed, spending by year and by meter.
 2. Action plan: every action in `/data/actions/` grouped by status with owner, meter, and lawn filters; a page per action (`#action/<id>`); the Quick wins plan as a tab; a printable landscaper checklist (`#checklist`).
 3. Problems: leak flags and watering checks.
-4. Where the water goes: meters and map, controllers and zones (`/data/controllers/`), when it waters, how much should we use.
+4. Where the water goes: meters and map, controllers and zones (`/data/controllers/`), when it waters, how much should we use, next year's need and cost (`/data/budget/need-model.md`).
 5. Savings calculator: What if, Is an investment worth it?, Did it work? (experiments).
 6. History and bills: how we got here, every bill with its reconciliation badge.
 7. About the data (footer): freshness, data requests, glossary. Maintainer notes show only with `?maintainer=1`.

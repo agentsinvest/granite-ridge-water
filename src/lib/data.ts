@@ -20,6 +20,7 @@ export const fmt = {
   gallons: (thousand: number) =>
     thousand >= 1000 ? `${(thousand / 1000).toFixed(1)} million gallons` : `${Math.round(thousand).toLocaleString('en-US')},000 gallons`,
   month: (iso: string) => new Date(`${iso}T12:00:00`).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+  day: (iso: string) => new Date(`${iso}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
 }
 
 /** "Meter 1 · East park (…8300)": the one way meters are named across the site. Missing parts are left out, never guessed. */

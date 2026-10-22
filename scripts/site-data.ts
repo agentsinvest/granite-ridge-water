@@ -1,4 +1,4 @@
-import type { Action, AreaRow, LandscapeProblem, Controller, Bill, Experiment, Flag, Meter, MoveOption, QuickWinsPlan, Rate, SiteMap } from './schemas'
+import type { Action, AreaRow, NeedCase, LandscapeProblem, Controller, Bill, Experiment, Flag, Meter, MoveOption, QuickWinsPlan, Rate, SiteMap } from './schemas'
 
 export type BillingPeriod = { start: string; end: string; usage: number | null }
 export type DailyUsage = { date: string; gallons: number | null; hours: number | null; minHour: number | null }
@@ -34,6 +34,24 @@ export type SiteData = {
     effectiveRainShare: { value: number; source: string; confidence: string }
     source: string
     confidence: string
+  } | null
+  /** Inputs for the next-12-bills need model. Blank meter cells are null and show as missing. */
+  needModel: {
+    title: string
+    first_bill_month: string
+    bills: number
+    bill_end_day: { value: number; source: string; confidence: string }
+    rain_share: { value: number; source: string; confidence: string }
+    rye_months: number[]
+    rye_months_source: string
+    seeding_month: number
+    seeding_note: string
+    rates_note: string
+    cases: { lean: NeedCase; cautious: NeedCase }
+    source: string
+    confidence: string
+    todo?: string
+    meters: { meter: string; turfShare: number | null; desertSqFt: number | null; dripShare: number | null; todayKept: number | null; source: string; confidence: string }[]
   } | null
   monthlyNormals: {
     etoSource: string
