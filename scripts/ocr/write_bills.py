@@ -51,13 +51,16 @@ for r in A['good']:
         skipped.append((m,bd,'month collision '+month)); continue
     items=[(n,v) for n,v in r['items']]
     if not any(n=='Water drought' for n,_ in items): items.insert(2,('Water drought',0.0)) if r['n_lines']==5 else None
-    oth=[]
+    oth=[]; skipped_pay=False
     for lab,v in r['other']:
+        # Payments and subtotals are printed among the other charges but are not charges; adding them inflated totals (fixed 2026-11-03).
+        if re.search(r'payment|adjust|total oth',lab or '',re.I):
+            notes.append(f'Left out "{lab}" ${v:.2f}: a payment or subtotal, not a charge.'); skipped_pay=True; continue
         n=other_name(lab)
         if n is None: notes.append(f'Unrecognized other charge "{lab}" ${v:.2f} on the bill.'); review=True; n=lab or 'Other charge'
         oth.append((n,v))
     ot=r.get('other_total')
-    if ot is None: ot=round(sum(v for _,v in oth),2)
+    if ot is None or skipped_pay: ot=round(sum(v for _,v in oth),2)
     elif abs(sum(v for _,v in oth)-ot)>0.005:
         notes.append(f'Other charges listed (${sum(v for _,v in oth):.2f}) do not add to the printed other total (${ot:.2f}); the printed total is used.'); review=True
         oth=[('Other fees',ot)] if not oth else oth

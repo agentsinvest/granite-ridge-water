@@ -187,6 +187,7 @@ export const hourlyRowSchema = z.object({
 export const financialsFrontmatterSchema = z.object({
   year: z.number(),
   basis: z.enum(['cash', 'accrual']).nullable(),
+  basis_source: z.string().optional(),
   report_generated: z.union([date, z.date()]),
   source: z.string(),
   water_irrigation_december: z.number(),
