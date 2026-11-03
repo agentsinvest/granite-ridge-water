@@ -91,3 +91,26 @@ export function stationRanges(ids: string[]): string {
   }
   return out.join(', ')
 }
+
+export type ShareRow = { stations: string[]; meter: string; atLeast: number | null; atMost: number | null }
+
+const boundText = (r: ShareRow) =>
+  r.atLeast !== null && r.atMost !== null ? `between ${r.atLeast}% and ${r.atMost}%` : r.atLeast !== null ? `at least ${r.atLeast}%` : `at most ${r.atMost}%`
+
+/**
+ * What is measured about a zone's share of its meter's water, in plain sentences. Only rows that touch the zone are used.
+ * A row covering more stations than the zone is reported for the group, with a note that the zone's own part is not known.
+ */
+export function zoneShareLines(zoneStations: string[], rows: ShareRow[]): string[] {
+  const zone = new Set(zoneStations)
+  return rows
+    .filter((r) => r.stations.some((s) => zone.has(s)))
+    .map((r) => {
+      const meter = `meter ${r.meter.replace('meter-', '')}'s water`
+      const insideZone = r.stations.every((s) => zone.has(s))
+      const names = r.stations.length === 2 ? r.stations.join(' and ') : stationRanges(r.stations)
+      if (insideZone && r.stations.length === zone.size) return `This zone uses ${boundText(r)} of ${meter}.`
+      if (insideZone) return `${names} ${r.stations.length > 1 ? 'use' : 'uses'} ${boundText(r)} of ${meter}.`
+      return `${names} together use ${boundText(r)} of ${meter}; how that splits between them is not measured.`
+    })
+}

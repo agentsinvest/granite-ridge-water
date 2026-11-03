@@ -179,6 +179,21 @@ export const usageRowSchema = z.object({
 
 export const hourlyFrontmatterSchema = usageFrontmatterSchema
 
+export const zoneSharesFrontmatterSchema = z.object({
+  period: z.string().min(1),
+  source: z.string().min(1),
+  note: z.string().min(1),
+  confidence,
+  todo: z.string().optional(),
+})
+export const zoneShareRowSchema = z.object({
+  Stations: z.string().regex(/^[A-Z]\d+(, [A-Z]\d+)*$/, 'comma-separated station ids, like C1, C2'),
+  Meter: z.string().regex(/^meter-\d+$/),
+  'At least %': cellNumber,
+  'At most %': cellNumber,
+  What: z.string().min(1),
+})
+
 export const controllerUsageFrontmatterSchema = z.object({
   controller: z.string().regex(/^[A-Z]$/, 'must be the controller letter, like C'),
   water_year: z.string().regex(/^\d{4}-\d{4}$/, 'must be YYYY-YYYY'),

@@ -82,6 +82,7 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
     landscapeProblems: [],
     controllers: [],
     controllerUsage: {},
+    zoneShares: null,
     openTodos: [],
   }
   for (const abs of walk(dataDir).sort()) {
@@ -289,6 +290,16 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
       out.quickWins = plan
     } else if (rel === 'config/site.md') {
       out.config.site = check(S.siteConfigSchema, fm, file, text)
+    } else if (rel === 'zone-shares.md') {
+      const f = check(S.zoneSharesFrontmatterSchema, fm, file, text)
+      const table = firstTable(p, ['Stations', 'Meter'], file)
+      const r = rows(table, S.zoneShareRowSchema, file)
+      r.forEach((x, i) => {
+        if (x['At least %'] === null && x['At most %'] === null) fail(file, table.rows[i].line, 'give at least one bound')
+        for (const v of [x['At least %'], x['At most %']]) if (v !== null && (v < 0 || v > 100)) fail(file, table.rows[i].line, 'shares are 0 to 100')
+        if (x['At least %'] !== null && x['At most %'] !== null && x['At least %'] > x['At most %']) fail(file, table.rows[i].line, 'At least is above At most')
+      })
+      out.zoneShares = { period: f.period, source: f.source, note: f.note, confidence: f.confidence, rows: r.map((x) => ({ stations: x.Stations.split(', '), meter: x.Meter, atLeast: x['At least %'], atMost: x['At most %'], what: x.What })) }
     } else if (rel === 'config/plant-factors.md') {
       out.config.plantFactors = check(S.plantFactorsFrontmatterSchema, fm, file, text)
     } else {
@@ -310,6 +321,12 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
   for (const z of out.map.zones ?? []) for (const s of z.stations) if (!mapStationIds.has(s)) fail('data/map.md', null, `zone ${z.id}: station "${s}" is not in data/controllers/`)
   for (const b of out.bills) if (!meterIds.has(b.meter)) fail(`data/${b.id}.md`, null, `unknown meter "${b.meter}"`)
   for (const id of Object.keys(out.hourly)) if (!meterIds.has(id)) fail(`data/hourly/${id}`, null, `unknown meter "${id}"`)
+  const stationMeter = new Map(out.controllers.flatMap((c) => c.stations.map((s) => [s.station, s.meter] as const)))
+  for (const r of out.zoneShares?.rows ?? [])
+    for (const s of r.stations) {
+      if (!stationMeter.has(s)) fail('data/zone-shares.md', null, `station ${s} is not in data/controllers/`)
+      else if (stationMeter.get(s) !== r.meter) fail('data/zone-shares.md', null, `station ${s} is on ${stationMeter.get(s)}, not ${r.meter}`)
+    }
   const checkIds = out.meters.flatMap((m) => (m.checks ?? []).map((c) => ({ meter: m.id, id: c.id })))
   checkIds.forEach((c, i) => {
     if (checkIds.findIndex((x) => x.id === c.id) !== i) fail(`data/meters/${c.meter}.md`, null, `check id "${c.id}" is used twice`)

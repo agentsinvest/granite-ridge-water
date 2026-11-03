@@ -22,6 +22,7 @@ export function MapSection({ data }: { data: SiteData }) {
     stations: data.controllers.flatMap((c) => c.stations),
     unconfirmedSplit: new Set(data.controllers.filter((c) => c.confidence !== 'high' && c.meters.length > 1).map((c) => c.id)),
     meters: data.meters,
+    shares: data.zoneShares,
   }
   const meterCosts = data.meters.map((m) => ({ meter: m.id, p: meterCostPair(data.bills, m.id) }))
   const costYears = meterCosts.find((x) => x.p)?.p ?? null
@@ -31,7 +32,7 @@ export function MapSection({ data }: { data: SiteData }) {
           Map
         </h2>
         <p className="mt-1 max-w-prose text-sm text-ink-2">
-          Hover over, tap, or tab to a meter or a watering zone to see what it cost{costYears ? ` in ${costYears.ytd.year} so far and in ${costYears.prior.year}` : ''}, or to a controller to see what it is and when it went in.{' '}
+          Hover over, tap, or tab to a meter to see what it cost{costYears ? ` in ${costYears.ytd.year} so far and in ${costYears.prior.year}` : ''}, to a watering zone to see what is known about its share of its meter's water, or to a controller to see what it is and when it went in.{' '}
           {alerts.length > 0
             ? `The ${alerts.length} red ! markers are current problems: each says what is wrong, and selecting it opens that problem.`
             : 'No current problems are flagged.'}

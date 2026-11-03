@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import type { SiteData } from '../../scripts/site-data'
 import { installText } from '../lib/mapAlerts'
-import { meterCostPair, stationRanges, zoneMeters, type CostBill, type MeterYearCost, type StationLike } from '../engine/mapCost'
+import { meterCostPair, stationRanges, zoneMeters, zoneShareLines, type CostBill, type MeterYearCost, type ShareRow, type StationLike } from '../engine/mapCost'
 import { fmt, meterName, meterNumber } from '../lib/data'
 import { MONTHS } from '../lib/model'
 
@@ -12,6 +12,8 @@ export type MapCosts = {
   unconfirmedSplit: Set<string>
   /** Meter facts for the hover card (install date). Optional so older callers keep working. */
   meters?: SiteData['meters']
+  /** Measured floors and ceilings on a group of stations' share of its meter's water. */
+  shares?: { period: string; rows: ShareRow[] } | null
 }
 
 type Zone = NonNullable<SiteData['map']['zones']>[number]
@@ -164,6 +166,7 @@ function ZoneBody({ costs, zone, controller }: { costs: MapCosts; zone: Zone; co
   const zm = zoneMeters(zone.stations, costs.stations)
   const meters = zm.meters.map(meterNumber)
   const meterText = `${meters.length > 1 ? 'meters' : 'meter'} ${meters.join(' and ')}`
+  const shareLines = costs.shares ? zoneShareLines(zone.stations, costs.shares.rows) : []
   return (
     <>
       <p className="font-semibold">
@@ -176,18 +179,35 @@ function ZoneBody({ costs, zone, controller }: { costs: MapCosts; zone: Zone; co
       {zm.meters.length === 0 ? (
         <p className="mt-2">Which meter feeds this zone is not on file yet, so its cost is unknown.</p>
       ) : zm.wholeMeter ? (
-        <p className="mt-2">This zone is the only thing watering on {meterText}, so the meter's bill is this zone's cost.</p>
+        <>
+          <p className="mt-2">This zone is the only thing watering on {meterText}, so the meter's bill is this zone's cost.</p>
+          <MeterRows meters={zm.meters} bills={costs.bills} />
+        </>
       ) : (
-        <p className="mt-2">
-          This zone has no meter of its own. Its water goes through {meterText}, which also {meters.length > 1 ? 'feed' : 'feeds'} {stationRanges(zm.sharedWith)}. The cost below is for the whole{' '}
-          {meters.length > 1 ? 'meters' : 'meter'}, not this zone alone.
-        </p>
+        <>
+          <p className="mt-2 font-semibold">What this zone alone costs: not known yet.</p>
+          <p className="mt-1">
+            It has no meter of its own. Its water goes through {meterText}, which also {meters.length > 1 ? 'feed' : 'feeds'} {stationRanges(zm.sharedWith)}, so{' '}
+            {meters.length > 1 ? "the meters' bills are" : "the meter's bill is"} not this zone's cost.
+          </p>
+          {shareLines.length > 0 ? (
+            <div className="mt-2">
+              <p className="text-xs font-semibold">Measured share of the water, {costs.shares!.period}</p>
+              <ul className="mt-0.5 list-disc space-y-0.5 pl-4">
+                {shareLines.map((l) => (
+                  <li key={l}>{l}</li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <p className="mt-2 text-xs text-ink-2">How much of the meter's water this zone uses has not been measured yet.</p>
+          )}
+          <p className="mt-2 text-xs text-ink-2">Pricing a zone needs each station's run minutes and flow over a whole billing period, which are not on file yet.</p>
+          <p className="mt-2 text-xs font-semibold">For context only: {meters.length > 1 ? 'the whole bills of ' : 'the whole bill of '}{meterText}</p>
+          <MeterRows meters={zm.meters} bills={costs.bills} />
+        </>
       )}
-      {zm.meters.length > 0 && <MeterRows meters={zm.meters} bills={costs.bills} />}
       {zm.unknownMeter.length > 0 && zm.meters.length > 0 && <p className="mt-1 text-xs text-ink-2">Meter not on file for {stationRanges(zm.unknownMeter)}.</p>}
-      {!zm.wholeMeter && zm.meters.length > 0 && (
-        <p className="mt-2 text-xs text-ink-2">Splitting a meter's bill by zone needs each station's run time and flow, which the landscaper has not given us yet.</p>
-      )}
       {controller && costs.unconfirmedSplit.has(controller.id) && (
         <p className="mt-1 text-xs text-ink-2">Which stations are on which meter is likely but not yet confirmed by the landscaper.</p>
       )}
