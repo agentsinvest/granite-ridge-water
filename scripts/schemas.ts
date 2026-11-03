@@ -256,7 +256,7 @@ export const eventRowSchema = z.object({
   Precision: z.enum(['day', 'month', 'year']),
   Meter: z.string(),
   Zones: z.string(),
-  Type: z.enum(['leak', 'repair', 'controller', 'schedule', 'landscape', 'meter', 'overseed', 'rebate', 'other']),
+  Type: z.enum(['leak', 'repair', 'controller', 'schedule', 'landscape', 'meter', 'overseed', 'rebate', 'price', 'other']),
   'What happened': z.string().min(1),
   Source: z.string().min(1),
 })
