@@ -24,9 +24,9 @@ controller:
   confidence: medium
 checks:
   - kind: action
-    title: "Entrance trees and shrubs have had no water since September 14"
-    detail: "Meter 3 read zero in every reported hour from September 15 to October 1, including the nights the drip should run. The turf is now artificial, but drip stations 4 and 6 still water the entrance trees and shrubs. Ask the landscaper to turn those back on and leave only turf stations 1 to 3 off."
-    source: "data/hourly/meter-3/2026.md; docs/analysis/2026-10-07-controller-run-times-vs-waterfluence.md"
+    title: "Entrance drip may not be getting water since the turf work"
+    detail: "Meter 3 read zero in every reported hour from September 15 to October 1, including the nights the drip should run. The entrance controller's own report shows more: it ran 1,236, 1,260, and 822 gallons on September 19, 20, and 22 (likely drip station 4; the meter is missing those hours), but each time it turned on drip station 6, the entry drip, no water came out (No Flow alarms on September 19, 21, and 22). From September 23 to 30 it watered nothing, and it was paused on 4 of those days. Meter 3 shows some water again on October 6, 9, and 22. The turf is now artificial, but drip stations 4 and 6 still water the entrance trees and shrubs. Ask the landscaper to check station 6's valve and line (possibly cut or capped during the turf work), confirm both drip stations are on, and leave only turf stations 1 to 3 off."
+    source: "data/hourly/meter-3/2026.md; data/controller-usage/A/2025-2026.md; sources/controllers/weathertrak-usage-entrance-2025-2026.md (alert list); docs/analysis/2026-10-07-controller-run-times-vs-waterfluence.md"
     confidence: medium
 active_from: null
 active_to: null

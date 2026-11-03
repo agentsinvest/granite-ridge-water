@@ -19,6 +19,16 @@ findings:
     source: "Eco Verde assessment, sections 3a and page 5"
   - text: "The wireless rain sensor should be moved to catch more rain."
     source: "Eco Verde assessment, section 4"
+  - text: "The flow sensor agrees with the City meters: over 23 billing periods from October 2024 to September 2026 it measured 0.95 to 1.13 times what meters 1 and 2 recorded together (about 1.04 on average; the two meters are read within 3 days of each other), so nearly all water through those two meters passes the sensor."
+    source: "data/controller-usage/C/2024-2025.md and data/controller-usage/C/2025-2026.md; data/billing-periods/meter-1.md and data/billing-periods/meter-2.md"
+  - text: "Drip station C13 (south and southwest desert drip) ran low flow on 200 nights from October 2024 to May 2026, about half its expected flow. Drip station C15 (north side) ran at about double its normal flow from late August 2026."
+    source: "WeatherTRAK Park reports, 2024-10 to 2026-09 (sources/controllers/weathertrak-usage-park-2024-2025.md and sources/controllers/weathertrak-usage-park-2025-2026.md)"
+  - text: "The Mainline Break alarm went off 19 times in summer 2025 and 2026, mostly Sunday nights, when drip station C14 runs together with a lawn station. It looks like overlapping stations, not a broken pipe."
+    source: "WeatherTRAK Park reports, 2024-10 to 2026-09 (sources/controllers/weathertrak-usage-park-2024-2025.md and sources/controllers/weathertrak-usage-park-2025-2026.md)"
+  - text: "Valve shorts kept single lawn stations from watering for days at a time: C12 for 14 days in May 2025, C9 in October 2025, C7 for 12 days in April and May 2026. Each was cleared by landscaper staff."
+    source: "WeatherTRAK Park reports, 2024-10 to 2026-09 (sources/controllers/weathertrak-usage-park-2024-2025.md and sources/controllers/weathertrak-usage-park-2025-2026.md)"
+  - text: "Mainline 1 carries stations 1, 2, 4, and 14; mainline 2 (master valve MV2) carries stations 8 and 9."
+    source: "WeatherTRAK Park reports, 2024-10 to 2026-09 (sources/controllers/weathertrak-usage-park-2024-2025.md and sources/controllers/weathertrak-usage-park-2025-2026.md) (alert descriptions)"
 todo: "Need the other 8 pages of the park settings report: programs, days, start times, run times, weather adjustment by month, overseed program, and the program that runs every night at about 10 PM. Confirm which stations are on meter 1 and which on meter 2."
 ---
 

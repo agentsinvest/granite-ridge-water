@@ -20,10 +20,10 @@ verify_experiment: meter-4-valve-repair
 updated: 2026-11-03
 history:
   - { date: 2026-10-07, status: not-started, note: "Added to the action plan" }
-  - { date: 2026-11-03, status: not-started, note: "Solenoids were replaced on 2026-09-25 but the water kept running after the night cycle on 7 more days through 2026-10-23. Meter 4 has read zero since 2026-10-23 and may be shut off." }
+  - { date: 2026-11-03, status: not-started, note: "Solenoids were replaced on 2026-09-25 but the water kept running after the night cycle on 7 more days through 2026-10-23. The HOA shut meter 4 off on purpose on 2026-10-23." }
 todo: "Station B4 is the valve Eco Verde found the controller did not open in February 2026. Whether it is the one that runs at 2 AM is not confirmed."
 ---
 
-The valve solenoids were replaced on September 25 and the problem came back on October 2, so the next step is the valve itself (diaphragm, debris, flow control), the wiring, or the controller. Ask the landscaper which valve runs at about 1 to 2 AM on controller B and which one stays open, and whether anyone shut the water off by hand on September 18, October 4, October 15, 18, 20, or 23. Then inspect and repair or replace that valve. Meter 4 has used no water since about 2 PM on October 23; confirm whether it was shut off on purpose and how the interior strip is being watered meanwhile.
+The valve solenoids were replaced on September 25 and the problem came back on October 2, so the next step is the valve itself (diaphragm, debris, flow control), the wiring, or the controller. Ask the landscaper which valve runs at about 1 to 2 AM on controller B and which one stays open, and whether anyone shut the water off by hand on September 18, October 4, October 15, 18, 20, or 23. Then inspect and repair or replace that valve. The HOA shut meter 4 off on purpose on October 23, and heavy rain followed (1.7 inches from October 30 to November 1). Repair the valve before turning it back on, and plan how the interior strip trees get water if the repair runs into a dry spell.
 
 In February 2026 Eco Verde also found a valve at B4 that the controller did not open (repair 6) and a broken drip line in the interior strip (repair 5). Ask whether those were repaired, and whether B4 is the 2 AM valve.

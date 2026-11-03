@@ -155,6 +155,30 @@ export const usageRowSchema = z.object({
 })
 
 export const hourlyFrontmatterSchema = usageFrontmatterSchema
+
+export const controllerUsageFrontmatterSchema = z.object({
+  controller: z.string().regex(/^[A-Z]$/, 'must be the controller letter, like C'),
+  water_year: z.string().regex(/^\d{4}-\d{4}$/, 'must be YYYY-YYYY'),
+  source: z.string().min(1),
+  covers: z.string().min(1),
+  confidence,
+  todo: z.string().optional(),
+})
+const yesBlank = z.enum(['yes', ''])
+export const controllerUsageRowSchema = z.object({
+  Date: cellDate,
+  'ET in': cellNumber,
+  'Major alerts': cellNumber,
+  'Shut-down': yesBlank,
+  'Ctrlr Off': yesBlank,
+  Paused: yesBlank,
+  'Runtime min': cellNumber,
+  Scheduled: cellNumber,
+  Manual: cellNumber,
+  Other: cellNumber,
+  'None (5.x)': cellNumber,
+  Total: cellNumber,
+})
 export const hourlyRowSchema = z.object({
   'Read time': z.string().regex(/^\d{4}-\d{2}-\d{2} \d{2}:00$/, 'must be YYYY-MM-DD HH:00'),
   Gallons: cellNumber.refine((n) => n !== null, 'blank hours must be left out, not written as empty'),

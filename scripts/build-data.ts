@@ -81,6 +81,7 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
     evidenceLabels: {},
     landscapeProblems: [],
     controllers: [],
+    controllerUsage: {},
     openTodos: [],
   }
   for (const abs of walk(dataDir).sort()) {
@@ -130,6 +131,32 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
       out.hourly[m[1]] = prev
         ? { covers: `${prev.covers}; ${f.covers}`, source: `${prev.source}; ${f.source}`, reads: [...prev.reads, ...reads] }
         : { covers: f.covers, source: f.source, reads }
+    } else if ((m = rel.match(/^controller-usage\/([A-Z])\/(\d{4})-(\d{4})\.md$/))) {
+      const f = check(S.controllerUsageFrontmatterSchema, fm, file, text)
+      if (f.controller !== m[1]) fail(file, keyLine(text, 'controller'), 'controller does not match folder')
+      if (f.water_year !== `${m[2]}-${m[3]}`) fail(file, keyLine(text, 'water_year'), 'water_year does not match file name')
+      const table = firstTable(p, ['Date', 'Scheduled'], file)
+      const r = rows(table, S.controllerUsageRowSchema, file)
+      const days = r.map((x) => ({
+        date: x.Date, et: x['ET in'], alerts: x['Major alerts'], off: x['Ctrlr Off'] === 'yes', paused: x.Paused === 'yes', runtimeMin: x['Runtime min'],
+        scheduled: x.Scheduled, manual: x.Manual, other: x.Other, total: x.Total,
+      }))
+      r.forEach((x, i) => {
+        const parts = [x.Scheduled, x.Manual, x.Other, x['None (5.x)']]
+        if (x.Total !== null && parts.every((n) => n !== null) && Math.abs(parts.reduce((s, n) => s + n!, 0) - x.Total) > 0.15)
+          fail(file, table.rows[i].line, 'Scheduled + Manual + Other + None does not equal Total')
+        if (i > 0) {
+          const next = new Date(`${r[i - 1].Date}T00:00:00Z`)
+          next.setUTCDate(next.getUTCDate() + 1)
+          if (next.toISOString().slice(0, 10) !== x.Date) fail(file, table.rows[i].line, 'dates must be consecutive, one row per day')
+        }
+      })
+      const prev = out.controllerUsage[m[1]]
+      if (prev && prev.days.length && days.length) {
+        const last = prev.days[prev.days.length - 1].date
+        if (days[0].date <= last) fail(file, table.rows[0].line, `overlaps ${last} from an earlier file`)
+      }
+      out.controllerUsage[m[1]] = prev ? { source: `${prev.source}; ${f.source}`, days: [...prev.days, ...days] } : { source: f.source, days }
     } else if ((m = rel.match(/^financials\/(\d{4})\.md$/))) {
       const f = check(S.financialsFrontmatterSchema, fm, file, text)
       const r = rows(firstTable(p, ['Account', 'Actual'], file), S.financialsRowSchema, file)
@@ -277,6 +304,7 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
   if (!areaIds.has(out.map.streets.area)) fail('data/map.md', null, `unknown streets area "${out.map.streets.area}"`)
   const controllerIds = new Set((out.map.controllers ?? []).map((c) => c.id))
   for (const c of out.map.controllers ?? []) for (const m of c.meters) if (!meterIds.has(m)) fail('data/map.md', null, `controller ${c.id}: unknown meter "${m}"`)
+  for (const id of Object.keys(out.controllerUsage)) if (!out.controllers.some((c) => c.id === id)) fail(`data/controller-usage/${id}`, null, `unknown controller "${id}"`)
   for (const z of out.map.zones ?? []) if (!controllerIds.has(z.controller)) fail('data/map.md', null, `zone ${z.id}: unknown controller "${z.controller}"`)
   const mapStationIds = new Set(out.controllers.flatMap((c) => c.stations.map((s) => s.station)))
   for (const z of out.map.zones ?? []) for (const s of z.stations) if (!mapStationIds.has(s)) fail('data/map.md', null, `zone ${z.id}: station "${s}" is not in data/controllers/`)

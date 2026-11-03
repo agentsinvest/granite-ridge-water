@@ -25,8 +25,13 @@ controller:
 checks:
   - kind: question
     title: "What does the park water every night at about 10 PM?"
-    detail: "Besides the early-morning turf watering 5 days a week, the park also waters every night at about 10 PM. On this meter that is about 5,500 gallons a night, about half of this meter's water (July to September 2026). The controller pages that would say what it is are not on file yet."
-    source: "docs/analysis/2026-10-07-controller-run-times-vs-waterfluence.md"
+    detail: "Besides the early-morning turf watering 5 days a week, the park also waters every night at about 10 PM. On this meter that is about 5,500 gallons a night, about half of this meter's water (July to September 2026). The controller pages that would say what it is are not on file yet. Partly answered by the WeatherTRAK alert times: drip station C13 on this meter starts around 6 to 9 PM most nights."
+    source: "docs/analysis/2026-10-07-controller-run-times-vs-waterfluence.md; sources/controllers/weathertrak-usage-park-2024-2025.md and sources/controllers/weathertrak-usage-park-2025-2026.md (alert lists)"
+    confidence: medium
+  - kind: question
+    title: "The south and southwest park drip got about half its normal water for 20 months"
+    detail: "From October 2, 2024 to May 19, 2026 the park controller flagged drip station C13 (the south and southwest desert drip, with mature trees) for low flow on 200 nights: 13 to 21 gallons a minute against a limit of 31 to 33 (Eco Verde recorded its learned flow as 41). Low flow on drip usually means a clogged filter, a partly closed valve, or low pressure, so the trees and shrubs on this station got roughly half the water they were scheduled for. The alerts stop after May 19, 2026. Ask the landscaper whether something was fixed then, or whether the station was relearned or its alarm turned off. If nothing was fixed, check the filter and valve on C13."
+    source: "sources/controllers/weathertrak-usage-park-2024-2025.md and sources/controllers/weathertrak-usage-park-2025-2026.md (alert lists); Eco Verde assessment page 5 (sources/controllers/eco-verde-assessment-2026.md)"
     confidence: medium
 active_from: null
 active_to: null
