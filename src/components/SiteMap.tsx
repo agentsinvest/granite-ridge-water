@@ -86,8 +86,8 @@ export function SiteMap({ map, areaNames, flaggedMeters, costs, alerts, controll
       >
         <title id="site-map-title">Schematic map of Granite Ridge common areas and water meters</title>
         <desc id="site-map-desc">
-          Five common areas labeled B to E plus the private streets, the park turf, and four City of Mesa water meters
-          numbered 1 to 4. The same information is in the tables below the map.
+          The common areas, the private streets, the park turf, four City of Mesa water meters numbered 1 to 4, and the
+          watering zones of irrigation controllers A, B, and C. The same information is in the tables below the map.
         </desc>
         <defs>
           {controllers.map((c) => (
@@ -108,7 +108,7 @@ export function SiteMap({ map, areaNames, flaggedMeters, costs, alerts, controll
 
         {map.areas.map((a) => (
           <g key={a.id}>
-            <title>{`${areaNames[a.id]?.label ?? ''} ${areaNames[a.id]?.name ?? a.id}`.trim()}</title>
+            <title>{areaNames[a.id]?.name ?? a.id}</title>
             {a.parts.map((part, i) => (
               <polygon key={i} points={toPoints(part)} fill="var(--shrub)" stroke="var(--surface)" strokeWidth={4} strokeLinejoin="round" />
             ))}
@@ -155,7 +155,7 @@ export function SiteMap({ map, areaNames, flaggedMeters, costs, alerts, controll
           })}
 
         <g>
-          <title>{`${areaNames[map.streets.area]?.label ?? ''} ${areaNames[map.streets.area]?.name ?? 'Private streets'}`.trim()}</title>
+          <title>{areaNames[map.streets.area]?.name ?? 'Private streets'}</title>
           {map.streets.lines.map((line, i) => (
             <polyline
               key={i}
@@ -182,17 +182,6 @@ export function SiteMap({ map, areaNames, flaggedMeters, costs, alerts, controll
             >
               {r.name}
             </text>
-          ))}
-        </g>
-
-        <g aria-hidden="true">
-          {[...map.areas.map((a) => ({ id: a.id, at: a.label_at })), { id: map.streets.area, at: map.streets.label_at }].map(({ id, at }) => (
-            <g key={id} transform={`translate(${at[0]} ${at[1]})`}>
-              <circle r={26} fill="var(--surface)" stroke="var(--ink)" strokeWidth={3} />
-              <text textAnchor="middle" dominantBaseline="central" fontSize={30} fontWeight={700} fill="var(--ink)">
-                {areaNames[id]?.label ?? '?'}
-              </text>
-            </g>
           ))}
         </g>
 

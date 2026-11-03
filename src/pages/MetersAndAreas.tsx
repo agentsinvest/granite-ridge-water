@@ -109,9 +109,6 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
                 {data.areas.rows.map((r) => (
                   <tr key={r['Area id']} className="border-b border-line last:border-0 align-top">
                     <th scope="row" className="px-4 py-3 font-normal">
-                      <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full border-2 border-ink text-xs font-bold">
-                        {r['Map label']}
-                      </span>
                       <span className="font-semibold">{r.Name}</span>
                       <span className="mt-1 block text-ink-2">{r.Description}</span>
                     </th>
