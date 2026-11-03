@@ -6,6 +6,14 @@ model: "WeatherTRAK ETPRO3 smart controller"
 serial_last4: "6637"
 meters: [meter-1, meter-2]
 has_flow_sensor: true
+installed:
+  from: null
+  to: null
+  in_use_by: 2024-10-01
+  note: "The earliest WeatherTRAK report on file starts October 1, 2024. Its station flows were last learned in August and October 2024."
+  source: "WeatherTRAK Park report starting 2024-10-01 (sources/controllers/weathertrak-usage-park-2024-2025.md); Eco Verde assessment page 5 (sources/controllers/eco-verde-assessment-2026.md)"
+  confidence: low
+  todo: "Ask the landscaper or the board when this controller was installed."
 source: "Eco Verde irrigation assessment, 2026, page 5 (station flow rates, settings of 2026-03-29) and sections 3a, 3g, 3j, and 4 (sources/controllers/eco-verde-assessment-2026.md); station-to-meter split from docs/analysis/2026-10-07-controller-run-times-vs-waterfluence.md (medium confidence); zone names from data/map.md"
 confidence: medium
 findings:

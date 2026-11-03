@@ -1,4 +1,6 @@
+import type { ReactNode } from 'react'
 import type { SiteData } from '../../scripts/site-data'
+import { installText } from '../lib/mapAlerts'
 import { meterCostPair, stationRanges, zoneMeters, type CostBill, type MeterYearCost, type StationLike } from '../engine/mapCost'
 import { fmt, meterName, meterNumber } from '../lib/data'
 import { MONTHS } from '../lib/model'
@@ -8,6 +10,8 @@ export type MapCosts = {
   stations: StationLike[]
   /** Controller ids whose station-to-meter split is inferred, not confirmed by the landscaper. */
   unconfirmedSplit: Set<string>
+  /** Meter facts for the hover card (install date). Optional so older callers keep working. */
+  meters?: SiteData['meters']
 }
 
 type Zone = NonNullable<SiteData['map']['zones']>[number]
@@ -75,26 +79,24 @@ function MeterRows({ meters, bills }: { meters: string[]; bills: CostBill[] }) {
   )
 }
 
-export function MapCostCard({
+/** A card placed next to a spot on the map and kept inside it; under the map on narrow screens. */
+export function MapCard({
   id,
-  costs,
-  target,
   at,
   canvas,
   wrap,
   onMouseEnter,
   onMouseLeave,
+  children,
 }: {
   id: string
-  costs: MapCosts
-  target: Target
   at: [number, number]
   canvas: { width: number; height: number }
   wrap: HTMLDivElement | null
   onMouseEnter: () => void
   onMouseLeave: () => void
+  children: ReactNode
 }) {
-  // Place the card next to the shape it describes, kept inside the map.
   const w = wrap?.clientWidth ?? 0
   const h = wrap?.clientHeight ?? 0
   const scale = w / canvas.width
@@ -106,7 +108,6 @@ export function MapCostCard({
   // On narrow screens a floating card would cover most of the map, so it sits under the map instead.
   const floating = w >= 560
   const style = !floating ? undefined : below ? { left, top: y + 20 } : { left, bottom: h - y + 20 }
-
   return (
     <div
       id={id}
@@ -116,8 +117,29 @@ export function MapCostCard({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      {target.kind === 'meter' ? <MeterBody costs={costs} meter={target.meter} flagged={target.flagged} /> : <ZoneBody costs={costs} zone={target.zone} controller={target.controller} />}
+      {children}
     </div>
+  )
+}
+
+export function MapCostCard({
+  costs,
+  target,
+  ...card
+}: {
+  id: string
+  costs: MapCosts
+  target: Target
+  at: [number, number]
+  canvas: { width: number; height: number }
+  wrap: HTMLDivElement | null
+  onMouseEnter: () => void
+  onMouseLeave: () => void
+}) {
+  return (
+    <MapCard {...card}>
+      {target.kind === 'meter' ? <MeterBody costs={costs} meter={target.meter} flagged={target.flagged} /> : <ZoneBody costs={costs} zone={target.zone} controller={target.controller} />}
+    </MapCard>
   )
 }
 
@@ -125,11 +147,12 @@ function MeterBody({ costs, meter, flagged }: { costs: MapCosts; meter: string; 
   return (
     <>
       <p className="font-semibold">{meterName(meter, 'name')}</p>
-      <p className="text-xs text-ink-2">What the City billed for this meter.</p>
+      {costs.meters && <p className="text-xs text-ink-2">{installText(costs.meters.find((m) => m.id === meter)?.installed)}</p>}
+      <p className="mt-1 text-xs text-ink-2">What the City billed for this meter.</p>
       <MeterRows meters={[meter]} bills={costs.bills} />
       {flagged && (
         <p className="mt-2 text-xs">
-          <span aria-hidden="true" className="font-extrabold">! </span>This meter has a possible leak flagged.
+          <span aria-hidden="true" className="font-extrabold">! </span>This meter has a problem flagged. The ! markers next to it say what.
         </p>
       )}
       <p className="mt-2 text-xs text-ink-2">Select the meter for its details.</p>

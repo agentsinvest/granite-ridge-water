@@ -6,6 +6,14 @@ model: "WeatherTRAK LC+ smart controller"
 serial_last4: "6094"
 meters: [meter-3]
 has_flow_sensor: true
+installed:
+  from: null
+  to: null
+  in_use_by: 2023-10-01
+  note: "The earliest WeatherTRAK report on file starts October 1, 2023."
+  source: "WeatherTRAK Entrance report starting 2023-10-01 (sources/controllers/weathertrak-usage-entrance-2023-2024.md)"
+  confidence: low
+  todo: "Ask the landscaper or the board when this controller was installed."
 source: "Eco Verde irrigation assessment, 2026, page 4 (controller settings of 2026-03-29) and section 3a (sources/controllers/eco-verde-assessment-2026.md); HydroPoint reports of 2025-04-04 (sources/controllers/hydropoint-reports-2025-04-04.md); zone names from data/map.md"
 confidence: high
 findings:

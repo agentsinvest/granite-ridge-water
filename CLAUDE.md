@@ -178,10 +178,10 @@ Ranked automatically from leak flags, the investment catalog, and down or off op
 
 Written for homeowners, not the board. Six screens in the menu, plus About the data in the footer. Each tab has its own address (`#screen?tab=`); old hashes redirect (`src/lib/route.ts`).
 
-1. Home: cost per home per month vs the $30K goal, progress bar in three bands (verified, in progress, proposed), up to 3 "Fix now" action cards, what changed, spending by year and by meter.
+1. Home: cost per home per month vs the $30K goal, progress bar in three bands (verified, in progress, proposed), up to 3 "Fix now" action cards, the site map (cost on hover for meters and zones, install date for meters and controllers, and a ! marker for every current problem linking to it, from `src/lib/mapAlerts.ts`), what changed, spending by year and by meter.
 2. Action plan: every action in `/data/actions/` grouped by status with owner, meter, and lawn filters; a page per action (`#action/<id>`); the Quick wins plan as a tab; a printable landscaper checklist (`#checklist`).
 3. Problems: leak flags and watering checks.
-4. Where the water goes: meters and map, controllers and zones (`/data/controllers/`), when it waters, how much should we use, next year's need and cost (`/data/budget/need-model.md`).
+4. Where the water goes: meters (the map moved to Home, 2026-11-03), controllers and zones (`/data/controllers/`), when it waters, how much should we use, next year's need and cost (`/data/budget/need-model.md`).
 5. Savings calculator: What if, Is an investment worth it?, Did it work? (experiments).
 6. History and bills: how we got here, every bill with its reconciliation badge.
 6b. Documents (`#documents`): anyone with the passcode can upload any file type up to 250 MB, give it a readable name, add a note, rename, and move it to a 30-day trash. Files go up and down in 3 MiB pieces through `netlify/functions/docs.ts` (`/api/docs`) because Netlify Functions cap a request or response at about 6 MB. Limits live in `netlify/shared/docs-config.ts`. Uploaded files are reference material only: numbers from them reach the model only after someone transcribes them into `/data/`.

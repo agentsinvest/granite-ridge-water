@@ -1,5 +1,6 @@
 import type { SiteData } from '../../scripts/site-data'
 import { meterName } from '../lib/data'
+import { checkAnchor } from '../lib/mapAlerts'
 
 type MeterCheck = NonNullable<SiteData['meters'][number]['checks']>[number]
 
@@ -11,7 +12,7 @@ export function WateringChecks({ data }: { data: SiteData }) {
   return (
     <ul className="mt-4 space-y-3">
       {checks.map((c) => (
-        <li key={`${c.meter}-${c.title}`}>
+        <li key={c.id} id={checkAnchor(c.id)} className="scroll-mt-6">
           <Check check={c} meter={c.meter} />
         </li>
       ))}

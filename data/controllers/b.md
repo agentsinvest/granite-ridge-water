@@ -6,6 +6,12 @@ model: null
 serial_last4: null
 meters: [meter-4]
 has_flow_sensor: null
+installed:
+  from: null
+  to: null
+  source: "No document on file gives it"
+  confidence: low
+  todo: "Ask the landscaper or the board when this controller was installed."
 source: "Eco Verde irrigation assessment, 2026, page 3 map and section 4 (sources/controllers/eco-verde-assessment-2026.md); zone names from data/map.md"
 confidence: medium
 findings:

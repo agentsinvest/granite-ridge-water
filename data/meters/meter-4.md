@@ -11,6 +11,12 @@ turf_share_percent:
   source: "Jennifer's water model workbook, Meters table: this meter waters no turf"
   confidence: medium
 service_type: null
+installed:
+  from: 2024-09-13
+  to: 2024-10-11
+  note: "The bill dated 2024-09-27 shows the old meter (...3676) and the bill dated 2024-10-25 shows this one, so it went in between those two reads."
+  source: "City of Mesa bills dated 2024-09-27 and 2024-10-25 (data/bills/meter-4/2024-09.md and data/bills/meter-4/2024-10.md)"
+  confidence: high
 waterfluence_id: "MESA-437"
 location: "East side, west of the east street, at the east end of the interior strip"
 areas_served: ["interior-strip", "perimeter"]

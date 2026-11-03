@@ -13,7 +13,8 @@ One file per City of Mesa meter: `meter-1.md` through `meter-4.md`. Frontmatter 
 | `waterfluence_id` | no | Identifier used in Waterfluence exports. |
 | `areas_served` | yes | Area ids from `areas.md`, or `null`. Add `areas_served_note` and `areas_served_source`. |
 | `controller` | no | `name`, `model` (or `null`), `summary` (plain words), `source`, `confidence`. Shown on the meter card. |
-| `checks` | no | List of things to check on this meter that are not leaks: `kind` (`action` or `question`), `title`, `detail`, `source`, `confidence`. Shown on the Meters page until removed. |
+| `installed` | no | When this physical meter went in: (`from` and `to`: the earliest and latest possible install day, the same day when exact, or both `null` when unknown; optional `in_use_by`, the earliest day a document shows it working; `note`, `source`, `confidence`, `todo`). Shown on the map hover. Never guess a day; give the window the bills support. |
+| `checks` | no | List of things to check on this meter that are not leaks: `id` (unique slug; the Problems screen anchors it at `#problems/check-<id>`), `stations` (like `[C13]`, for placing its map marker; `[]` puts it on the meter), `kind` (`action` or `question`), `title`, `detail`, `source`, `confidence`. Shown under Watering checks on Problems until removed; `action` checks also show as markers on the Home map. |
 | `active_from` / `active_to` | no | Service dates if the meter was added or retired. |
 | `source` | yes | Document and page each fact came from. |
 | `todo` | no | What is still unknown. |

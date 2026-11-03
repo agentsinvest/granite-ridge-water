@@ -8,7 +8,7 @@ One file per leak or anomaly flag at `flags/<flag-id>.md`. The leak engine (Phas
 | `title` | yes | Short plain-language headline shown on the site, starting with the meter, for example "Meter 2: over budget two bills in a row". |
 | `summary` | yes | Two or three plain sentences a neighbor can follow: what we saw and why it matters. The full numbers go in `evidence`. |
 | `meter` | yes | Meter the flag is on. |
-| `zones` | no | Zones involved, if known. |
+| `zones` | no | Stations involved, if known, like `[C15]`. The Home map puts the flag's marker on the first one that is on the map, otherwise on the meter. |
 | `rule` | yes | `over_budget`, `step_change`, `off_schedule`, `never_zero`, `winter_summer_ratio`, or `meter_vs_meter`. Use `manual` for flags a person adds. |
 | `first_seen` | yes | First date or period the pattern appears. |
 | `status` | yes | `suggested`, `open`, `investigating`, `fixed`, or `false-alarm`. |
