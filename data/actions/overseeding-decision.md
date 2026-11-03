@@ -19,7 +19,7 @@ verify_with: "The HOA's decision is recorded with its date."
 updated: 2026-10-07
 history:
   - { date: 2026-10-07, status: not-started, note: "Added to the action plan" }
-todo: "The seeding date for this year is not on file."
+todo: "The 2026 seed went down on 2026-10-21 (Jennifer, 2026-11-03); germination watering started 10-23. The 2026 overseeding invoice is not on file yet."
 ---
 
 The HOA is deciding whether to overseed the park lawn with winter rye this year, overseed less, or skip it.
