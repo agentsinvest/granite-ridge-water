@@ -18,15 +18,16 @@ Out of scope for now: rain gardens, rainwater harvesting, and landscape conversi
 
 Accuracy is the top priority. Simplicity for neighbors is second. Everything else is third.
 
-## Architecture: no database, no login, markdown is the data
+## Architecture: no database, one shared passcode, markdown is the data
 
 * All data lives as markdown files in `/data/` in this private repo. Git history is the audit trail.
 * A build script (`scripts/build-data.ts`) parses every markdown file (YAML frontmatter plus markdown tables), validates it with Zod, and writes typed JSON into `src/generated/`. Any malformed or missing required value fails the build with the file name and line. Files named `README.md`, `INVENTORY.md`, and `RECONCILIATION.md` are documentation and are skipped by the parser.
 * Updating data means editing markdown (by hand or via Claude Code), committing, and pushing. Netlify rebuilds automatically.
-* The site is public with no login. Anyone with the link can view it.
+* The whole site sits behind one shared passcode (Netlify env var `SITE_PASSCODE`), checked on the server by `netlify/edge-functions/gate.ts` before any page, data file, or API call is served. There are no individual accounts. If the env var is missing the site stays locked. (Changed 2026-11-03, see docs/decisions/2026-11-03-documents-and-site-passcode.md.)
+* Uploaded documents are the one exception to "markdown is the data": they live in Netlify Blobs (store `documents`), not git, and are never parsed into the model. See Documents below.
 * Stack: Vite + React + TypeScript + Tailwind + shadcn/ui, Recharts, Vitest, Zod, gray-matter. No Lovable. No database.
 
-## Public site rules (because there is no login)
+## Data file rules (the repo and the data files are shared widely, so treat them as public)
 
 * Nothing goes into `/data/` that the HOA would not be comfortable posting publicly: no full Mesa account numbers (last 4 only), no homeowner names or addresses, no bill PDFs, no contact details.
 * Raw bills and Waterfluence exports stay in `/raw/`, which is in `.gitignore` and never deployed.
@@ -175,7 +176,7 @@ Ranked automatically from leak flags, the investment catalog, and down or off op
 
 ## Screens
 
-Written for homeowners, not the board. Five screens in the menu, plus About the data in the footer. Each tab has its own address (`#screen?tab=`); old hashes redirect (`src/lib/route.ts`).
+Written for homeowners, not the board. Six screens in the menu, plus About the data in the footer. Each tab has its own address (`#screen?tab=`); old hashes redirect (`src/lib/route.ts`).
 
 1. Home: cost per home per month vs the $30K goal, progress bar in three bands (verified, in progress, proposed), up to 3 "Fix now" action cards, what changed, spending by year and by meter.
 2. Action plan: every action in `/data/actions/` grouped by status with owner, meter, and lawn filters; a page per action (`#action/<id>`); the Quick wins plan as a tab; a printable landscaper checklist (`#checklist`).
@@ -183,6 +184,7 @@ Written for homeowners, not the board. Five screens in the menu, plus About the 
 4. Where the water goes: meters and map, controllers and zones (`/data/controllers/`), when it waters, how much should we use, next year's need and cost (`/data/budget/need-model.md`).
 5. Savings calculator: What if, Is an investment worth it?, Did it work? (experiments).
 6. History and bills: how we got here, every bill with its reconciliation badge.
+6b. Documents (`#documents`): anyone with the passcode can upload any file type up to 250 MB, give it a readable name, add a note, rename, and move it to a 30-day trash. Files go up and down in 3 MiB pieces through `netlify/functions/docs.ts` (`/api/docs`) because Netlify Functions cap a request or response at about 6 MB. Limits live in `netlify/shared/docs-config.ts`. Uploaded files are reference material only: numbers from them reach the model only after someone transcribes them into `/data/`.
 7. About the data (footer): freshness, data requests, glossary. Maintainer notes show only with `?maintainer=1`.
 
 Data text shown to homeowners passes through `src/lib/publicText.ts`: no file paths, INVENTORY or CLAUDE references, or jargon in public views.

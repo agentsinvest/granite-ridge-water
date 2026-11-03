@@ -20,12 +20,13 @@ import { Problems } from './pages/Problems'
 import { Controllers } from './pages/Controllers'
 import { Checklist } from './pages/Checklist'
 import { NextYear } from './pages/NextYear'
+import { Documents } from './pages/Documents'
 
 type Model = ReturnType<typeof buildModel>
 type Tab = { id: string; label: string; render: (r: Route, m: Model) => ReactNode }
 type Screen = { route: RouteName; name: string; menu: boolean; tabs: Tab[]; parent?: RouteName }
 
-/** Five screens in the menu, plus About the data in the footer. Each screen's tabs reuse the existing views. */
+/** Six screens in the menu (the sixth is Documents), plus About the data in the footer. Each screen's tabs reuse the existing views. */
 const SCREENS: Screen[] = [
   { route: 'home', name: 'Home', menu: true, tabs: [{ id: 'home', label: 'Home', render: (_, m) => <Home data={data} model={m} /> }] },
   {
@@ -70,6 +71,7 @@ const SCREENS: Screen[] = [
       { id: 'bills', label: 'Bills', render: (r) => <Bills data={data} query={r.query} /> },
     ],
   },
+  { route: 'documents', name: 'Documents', menu: true, tabs: [{ id: 'documents', label: 'Documents', render: () => <Documents /> }] },
   { route: 'checklist', name: 'Landscaper checklist', menu: false, tabs: [{ id: 'checklist', label: 'Landscaper checklist', render: () => <Checklist data={data} /> }] },
   { route: 'about', name: 'About the data', menu: false, tabs: [{ id: 'about', label: 'About the data', render: (_, m) => <DataAccuracy data={data} model={m} /> }] },
 ]
@@ -117,7 +119,8 @@ export function App() {
         <footer className="mx-auto max-w-5xl border-t border-line px-4 py-6 text-sm text-ink-2 md:px-8">
           <p>Estimates are based on City of Mesa published rates and HOA records. Bills from the City are the official record.</p>
           <p className="mt-2 print:hidden">
-            <a href="#about" className="underline underline-offset-4">About the data</a> · Data built {new Date(data.generatedAt).toLocaleDateString('en-US', { dateStyle: 'medium' })}.
+            <a href="#about" className="underline underline-offset-4">About the data</a> · Data built {new Date(data.generatedAt).toLocaleDateString('en-US', { dateStyle: 'medium' })}. ·{' '}
+            <a href="/__logout" className="underline underline-offset-4">Sign out on this device</a>
           </p>
         </footer>
       </div>

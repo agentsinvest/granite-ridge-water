@@ -14,6 +14,7 @@
     "fetch-weather": "node scripts/fetch-weather.mjs"
   },
   "dependencies": {
+    "@netlify/blobs": "^11.1.7",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "recharts": "^3.10.1"
