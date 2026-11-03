@@ -11,6 +11,12 @@ turf_share_percent:
   source: "Jennifer's water model workbook, Meters table: share of this meter's water that flows at sprinkler-level rates in the hourly smart-meter data"
   confidence: medium
 service_type: null
+installed:
+  from: 2024-03-16
+  to: 2024-04-15
+  note: "The bill dated 2024-04-01 shows the old meter (...1424) and the bill dated 2024-04-29 shows this one, so it went in between those two reads."
+  source: "City of Mesa bills dated 2024-04-01 and 2024-04-29 (data/bills/meter-1/2024-03.md and data/bills/meter-1/2024-04.md)"
+  confidence: high
 waterfluence_id: "MESA-437"
 location: "East side, at the northeast corner of the park, west of the east street"
 areas_served: ["park-green", "west-south-desert"]
@@ -23,10 +29,19 @@ controller:
   source: "Eco Verde irrigation assessment, 2026 (sources/controllers/eco-verde-assessment-2026.md); HydroPoint reports of 2025-04-04; station split from docs/analysis/2026-10-07-controller-run-times-vs-waterfluence.md"
   confidence: medium
 checks:
-  - kind: question
+  - id: park-10pm-meter-1
+    stations: []
+    kind: question
     title: "What does the park water every night at about 10 PM?"
-    detail: "Besides the early-morning turf watering 5 days a week, the park also waters every night at about 10 PM. On this meter that is about 2,400 gallons a night (July to September 2026). It may be the drip around the park. The controller pages that would say are not on file yet."
-    source: "docs/analysis/2026-10-07-controller-run-times-vs-waterfluence.md"
+    detail: "Besides the early-morning turf watering 5 days a week, the park also waters every night at about 10 PM. On this meter that is about 2,400 gallons a night (July to September 2026). It may be the drip around the park. The controller pages that would say are not on file yet. Partly answered by the WeatherTRAK alert times: the drip on this meter runs in the evening (station C14 around 9 to 10 PM, station C15 around 10:20 to 10:45 PM), and on many summer Sunday nights a lawn station (C1, C2, or C4) runs at the same time as C14, between about 10 PM and midnight."
+    source: "docs/analysis/2026-10-07-controller-run-times-vs-waterfluence.md; sources/controllers/weathertrak-usage-park-2024-2025.md and sources/controllers/weathertrak-usage-park-2025-2026.md (alert lists)"
+    confidence: medium
+  - id: park-mainline-break-alarm
+    stations: [C14]
+    kind: action
+    title: "The park controller's water-main break alarm goes off most summer Sundays"
+    detail: "The park controller raised its most serious alarm, Mainline Break, 19 times: 7 in June and July 2025 and 12 from April to September 2026, 15 of them on a Sunday night, all between 10 PM and 1 AM. Each time the flow was 90 to 99 gallons a minute against a limit of 90, with drip station C14 running at the same time as lawn station C1, C2, or C4. Those two stations together use about 90 to 100 gallons a minute, so this looks like two stations scheduled at once, not a broken pipe, and the daily totals do not show the watering stopping. But an alarm that goes off every week gets ignored, which is how a real break would be missed. Ask the landscaper to stop C14 overlapping the lawn stations, or set the limit to fit, so the alarm only goes off for a real break."
+    source: "sources/controllers/weathertrak-usage-park-2024-2025.md and sources/controllers/weathertrak-usage-park-2025-2026.md (alert lists); station flows from Eco Verde assessment page 5"
     confidence: medium
 active_from: null
 active_to: null

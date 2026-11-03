@@ -27,7 +27,7 @@ export function Problems({ data, model }: { data: SiteData; model: Model }) {
         <Stat value={String(landscape)} label={landscape === 1 ? 'landscape cost to watch' : 'landscape costs to watch'} flag={landscape > 0} />
       </Stats>
 
-      <Section id="leaks" title="Possible leaks" lead="Each one says what we saw, roughly what it cost, and what to check next. None are confirmed leaks yet.">
+      <Section id="leaks" title="Possible leaks" lead="Each one says what we saw, roughly what it cost, and what to check next. The label on each says whether it has been confirmed.">
         <LeakFlags flags={costed} />
       </Section>
 

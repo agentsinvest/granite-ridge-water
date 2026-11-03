@@ -20,6 +20,24 @@ export const cellNumber = z
   })
 export const cellDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'must be YYYY-MM-DD')
 
+/**
+ * When a meter or controller was put in, as a window: from and to are the earliest and latest possible days
+ * (the same day when it is known exactly). Never guessed: unknown is null with a todo. in_use_by is the
+ * earliest day a document shows it working, when the install date itself is unknown.
+ */
+export const installedSchema = z
+  .object({
+    from: date.nullable(),
+    to: date.nullable(),
+    in_use_by: date.optional(),
+    note: z.string().optional(),
+    source: z.string().min(1),
+    confidence,
+    todo: z.string().optional(),
+  })
+  .refine((x) => (x.from === null) === (x.to === null), 'from and to must both be set or both be null')
+  .refine((x) => x.from === null || x.to === null || x.from <= x.to, 'from must not be after to')
+
 export const meterSchema = z.object({
   id: z.string().regex(/^meter-\d+$/),
   name: nullableString,
@@ -40,9 +58,14 @@ export const meterSchema = z.object({
   controller: z
     .object({ name: z.string(), model: nullableString, summary: z.string(), source: z.string(), confidence })
     .optional(),
+  installed: installedSchema.optional(),
   checks: z
     .array(
       z.object({
+        /** Short slug, unique on the site: the Problems screen anchors the check at #problems/check-<id>. */
+        id: z.string().regex(/^[a-z0-9-]+$/),
+        /** Stations the check is about, like C13; the map puts its marker on that zone. Empty means the meter as a whole. */
+        stations: z.array(z.string().regex(/^[A-Z]\d+$/)).default([]),
         kind: z.enum(['action', 'question']),
         title: z.string().min(1),
         detail: z.string().min(1),
@@ -155,6 +178,45 @@ export const usageRowSchema = z.object({
 })
 
 export const hourlyFrontmatterSchema = usageFrontmatterSchema
+
+export const zoneSharesFrontmatterSchema = z.object({
+  period: z.string().min(1),
+  source: z.string().min(1),
+  note: z.string().min(1),
+  confidence,
+  todo: z.string().optional(),
+})
+export const zoneShareRowSchema = z.object({
+  Stations: z.string().regex(/^[A-Z]\d+(, [A-Z]\d+)*$/, 'comma-separated station ids, like C1, C2'),
+  Meter: z.string().regex(/^meter-\d+$/),
+  'At least %': cellNumber,
+  'At most %': cellNumber,
+  What: z.string().min(1),
+})
+
+export const controllerUsageFrontmatterSchema = z.object({
+  controller: z.string().regex(/^[A-Z]$/, 'must be the controller letter, like C'),
+  water_year: z.string().regex(/^\d{4}-\d{4}$/, 'must be YYYY-YYYY'),
+  source: z.string().min(1),
+  covers: z.string().min(1),
+  confidence,
+  todo: z.string().optional(),
+})
+const yesBlank = z.enum(['yes', ''])
+export const controllerUsageRowSchema = z.object({
+  Date: cellDate,
+  'ET in': cellNumber,
+  'Major alerts': cellNumber,
+  'Shut-down': yesBlank,
+  'Ctrlr Off': yesBlank,
+  Paused: yesBlank,
+  'Runtime min': cellNumber,
+  Scheduled: cellNumber,
+  Manual: cellNumber,
+  Other: cellNumber,
+  'None (5.x)': cellNumber,
+  Total: cellNumber,
+})
 export const hourlyRowSchema = z.object({
   'Read time': z.string().regex(/^\d{4}-\d{2}-\d{2} \d{2}:00$/, 'must be YYYY-MM-DD HH:00'),
   Gallons: cellNumber.refine((n) => n !== null, 'blank hours must be left out, not written as empty'),
@@ -163,6 +225,7 @@ export const hourlyRowSchema = z.object({
 export const financialsFrontmatterSchema = z.object({
   year: z.number(),
   basis: z.enum(['cash', 'accrual']).nullable(),
+  basis_source: z.string().optional(),
   report_generated: z.union([date, z.date()]),
   source: z.string(),
   water_irrigation_december: z.number(),
@@ -208,7 +271,7 @@ export const eventRowSchema = z.object({
   Precision: z.enum(['day', 'month', 'year']),
   Meter: z.string(),
   Zones: z.string(),
-  Type: z.enum(['leak', 'repair', 'controller', 'schedule', 'landscape', 'meter', 'overseed', 'rebate', 'other']),
+  Type: z.enum(['leak', 'repair', 'controller', 'schedule', 'landscape', 'meter', 'overseed', 'rebate', 'price', 'other']),
   'What happened': z.string().min(1),
   Source: z.string().min(1),
 })
@@ -520,6 +583,7 @@ export const controllerSchema = z.object({
   serial_last4: last4,
   meters: z.array(z.string()).min(1),
   has_flow_sensor: z.boolean().nullable(),
+  installed: installedSchema.optional(),
   source: z.string().min(1),
   confidence,
   findings: z.array(z.object({ text: z.string().min(1), source: z.string().min(1) })).default([]),

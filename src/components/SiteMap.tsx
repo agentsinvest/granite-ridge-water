@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import type { SiteData } from '../../scripts/site-data'
 import { meterNumber } from '../lib/data'
-import { MapCostCard, type MapCosts } from './MapCostCard'
+import { installText, type MapAlert } from '../lib/mapAlerts'
+import { MapCard, MapCostCard, type MapCosts } from './MapCostCard'
 
 type Props = {
   map: SiteData['map']
@@ -9,9 +10,13 @@ type Props = {
   flaggedMeters: Set<string>
   /** Bills and stations for the cost card shown on hover, focus, or tap. Without it the map shows no costs. */
   costs?: MapCosts
+  /** Current problems, each a ! marker linking to it. When given, they replace the ! badge on meter pins. */
+  alerts?: MapAlert[]
+  /** Controller facts for the controller hover card (model, flow sensor, install date). */
+  controllerInfo?: SiteData['controllers']
 }
 
-type Active = { kind: 'meter' | 'zone'; id: string; at: [number, number] }
+type Active = { kind: 'meter' | 'zone' | 'controller' | 'alert'; id: string; at: [number, number] }
 
 const toPoints = (pts: [number, number][]) => pts.map(([x, y]) => `${x},${y}`).join(' ')
 
@@ -19,7 +24,7 @@ const toPoints = (pts: [number, number][]) => pts.map(([x, y]) => `${x},${y}`).j
 export const zoneColor = (controller: string) => `var(--zone-${controller.toLowerCase()})`
 const meterList = (meters: string[]) => (meters.length > 1 ? 'meters ' : 'meter ') + meters.map(meterNumber).join(' and ')
 
-export function SiteMap({ map, areaNames, flaggedMeters, costs }: Props) {
+export function SiteMap({ map, areaNames, flaggedMeters, costs, alerts, controllerInfo }: Props) {
   const { width, height } = map.canvas
   const controllers = map.controllers ?? []
   const zones = map.zones ?? []
@@ -45,11 +50,25 @@ export function SiteMap({ map, areaNames, flaggedMeters, costs }: Props) {
     return () => window.removeEventListener('keydown', onKey)
   }, [active])
   useEffect(() => () => window.clearTimeout(closeTimer.current), [])
-  const hoverProps = (a: Active) =>
-    costs
-      ? { onMouseEnter: () => show(a), onMouseLeave: hideSoon, onFocus: () => show(a), onBlur: () => setActive(null), 'aria-describedby': active?.id === a.id ? 'map-cost-card' : undefined }
-      : {}
+  const cardHandlers = (a: Active, cardId: string) => ({
+    onMouseEnter: () => show(a),
+    onMouseLeave: hideSoon,
+    onFocus: () => show(a),
+    onBlur: () => setActive(null),
+    'aria-describedby': active?.kind === a.kind && active.id === a.id ? cardId : undefined,
+  })
+  const hoverProps = (a: Active) => (costs ? cardHandlers(a, 'map-cost-card') : {})
   const activeZone = active?.kind === 'zone' ? zones.find((z) => z.id === active.id) : undefined
+  const activeAlert = active?.kind === 'alert' ? alerts?.find((x) => x.id === active.id) : undefined
+  const activeController = active?.kind === 'controller' ? controllers.find((c) => c.id === active.id) : undefined
+  const cardProps = (at: [number, number]) => ({
+    at,
+    canvas: map.canvas,
+    wrap: wrapRef.current,
+    onMouseEnter: () => window.clearTimeout(closeTimer.current),
+    onMouseLeave: hideSoon,
+  })
+  const alertMeters = new Set((alerts ?? []).map((x) => x.meter))
   return (
     <figure className="m-0">
       {hasZones && (
@@ -67,8 +86,8 @@ export function SiteMap({ map, areaNames, flaggedMeters, costs }: Props) {
       >
         <title id="site-map-title">Schematic map of Granite Ridge common areas and water meters</title>
         <desc id="site-map-desc">
-          Five common areas labeled B to E plus the private streets, the park turf, and four City of Mesa water meters
-          numbered 1 to 4. The same information is in the tables below the map.
+          The common areas, the private streets, the park turf, four City of Mesa water meters numbered 1 to 4, and the
+          watering zones of irrigation controllers A, B, and C. The same information is in the tables below the map.
         </desc>
         <defs>
           {controllers.map((c) => (
@@ -89,7 +108,7 @@ export function SiteMap({ map, areaNames, flaggedMeters, costs }: Props) {
 
         {map.areas.map((a) => (
           <g key={a.id}>
-            <title>{`${areaNames[a.id]?.label ?? ''} ${areaNames[a.id]?.name ?? a.id}`.trim()}</title>
+            <title>{areaNames[a.id]?.name ?? a.id}</title>
             {a.parts.map((part, i) => (
               <polygon key={i} points={toPoints(part)} fill="var(--shrub)" stroke="var(--surface)" strokeWidth={4} strokeLinejoin="round" />
             ))}
@@ -136,7 +155,7 @@ export function SiteMap({ map, areaNames, flaggedMeters, costs }: Props) {
           })}
 
         <g>
-          <title>{`${areaNames[map.streets.area]?.label ?? ''} ${areaNames[map.streets.area]?.name ?? 'Private streets'}`.trim()}</title>
+          <title>{areaNames[map.streets.area]?.name ?? 'Private streets'}</title>
           {map.streets.lines.map((line, i) => (
             <polyline
               key={i}
@@ -166,17 +185,6 @@ export function SiteMap({ map, areaNames, flaggedMeters, costs }: Props) {
           ))}
         </g>
 
-        <g aria-hidden="true">
-          {[...map.areas.map((a) => ({ id: a.id, at: a.label_at })), { id: map.streets.area, at: map.streets.label_at }].map(({ id, at }) => (
-            <g key={id} transform={`translate(${at[0]} ${at[1]})`}>
-              <circle r={26} fill="var(--surface)" stroke="var(--ink)" strokeWidth={3} />
-              <text textAnchor="middle" dominantBaseline="central" fontSize={30} fontWeight={700} fill="var(--ink)">
-                {areaNames[id]?.label ?? '?'}
-              </text>
-            </g>
-          ))}
-        </g>
-
         {zonesOn && (
           <g aria-hidden="true" fontSize={21} fontWeight={700} pointerEvents="none">
             {zones.map((z) => (
@@ -199,8 +207,22 @@ export function SiteMap({ map, areaNames, flaggedMeters, costs }: Props) {
 
         {zonesOn &&
           controllers.map((c) => (
-            <g key={c.id} transform={`translate(${c.at[0]} ${c.at[1]})`}>
-              <title>{`${c.name} (controller ${c.id}), ${meterList(c.meters)}`}</title>
+            <g
+              key={c.id}
+              transform={`translate(${c.at[0]} ${c.at[1]})`}
+              {...(controllerInfo
+                ? {
+                    className: 'map-pin',
+                    tabIndex: 0,
+                    role: 'button',
+                    'aria-label': `${c.name} (controller ${c.id}), ${meterList(c.meters)}. Show its details.`,
+                    ...cardHandlers({ kind: 'controller', id: c.id, at: c.at }, 'map-controller-card'),
+                    onClick: () => show({ kind: 'controller', id: c.id, at: c.at }),
+                  }
+                : {})}
+            >
+              {!controllerInfo && <title>{`${c.name} (controller ${c.id}), ${meterList(c.meters)}`}</title>}
+              <circle r={32} fill="transparent" />
               <polygon points="0,-26 24,16 -24,16" fill="var(--surface)" stroke={zoneColor(c.id)} strokeWidth={5} strokeLinejoin="round" />
               <text y={4} textAnchor="middle" dominantBaseline="central" fontSize={22} fontWeight={800} fill="var(--ink)" aria-hidden="true">
                 {c.id}
@@ -210,12 +232,12 @@ export function SiteMap({ map, areaNames, flaggedMeters, costs }: Props) {
 
         {map.meters.map((pin) => {
           const n = meterNumber(pin.meter)
-          const flagged = flaggedMeters.has(pin.meter)
+          const flagged = flaggedMeters.has(pin.meter) || alertMeters.has(pin.meter)
           return (
             <a
               key={pin.meter}
               href={`#water/${pin.meter}?tab=meters`}
-              aria-label={`Meter ${n}${flagged ? ', has a leak flag' : ''}. Go to details.`}
+              aria-label={`Meter ${n}${flagged ? ', has a problem flagged' : ''}. Go to details.`}
               {...hoverProps({ kind: 'meter', id: pin.meter, at: pin.at })}
             >
               <g transform={`translate(${pin.at[0]} ${pin.at[1]})`} className="map-pin">
@@ -224,7 +246,7 @@ export function SiteMap({ map, areaNames, flaggedMeters, costs }: Props) {
                 <text textAnchor="middle" dominantBaseline="central" fontSize={28} fontWeight={700} fill="var(--pin-ink)">
                   {n}
                 </text>
-                {flagged && (
+                {flagged && !alerts && (
                   <g transform="translate(22 -22)">
                     <circle r={14} fill="var(--serious)" stroke="var(--surface)" strokeWidth={3} />
                     <text textAnchor="middle" dominantBaseline="central" fontSize={20} fontWeight={800} fill="#0b0b0b">
@@ -236,7 +258,36 @@ export function SiteMap({ map, areaNames, flaggedMeters, costs }: Props) {
             </a>
           )
         })}
+
+        {alerts?.map((x) => (
+          <a key={x.id} href={x.href} aria-label={`Problem: ${x.title}. ${x.status}. Go to it.`} {...cardHandlers({ kind: 'alert', id: x.id, at: x.at }, 'map-alert-card')}>
+            <g transform={`translate(${x.at[0]} ${x.at[1]})`} className="map-pin">
+              <circle r={22} fill="transparent" />
+              <AlertMark kind={x.kind} />
+            </g>
+          </a>
+        ))}
       </svg>
+      {activeAlert && (
+        <MapCard id="map-alert-card" {...cardProps(activeAlert.at)}>
+          <p className="text-xs font-semibold uppercase tracking-wide text-ink-2">
+            {activeAlert.status}
+            {activeAlert.zone ? ` · Zone ${activeAlert.zone}` : ''}
+          </p>
+          <p className="mt-1 font-semibold">{activeAlert.title}</p>
+          <p className="mt-1 text-ink-2">{activeAlert.blurb}</p>
+          <p className="mt-2">
+            <a href={activeAlert.href} className="font-semibold underline underline-offset-4">
+              Go to this problem
+            </a>
+          </p>
+        </MapCard>
+      )}
+      {activeController && controllerInfo && (
+        <MapCard id="map-controller-card" {...cardProps(activeController.at)}>
+          <ControllerBody c={activeController} info={controllerInfo.find((x) => x.id === activeController.id)} />
+        </MapCard>
+      )}
       {costs && active && (active.kind === 'meter' || activeZone) && (
         <MapCostCard
           id="map-cost-card"
@@ -270,8 +321,16 @@ export function SiteMap({ map, areaNames, flaggedMeters, costs }: Props) {
               !
             </text>
           </svg>
-          Leak flag
+          {alerts ? 'A current problem: hover or tab to it for a summary, select it to open it' : 'Leak flag'}
         </span>
+        {alerts?.some((x) => x.kind === 'check') && (
+          <span className="inline-flex items-center gap-2">
+            <svg width="20" height="20" viewBox="-12 -12 24 24" aria-hidden="true">
+              <AlertMark kind="check" small />
+            </svg>
+            A watering check for the landscaper
+          </span>
+        )}
         {zonesOn &&
           controllers.map((c) => (
             <span key={c.id} className="inline-flex items-center gap-2">
@@ -331,6 +390,47 @@ function ZoneShapes({ z }: { z: NonNullable<SiteData['map']['zones']>[number] })
           strokeLinejoin="round"
         />
       ))}
+    </>
+  )
+}
+
+/** Problem marker: a circle for a possible leak, a diamond for a watering check. Both carry "!" so shape and mark, not only color, say what it is. */
+function AlertMark({ kind, small }: { kind: MapAlert['kind']; small?: boolean }) {
+  const r = small ? 10 : 16
+  return (
+    <>
+      {kind === 'flag' ? (
+        <circle r={r} fill="var(--serious)" stroke="var(--surface)" strokeWidth={small ? 0 : 3} />
+      ) : (
+        <rect x={-r * 0.8} y={-r * 0.8} width={r * 1.6} height={r * 1.6} transform="rotate(45)" fill="var(--serious)" stroke="var(--surface)" strokeWidth={small ? 0 : 3} />
+      )}
+      <text textAnchor="middle" dominantBaseline="central" fontSize={small ? 14 : 22} fontWeight={800} fill="#0b0b0b">
+        !
+      </text>
+    </>
+  )
+}
+
+function ControllerBody({ c, info }: { c: NonNullable<SiteData['map']['controllers']>[number]; info: SiteData['controllers'][number] | undefined }) {
+  return (
+    <>
+      <p className="font-semibold">
+        {c.name} (controller {c.id})
+      </p>
+      <p className="text-xs text-ink-2">{info?.model ?? 'Make and model not on file'}</p>
+      <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5">
+        <dt className="text-ink-2">Waters</dt>
+        <dd>{meterList(c.meters)}</dd>
+        <dt className="text-ink-2">Installed</dt>
+        <dd>{installText(info?.installed).replace(/^Installed /, '').replace(/^Install date not on file\./, 'Not on file.')}</dd>
+        <dt className="text-ink-2">Flow sensor</dt>
+        <dd>{info?.has_flow_sensor === true ? 'Yes' : info?.has_flow_sensor === false ? 'No' : 'Not known'}</dd>
+      </dl>
+      <p className="mt-2">
+        <a href={`#water/controller-${c.id}?tab=controllers`} className="font-semibold underline underline-offset-4">
+          Controller details
+        </a>
+      </p>
     </>
   )
 }

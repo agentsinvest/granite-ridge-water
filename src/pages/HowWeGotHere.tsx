@@ -7,7 +7,7 @@ import { fmt, meterNumber, meterName } from '../lib/data'
 import type { Model } from '../lib/model'
 
 const EVENT_TYPE: Record<string, string> = {
-  leak: 'Leak', repair: 'Repair', controller: 'Controller', schedule: 'Schedule', landscape: 'Landscape', meter: 'Meter', overseed: 'Overseed', rebate: 'Rebate', other: 'Other',
+  leak: 'Leak', repair: 'Repair', controller: 'Controller', schedule: 'Schedule', landscape: 'Landscape', meter: 'Meter', overseed: 'Overseed', rebate: 'Rebate', price: 'City price change', other: 'Other',
 }
 
 const longDate = (iso: string) => new Date(`${iso}T12:00:00`).toLocaleDateString('en-US', { dateStyle: 'medium' })

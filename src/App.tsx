@@ -45,7 +45,7 @@ const SCREENS: Screen[] = [
     name: 'Where the water goes',
     menu: true,
     tabs: [
-      { id: 'meters', label: 'Meters and map', render: () => <MetersAndAreas data={data} /> },
+      { id: 'meters', label: 'Meters', render: () => <MetersAndAreas data={data} /> },
       { id: 'controllers', label: 'Controllers and zones', render: (_, m) => <Controllers data={data} model={m} /> },
       { id: 'schedule', label: 'When it waters', render: () => <Schedule data={data} /> },
       { id: 'budget', label: 'How much should we use', render: (_, m) => <HowMuch data={data} model={m} /> },

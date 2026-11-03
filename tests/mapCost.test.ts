@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { latestBillMonth, meterCostPair, meterYearCost, stationRanges, zoneMeters } from '../src/engine/mapCost'
+import { latestBillMonth, meterCostPair, meterYearCost, stationRanges, zoneMeters, zoneShareLines } from '../src/engine/mapCost'
 
 const bill = (meter: string, bill_date: string, printed_total: number, reconciled = 'pass') => ({ meter, bill_date, printed_total, reconciled })
 
@@ -64,4 +64,19 @@ describe('stationRanges', () => {
     expect(stationRanges(['C15', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C14'])).toBe('C1 to C7, C14, C15')
     expect(stationRanges(['B1', 'B2', 'A4'])).toBe('A4, B1, B2')
   })
+})
+
+describe('zoneShareLines', () => {
+  const rows = [
+    { stations: ['C1', 'C2', 'C3'], meter: 'meter-1', atLeast: 77, atMost: null },
+    { stations: ['C14', 'C15'], meter: 'meter-1', atLeast: null, atMost: 23 },
+    { stations: ['C13'], meter: 'meter-2', atLeast: null, atMost: 49 },
+  ]
+  it('states the zone itself when the row is exactly the zone', () => expect(zoneShareLines(['C13'], rows)).toEqual(["This zone uses at most 49% of meter 2's water."]))
+  it('names the group when the row is part of a bigger zone', () => expect(zoneShareLines(['C1', 'C2', 'C3', 'C4'], rows)).toEqual(["C1 to C3 use at least 77% of meter 1's water."]))
+  it('says the split is not measured when the zone is part of a bigger group', () =>
+    expect(zoneShareLines(['C15'], rows)).toEqual(["C14 and C15 together use at most 23% of meter 1's water; how that splits between them is not measured."]))
+  it('says nothing when no row touches the zone', () => expect(zoneShareLines(['B3'], rows)).toEqual([]))
+  it('gives a range when both bounds are known', () =>
+    expect(zoneShareLines(['X1'], [{ stations: ['X1'], meter: 'meter-4', atLeast: 10, atMost: 20 }])).toEqual(["This zone uses between 10% and 20% of meter 4's water."]))
 })

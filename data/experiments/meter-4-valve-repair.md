@@ -2,7 +2,7 @@
 id: meter-4-valve-repair
 title: "Meter 4: repair the 2 AM valve and confirm it stays shut"
 meter: meter-4
-what_changes: "Landscaper inspects and repairs or replaces the valve that runs at about 2 AM on meter 4, the one that stayed open three times in September and October 2026."
+what_changes: "Landscaper inspects and repairs or replaces the valve that runs at about 2 AM on meter 4, the one that kept running after the night cycle on 11 days from 2026-09-18 to 10-23. The solenoid replacement on 2026-09-25 did not fix it."
 status: planned
 start: null
 end: null

@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import type { SiteData } from '../../scripts/site-data'
 import { ActionCard } from '../components/actions'
+import { MapSection } from '../components/MapSection'
 import { Bars } from '../components/charts'
 import { rainSummaryText } from '../components/WateringAfterRain'
 import { buildRainCheck } from '../lib/rainCheck'
@@ -145,6 +146,8 @@ export function Home({ data, model }: { data: SiteData; model: Model }) {
           </a>
         </p>
       </section>
+
+      <MapSection data={data} />
 
       <Section id="changed" title="What changed since the last update">
         <p className="mt-3 rounded-xl bg-surface p-4 text-sm ring-1 ring-[var(--ring)]">

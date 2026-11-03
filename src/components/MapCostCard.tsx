@@ -1,5 +1,7 @@
+import type { ReactNode } from 'react'
 import type { SiteData } from '../../scripts/site-data'
-import { meterCostPair, stationRanges, zoneMeters, type CostBill, type MeterYearCost, type StationLike } from '../engine/mapCost'
+import { installText } from '../lib/mapAlerts'
+import { meterCostPair, stationRanges, zoneMeters, zoneShareLines, type CostBill, type MeterYearCost, type ShareRow, type StationLike } from '../engine/mapCost'
 import { fmt, meterName, meterNumber } from '../lib/data'
 import { MONTHS } from '../lib/model'
 
@@ -8,6 +10,10 @@ export type MapCosts = {
   stations: StationLike[]
   /** Controller ids whose station-to-meter split is inferred, not confirmed by the landscaper. */
   unconfirmedSplit: Set<string>
+  /** Meter facts for the hover card (install date). Optional so older callers keep working. */
+  meters?: SiteData['meters']
+  /** Measured floors and ceilings on a group of stations' share of its meter's water. */
+  shares?: { period: string; rows: ShareRow[] } | null
 }
 
 type Zone = NonNullable<SiteData['map']['zones']>[number]
@@ -75,26 +81,24 @@ function MeterRows({ meters, bills }: { meters: string[]; bills: CostBill[] }) {
   )
 }
 
-export function MapCostCard({
+/** A card placed next to a spot on the map and kept inside it; under the map on narrow screens. */
+export function MapCard({
   id,
-  costs,
-  target,
   at,
   canvas,
   wrap,
   onMouseEnter,
   onMouseLeave,
+  children,
 }: {
   id: string
-  costs: MapCosts
-  target: Target
   at: [number, number]
   canvas: { width: number; height: number }
   wrap: HTMLDivElement | null
   onMouseEnter: () => void
   onMouseLeave: () => void
+  children: ReactNode
 }) {
-  // Place the card next to the shape it describes, kept inside the map.
   const w = wrap?.clientWidth ?? 0
   const h = wrap?.clientHeight ?? 0
   const scale = w / canvas.width
@@ -106,7 +110,6 @@ export function MapCostCard({
   // On narrow screens a floating card would cover most of the map, so it sits under the map instead.
   const floating = w >= 560
   const style = !floating ? undefined : below ? { left, top: y + 20 } : { left, bottom: h - y + 20 }
-
   return (
     <div
       id={id}
@@ -116,8 +119,29 @@ export function MapCostCard({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      {target.kind === 'meter' ? <MeterBody costs={costs} meter={target.meter} flagged={target.flagged} /> : <ZoneBody costs={costs} zone={target.zone} controller={target.controller} />}
+      {children}
     </div>
+  )
+}
+
+export function MapCostCard({
+  costs,
+  target,
+  ...card
+}: {
+  id: string
+  costs: MapCosts
+  target: Target
+  at: [number, number]
+  canvas: { width: number; height: number }
+  wrap: HTMLDivElement | null
+  onMouseEnter: () => void
+  onMouseLeave: () => void
+}) {
+  return (
+    <MapCard {...card}>
+      {target.kind === 'meter' ? <MeterBody costs={costs} meter={target.meter} flagged={target.flagged} /> : <ZoneBody costs={costs} zone={target.zone} controller={target.controller} />}
+    </MapCard>
   )
 }
 
@@ -125,11 +149,12 @@ function MeterBody({ costs, meter, flagged }: { costs: MapCosts; meter: string; 
   return (
     <>
       <p className="font-semibold">{meterName(meter, 'name')}</p>
-      <p className="text-xs text-ink-2">What the City billed for this meter.</p>
+      {costs.meters && <p className="text-xs text-ink-2">{installText(costs.meters.find((m) => m.id === meter)?.installed)}</p>}
+      <p className="mt-1 text-xs text-ink-2">What the City billed for this meter.</p>
       <MeterRows meters={[meter]} bills={costs.bills} />
       {flagged && (
         <p className="mt-2 text-xs">
-          <span aria-hidden="true" className="font-extrabold">! </span>This meter has a possible leak flagged.
+          <span aria-hidden="true" className="font-extrabold">! </span>This meter has a problem flagged. The ! markers next to it say what.
         </p>
       )}
       <p className="mt-2 text-xs text-ink-2">Select the meter for its details.</p>
@@ -141,6 +166,7 @@ function ZoneBody({ costs, zone, controller }: { costs: MapCosts; zone: Zone; co
   const zm = zoneMeters(zone.stations, costs.stations)
   const meters = zm.meters.map(meterNumber)
   const meterText = `${meters.length > 1 ? 'meters' : 'meter'} ${meters.join(' and ')}`
+  const shareLines = costs.shares ? zoneShareLines(zone.stations, costs.shares.rows) : []
   return (
     <>
       <p className="font-semibold">
@@ -153,18 +179,35 @@ function ZoneBody({ costs, zone, controller }: { costs: MapCosts; zone: Zone; co
       {zm.meters.length === 0 ? (
         <p className="mt-2">Which meter feeds this zone is not on file yet, so its cost is unknown.</p>
       ) : zm.wholeMeter ? (
-        <p className="mt-2">This zone is the only thing watering on {meterText}, so the meter's bill is this zone's cost.</p>
+        <>
+          <p className="mt-2">This zone is the only thing watering on {meterText}, so the meter's bill is this zone's cost.</p>
+          <MeterRows meters={zm.meters} bills={costs.bills} />
+        </>
       ) : (
-        <p className="mt-2">
-          This zone has no meter of its own. Its water goes through {meterText}, which also {meters.length > 1 ? 'feed' : 'feeds'} {stationRanges(zm.sharedWith)}. The cost below is for the whole{' '}
-          {meters.length > 1 ? 'meters' : 'meter'}, not this zone alone.
-        </p>
+        <>
+          <p className="mt-2 font-semibold">What this zone alone costs: not known yet.</p>
+          <p className="mt-1">
+            It has no meter of its own. Its water goes through {meterText}, which also {meters.length > 1 ? 'feed' : 'feeds'} {stationRanges(zm.sharedWith)}, so{' '}
+            {meters.length > 1 ? "the meters' bills are" : "the meter's bill is"} not this zone's cost.
+          </p>
+          {shareLines.length > 0 ? (
+            <div className="mt-2">
+              <p className="text-xs font-semibold">Measured share of the water, {costs.shares!.period}</p>
+              <ul className="mt-0.5 list-disc space-y-0.5 pl-4">
+                {shareLines.map((l) => (
+                  <li key={l}>{l}</li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <p className="mt-2 text-xs text-ink-2">How much of the meter's water this zone uses has not been measured yet.</p>
+          )}
+          <p className="mt-2 text-xs text-ink-2">Pricing a zone needs each station's run minutes and flow over a whole billing period, which are not on file yet.</p>
+          <p className="mt-2 text-xs font-semibold">For context only: {meters.length > 1 ? 'the whole bills of ' : 'the whole bill of '}{meterText}</p>
+          <MeterRows meters={zm.meters} bills={costs.bills} />
+        </>
       )}
-      {zm.meters.length > 0 && <MeterRows meters={zm.meters} bills={costs.bills} />}
       {zm.unknownMeter.length > 0 && zm.meters.length > 0 && <p className="mt-1 text-xs text-ink-2">Meter not on file for {stationRanges(zm.unknownMeter)}.</p>}
-      {!zm.wholeMeter && zm.meters.length > 0 && (
-        <p className="mt-2 text-xs text-ink-2">Splitting a meter's bill by zone needs each station's run time and flow, which the landscaper has not given us yet.</p>
-      )}
       {controller && costs.unconfirmedSplit.has(controller.id) && (
         <p className="mt-1 text-xs text-ink-2">Which stations are on which meter is likely but not yet confirmed by the landscaper.</p>
       )}

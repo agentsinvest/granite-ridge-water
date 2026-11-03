@@ -1,14 +1,10 @@
 import type { ReactNode } from 'react'
 import type { SiteData } from '../../scripts/site-data'
-import { SiteMap } from '../components/SiteMap'
 import { costFlags, dollarRange } from '../components/LeakFlags'
 import { Bars, METER_COLOR } from '../components/charts'
 import { TableView, HowCalculated } from '../components/ui'
 import { fmt, meterNumber, meterName } from '../lib/data'
 import { recentUsage, shares } from '../engine/usage'
-import { meterCostPair } from '../engine/mapCost'
-import type { MapCosts } from '../components/MapCostCard'
-import { MONTHS } from '../lib/model'
 
 const RECENT_PERIODS = 12
 
@@ -26,7 +22,6 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
   const priced = costed.filter((c) => c.cost?.low != null && c.cost.high != null)
   const leakLow = priced.reduce((s, c) => s + c.cost!.low!, 0)
   const leakHigh = priced.reduce((s, c) => s + c.cost!.high!, 0)
-  const flaggedMeters = new Set(activeFlags.map((f) => f.meter))
 
   const summaries = data.meters.map((m) => recentUsage(m.id, data.billingPeriods[m.id]?.rows ?? [], RECENT_PERIODS))
   const share = shares(summaries)
@@ -38,13 +33,6 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
   const recentBills = data.meters.flatMap((m) => billsFor(m.id))
   const billTotal = recentBills.reduce((s, b) => s + b.printed_total, 0)
   const billRange = recentBills.length ? [recentBills.map((b) => b.bill_date).sort()[0], recentBills.map((b) => b.bill_date).sort().at(-1)!] : null
-  const mapCosts: MapCosts = {
-    bills: data.bills,
-    stations: data.controllers.flatMap((c) => c.stations),
-    unconfirmedSplit: new Set(data.controllers.filter((c) => c.confidence !== 'high' && c.meters.length > 1).map((c) => c.id)),
-  }
-  const meterCosts = data.meters.map((m) => ({ meter: m.id, p: meterCostPair(data.bills, m.id) }))
-  const costYears = meterCosts.find((x) => x.p)?.p ?? null
   const grossTotal = data.areas.rows.reduce((s, r) => s + (r['Gross sq ft'] ?? 0), 0)
 
   if (data.meters.length === 0 && data.areas.rows.length === 0) {
@@ -58,7 +46,7 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
 
   return (
     <article>
-      <h1 className="text-2xl font-bold md:text-3xl">Meters and map</h1>
+      <h1 className="text-2xl font-bold md:text-3xl">Meters</h1>
       <p className="mt-2 max-w-prose text-ink-2">
         Where the HOA's four City of Mesa water meters are, and what landscape the common areas hold.
       </p>
@@ -94,94 +82,10 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
         <a href="#problems" className="font-semibold underline underline-offset-4">See what is wrong right now on the Problems screen</a>
       </p>
 
-      <section aria-labelledby="map-heading" className="mt-10">
-        <h2 id="map-heading" className="text-xl font-bold">
-          Map
-        </h2>
-        <p className="mt-1 text-sm text-ink-2">
-          Hover over, tap, or tab to a meter or a watering zone to see what it cost{costYears ? ` in ${costYears.ytd.year} so far and in ${costYears.prior.year}` : ''}. Select a meter number to jump to its details.
-        </p>
-        <div className="mt-4 rounded-xl bg-surface p-3 ring-1 ring-[var(--ring)] md:p-5">
-          <SiteMap map={data.map} areaNames={areaNames} flaggedMeters={flaggedMeters} costs={mapCosts} />
-        </div>
-        {costYears && (
-          <details className="mt-3 text-sm">
-            <summary className="cursor-pointer font-semibold">What each meter cost, as a table</summary>
-            <div className="mt-2 overflow-x-auto rounded-xl bg-surface ring-1 ring-[var(--ring)]">
-              <table className="w-full min-w-[32rem] text-left text-sm">
-                <caption className="sr-only">City water bills by meter, this year so far and last year</caption>
-                <thead className="border-b border-line text-ink-2">
-                  <tr>
-                    <th scope="col" className="px-4 py-2 font-semibold">Meter</th>
-                    <th scope="col" className="px-4 py-2 text-right font-semibold">{costYears.ytd.year} so far (bills through {MONTHS[costYears.ytd.throughMonth - 1]})</th>
-                    <th scope="col" className="px-4 py-2 text-right font-semibold">{costYears.prior.year}</th>
-                    <th scope="col" className="px-4 py-2 font-semibold">Bills not on file</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {meterCosts.map(({ meter, p }) => {
-                    const gaps = p ? [p.ytd, p.prior].filter((c) => c.missingMonths.length).map((c) => `${c.year}: ${c.missingMonths.map((m) => MONTHS[m - 1]).join(', ')}`) : []
-                    return (
-                      <tr key={meter} className="border-b border-line last:border-0 align-top">
-                        <th scope="row" className="px-4 py-2 font-semibold">{meterName(meter, 'name')}</th>
-                        <td className="tabular px-4 py-2 text-right">{p && p.ytd.bills ? fmt.usd(p.ytd.total) : <Missing what="Bills" />}</td>
-                        <td className="tabular px-4 py-2 text-right">{p && p.prior.bills ? fmt.usd(p.prior.total) : <Missing what="Bills" />}</td>
-                        <td className="px-4 py-2">{gaps.length ? gaps.join('; ') : 'None'}</td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
-            <p className="mt-2 max-w-prose text-ink-2">
-              Totals add up the printed totals on the City bills on file, by bill date. Zones have no meters of their own, so a zone's cost is
-              only known when it is the only thing on its meter.
-            </p>
-          </details>
-        )}
-        <details className="mt-3 text-sm text-ink-2">
-          <summary className="cursor-pointer font-semibold text-ink">How this map was made</summary>
-          <p className="mt-2 max-w-prose">
-            The area outlines are traced by hand from the HOA's annotated aerial map, and the meter locations come from the
-            Waterfluence controller map. It is a simplified drawing: square footages below come from the source maps, not
-            from the drawing. {data.map.slope.text}
-          </p>
-          {data.map.zones_source && <p className="mt-2 max-w-prose">Watering zones and controllers: {data.map.zones_source}</p>}
-        </details>
-        {(data.map.zones ?? []).length > 0 && (
-          <details className="mt-3 text-sm">
-            <summary className="cursor-pointer font-semibold">Watering zones as a table</summary>
-            <div className="mt-2 overflow-x-auto rounded-xl bg-surface ring-1 ring-[var(--ring)]">
-              <table className="w-full min-w-[32rem] text-left text-sm">
-                <caption className="sr-only">Watering zones by controller and meter</caption>
-                <thead className="border-b border-line text-ink-2">
-                  <tr>
-                    <th scope="col" className="px-4 py-2 font-semibold">Zone</th>
-                    <th scope="col" className="px-4 py-2 font-semibold">What it waters</th>
-                    <th scope="col" className="px-4 py-2 font-semibold">Controller</th>
-                    <th scope="col" className="px-4 py-2 font-semibold">Meter</th>
-                    <th scope="col" className="px-4 py-2 font-semibold">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(data.map.zones ?? []).map((z) => {
-                    const c = (data.map.controllers ?? []).find((x) => x.id === z.controller)
-                    return (
-                      <tr key={z.id} className="border-b border-line last:border-0 align-top">
-                        <th scope="row" className="px-4 py-2 font-semibold">{z.label}</th>
-                        <td className="px-4 py-2">{z.name}</td>
-                        <td className="px-4 py-2">{c?.name ?? z.controller}</td>
-                        <td className="px-4 py-2">{c ? c.meters.map(meterNumber).join(' and ') : <Missing what="Meter" />}</td>
-                        <td className="px-4 py-2">{z.status === 'off' ? 'Turned off' : 'On'}</td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </details>
-        )}
-      </section>
+      <p className="mt-6 text-sm">
+        The map of meters, watering zones, controllers, and current problems is on the{' '}
+        <a href="#home/map-heading" className="font-semibold underline underline-offset-4">Home page</a>.
+      </p>
 
       <section aria-labelledby="areas-heading" className="mt-10">
         <h2 id="areas-heading" className="text-xl font-bold">
@@ -205,9 +109,6 @@ export function MetersAndAreas({ data }: { data: SiteData }) {
                 {data.areas.rows.map((r) => (
                   <tr key={r['Area id']} className="border-b border-line last:border-0 align-top">
                     <th scope="row" className="px-4 py-3 font-normal">
-                      <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full border-2 border-ink text-xs font-bold">
-                        {r['Map label']}
-                      </span>
                       <span className="font-semibold">{r.Name}</span>
                       <span className="mt-1 block text-ink-2">{r.Description}</span>
                     </th>

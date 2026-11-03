@@ -22,7 +22,7 @@ todo: "Square footages in the table are gross common-area map areas, not irrigat
 
 # Areas
 
-Named parts of the neighborhood. Each zone file names one `area` id from this table. Turn-down and turn-off changes can target a whole area.
+Named parts of the neighborhood. Each zone file names one `area` id from this table. Turn-down and turn-off changes can target a whole area. `Map label` is the letter on the HOA website's annotated aerial map (A to E). It is kept for matching that map only: the site map does not show it, because A, B, and C there are the irrigation controllers.
 
 | Area id | Map label | Name | Gross sq ft | Turf sq ft | Description | Zones |
 |---|---|---|---|---|---|---|

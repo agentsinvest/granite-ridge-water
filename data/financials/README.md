@@ -2,12 +2,13 @@
 
 HOA year-end Statements of Revenues and Expenses, one file per calendar year at `financials/<YYYY>.md`. Only water and landscape lines are copied. Balance sheets, bank details, and lot owner names stay in `/raw/`.
 
-These are a cross-check, not the source of truth for water cost. City of Mesa bills are the official record. P&L amounts may follow payment dates rather than service periods (see `basis`), so a year's P&L water total can differ from the sum of that year's bills.
+These are a cross-check, not the source of truth for water cost. City of Mesa bills are the official record. P&L amounts may follow payment dates rather than service periods (see `basis`), so a year's P&L water total can differ from the sum of that year's bills. Checked 2026-11-03: the HOA books water on a cash basis, in the month after the bill date. A year's P&L water total is the bills dated December of the year before through November (exact to the cent for August and September 2026, and for December 2022, 2024, and 2025).
 
 | Field | Required | Notes |
 |---|---|---|
 | `year` | yes | Calendar year. |
 | `basis` | yes | `cash`, `accrual`, or `null` until confirmed. |
+| `basis_source` | if basis set | How the basis was confirmed. |
 | `report_generated` | yes | Date printed on the report. |
 | `source` | yes | File in `/raw/pl/` and page. |
 | `water_irrigation_december` | no | Current-period (December) actual for account 50110, to spot timing spikes. |

@@ -1,7 +1,7 @@
 ---
 id: controller-b-flow-sensor
 title: "Add a flow sensor and master valve to controller B"
-problem: "Controller B (meter 4) cannot tell when water keeps running, which is how the 2 AM valve ran for 62 hours unnoticed."
+problem: "Controller B (meter 4) cannot tell when water keeps running, which is how water kept running after the night cycle on 11 days in September and October 2026, once for about 44 hours straight, before anyone noticed."
 meter: meter-4
 controller: B
 stations: []
