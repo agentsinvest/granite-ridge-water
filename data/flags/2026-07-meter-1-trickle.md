@@ -18,8 +18,8 @@ excess_water:
     - { from: 2026-10-16, to: 2026-10-21, gallons: 610 }
     - { from: 2026-10-22, to: 2026-10-29, gallons: 586 }
     - { from: 2026-10-31, to: 2026-11-04, gallons: 810 }
-  ongoing_gallons_per_year: 36500
-  method: "About 100 gallons a day (the off-cycle hourly reads on the drip days average 4.3 gallons an hour and have a median of 4) times the days it was seen: 12 days in July and 7 days from 2026-09-29 to 10-05. 2026-10-10 to 10-14 is the measured off-cycle total from the hourly reads up to 4 PM on 10-14 (2,339 gallons). 2026-10-16 to 10-21 is the off-cycle hourly reads under 20 gallons, summed (610 gallons over 123 hours), and 2026-10-22 to 10-29 the same way (586 gallons over 106 hours). 2026-10-31 to 11-04 is every hourly read summed (810 gallons over 120 hours, no watering on those days). The yearly figure is 100 gallons a day for 365 days, if the drip ran all year."
+  ongoing_gallons_per_year: 59130
+  method: "About 100 gallons a day (the off-cycle hourly reads on the drip days average 4.3 gallons an hour and have a median of 4) times the days it was seen: 12 days in July and 7 days from 2026-09-29 to 10-05. 2026-10-10 to 10-14 is the measured off-cycle total from the hourly reads up to 4 PM on 10-14 (2,339 gallons). 2026-10-16 to 10-21 is the off-cycle hourly reads under 20 gallons, summed (610 gallons over 123 hours), and 2026-10-22 to 10-29 the same way (586 gallons over 106 hours). 2026-10-31 to 11-04 is every hourly read summed (810 gallons over 120 hours, no watering on those days). The yearly figure uses the most recent and cleanest measurement, 2026-10-31 to 11-04 with no watering mixed in: 6.75 gallons an hour times 24 is 162 gallons a day, times 365 days is 59,130 gallons, if the drip ran all year at that rate. It was lower earlier (about 100 a day in July, 36,500 a year), so this may overstate a full year if the drip comes and goes as it did in August."
   source: "sources/waterfluence/ami-hourly-meter-1-2026.md; data/usage/meter-1/2026.md"
   confidence: medium
 related_events: [2026-02-16]
