@@ -1,7 +1,7 @@
 ---
 source: "Jennifer's water model workbook, Bill history by meter sheet, rebuilt from 324 City of Mesa bills in Granite_Ridge_Water_Bills_by_Meter.xlsx (sources/workbook/water-model-2026-10-07.md)"
 confidence: medium
-covers: "Bills dated December 2019 to August 2026. 2026 is January to August."
+covers: "Bills dated December 2019 to September 2026. 2026 is January to September; the September 2026 bill was added from the City bill dated 2026-09-25, gallons and peak surcharge computed the same way as the earlier 2026 rows."
 note: "2023 looks low because the old park meters stopped counting water before the City replaced them."
 checks: "2026 gallons equal the 2026 bills in data/bills/ for every meter, and 2026 peak surcharge equals the billing engine's split of those bills to the dollar (tests/history.test.ts)."
 todo: "Put the bill-by-bill workbook in /raw/ and add the bills it has that data/bills/ is missing, so 2020 to 2025 can be checked bill by bill. City prices before August 2025 are not in data/rates/, so 2020 to 2025 peak surcharge cannot be recomputed yet."
@@ -37,7 +37,7 @@ One row per meter per calendar year. `Gallons kgal` is thousand gallons billed. 
 | 2025 | meter-2 | 2036 | 2470 | yes |
 | 2025 | meter-3 | 443 | 440 | yes |
 | 2025 | meter-4 | 484 | 19 | yes |
-| 2026 | meter-1 | 2534 | 4458 | no |
-| 2026 | meter-2 | 1448 | 2676 | no |
-| 2026 | meter-3 | 268 | 302 | no |
-| 2026 | meter-4 | 263 | 70 | no |
+| 2026 | meter-1 | 2933 | 5274 | no |
+| 2026 | meter-2 | 1669 | 3136 | no |
+| 2026 | meter-3 | 310 | 365 | no |
+| 2026 | meter-4 | 295 | 73 | no |
