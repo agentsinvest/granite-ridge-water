@@ -3,6 +3,7 @@ import type { Action, AreaRow, NeedCase, LandscapeProblem, Controller, Bill, Exp
 export type BillingPeriod = { start: string; end: string; usage: number | null }
 export type DailyUsage = { date: string; gallons: number | null; hours: number | null; minHour: number | null }
 export type HourlyRead = { time: string; gallons: number }
+export type ZoneWater = { stations: string[]; meter: string; period: string; gallons: number | null; low: number | null; high: number | null; basis: 'measured' | 'estimated' | 'not measured'; confidence: 'high' | 'medium' | 'low'; note: string }
 export type ZoneShare = { stations: string[]; meter: string; atLeast: number | null; atMost: number | null; what: string }
 /** One day of a WeatherTRAK controller's flow-sensor reading, in gallons. */
 export type ControllerDay = { date: string; et: number | null; alerts: number | null; off: boolean; paused: boolean; runtimeMin: number | null; scheduled: number | null; manual: number | null; other: number | null; total: number | null }
@@ -21,6 +22,8 @@ export type SiteData = {
   /** Daily flow-sensor gallons by controller letter, from the WeatherTRAK reports. */
   controllerUsage: Record<string, { source: string; days: ControllerDay[] }>
   /** Floors and ceilings on the share of a meter's water a group of stations uses (data/zone-shares.md). */
+  /** Gallons each watering zone used (data/zone-water.md). */
+  zoneWater: { method: string; confidence: string; rows: ZoneWater[] } | null
   zoneShares: { period: string; source: string; note: string; confidence: string; rows: ZoneShare[] } | null
   financials: Record<string, { lines: FinancialLine[]; needsReview: boolean }>
   flags: Flag[]

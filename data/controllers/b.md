@@ -24,7 +24,7 @@ todo: "Need controller B's make and model, a settings printout (programs, days, 
 
 | Station | Meter | Waters | Type | GPM | Program | Run min | Cycles | Days | Findings | Source |
 |---|---|---|---|---|---|---|---|---|---|---|
-| B1 | meter-4 | Interior strip south half and the Crismon frontage | drip | | | | | | | Eco Verde p. 3 map |
-| B2 | meter-4 | Interior strip south half and the Crismon frontage | drip | | | | | | | data/map.md (labeled with B1) |
+| B1 | meter-4 | Interior strip south half (and the Crismon frontage, if not on controller A) | drip |  |  |  |  |  |  | Eco Verde p. 3 map |
+| B2 | meter-4 | Interior strip south half (and the Crismon frontage, if not on controller A) | drip |  |  |  |  |  |  | data/map.md (labeled with B1) |
 | B3 | meter-4 | Interior strip north half | drip | | | | | | Broken drip line (repair 5). | Eco Verde p. 3 map and section 4 |
-| B4 | meter-4 | Northeast corner along McKellips and Crismon | drip | | | | | | The controller did not open this valve when tested (repair 6). | Eco Verde p. 3 map and section 4 |
+| B4 | meter-4 | Not known: the valve sits next to the northeast corner, which the landscaper says is on controller A | drip |  |  |  |  |  | The controller did not open this valve when tested (repair 6). | Eco Verde p. 3 map and section 4 |

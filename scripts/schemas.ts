@@ -200,6 +200,25 @@ export const zoneShareRowSchema = z.object({
   What: z.string().min(1),
 })
 
+export const zoneWaterFrontmatterSchema = z.object({
+  title: z.string().min(1),
+  source: z.string().min(1),
+  method: z.string().min(1),
+  confidence,
+  todo: z.string().optional(),
+})
+export const zoneWaterRowSchema = z.object({
+  Stations: z.string().regex(/^[A-Z]\d+(, [A-Z]\d+)*$/, 'comma-separated station ids, like C1, C2'),
+  Meter: z.string().regex(/^meter-\d+$/),
+  Period: z.string(),
+  Gallons: cellNumber,
+  Low: cellNumber,
+  High: cellNumber,
+  Basis: z.enum(['measured', 'estimated', 'not measured']),
+  Confidence: z.enum(['high', 'medium', 'low']),
+  Note: z.string(),
+})
+
 export const controllerUsageFrontmatterSchema = z.object({
   controller: z.string().regex(/^[A-Z]$/, 'must be the controller letter, like C'),
   water_year: z.string().regex(/^\d{4}-\d{4}$/, 'must be YYYY-YYYY'),

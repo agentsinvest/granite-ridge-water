@@ -14,7 +14,19 @@ type Props = {
   alerts?: MapAlert[]
   /** Controller facts for the controller hover card (model, flow sensor, install date). */
   controllerInfo?: SiteData['controllers']
+  /** Gallons per zone (data/zone-water.md). When given, the map offers a view colored by water used. */
+  zoneWater?: SiteData['zoneWater']
 }
+
+/** Upper bounds of the five shades, in gallons, for the measured park zones. */
+export const WATER_STEPS = [100_000, 250_000, 400_000, 500_000, Infinity]
+export const waterShade = (g: number) => `var(--w${WATER_STEPS.findIndex((x) => g < x) + 1})`
+const kGal = (g: number) => (g >= 1_000_000 ? `${(g / 1_000_000).toFixed(2)}M` : `${Math.round(g / 1000)}k`)
+
+type ZoneWaterRow = NonNullable<SiteData['zoneWater']>['rows'][number]
+/** The row that covers all of a zone's stations, if one does. */
+export const zoneWaterRow = (stations: string[], rows: ZoneWaterRow[]) => rows.find((r) => stations.every((s) => r.stations.includes(s)))
+
 
 type Active = { kind: 'meter' | 'zone' | 'controller' | 'alert'; id: string; at: [number, number] }
 
@@ -24,13 +36,24 @@ const toPoints = (pts: [number, number][]) => pts.map(([x, y]) => `${x},${y}`).j
 export const zoneColor = (controller: string) => `var(--zone-${controller.toLowerCase()})`
 const meterList = (meters: string[]) => (meters.length > 1 ? 'meters ' : 'meter ') + meters.map(meterNumber).join(' and ')
 
-export function SiteMap({ map, areaNames, flaggedMeters, costs, alerts, controllerInfo }: Props) {
+export function SiteMap({ map, areaNames, flaggedMeters, costs, alerts, controllerInfo, zoneWater }: Props) {
   const { width, height } = map.canvas
   const controllers = map.controllers ?? []
   const zones = map.zones ?? []
   const hasZones = controllers.length > 0 || zones.length > 0
   const [showZones, setShowZones] = useState(true)
   const zonesOn = hasZones && showZones
+  const [waterView, setWaterView] = useState(false)
+  const waterOn = zonesOn && waterView && !!zoneWater
+  const waterOf = (z: { stations: string[] }) => (zoneWater ? zoneWaterRow(z.stations, zoneWater.rows) : undefined)
+  /** Short text printed under a zone's label in the water view. */
+  const waterText = (z: { stations: string[]; confirmed?: boolean }) => {
+    const r = waterOf(z)
+    if (!r) return 'no data'
+    if (r.basis === 'not measured') return 'not measured'
+    if (z.confirmed === false && r.basis === 'estimated') return `part of ${r.stations.join(', ')}`
+    return r.basis === 'estimated' ? `~${kGal(r.gallons!)}/yr` : kGal(r.gallons!)
+  }
   const [active, setActive] = useState<Active | null>(null)
   const wrapRef = useRef<HTMLDivElement>(null)
   const closeTimer = useRef<number | undefined>(undefined)
@@ -75,6 +98,12 @@ export function SiteMap({ map, areaNames, flaggedMeters, costs, alerts, controll
         <label className="mb-3 inline-flex cursor-pointer items-center gap-2 text-sm font-semibold">
           <input type="checkbox" checked={showZones} onChange={(e) => setShowZones(e.target.checked)} className="h-4 w-4" />
           Show watering zones and controllers
+        </label>
+      )}
+      {hasZones && zoneWater && (
+        <label className="mb-3 ml-6 inline-flex cursor-pointer items-center gap-2 text-sm font-semibold">
+          <input type="checkbox" checked={waterView} disabled={!showZones} onChange={(e) => setWaterView(e.target.checked)} className="h-4 w-4" />
+          Color zones by water used
         </label>
       )}
       <div ref={wrapRef} className="relative">
@@ -144,12 +173,12 @@ export function SiteMap({ map, areaNames, flaggedMeters, costs, alerts, controll
                   }
                 }}
               >
-                <ZoneShapes z={z} />
+                <ZoneShapes z={z} water={waterOn ? waterOf(z) : undefined} waterOn={waterOn} />
               </g>
             ) : (
               <g key={z.id}>
                 <title>{label}</title>
-                <ZoneShapes z={z} />
+                <ZoneShapes z={z} water={waterOn ? waterOf(z) : undefined} waterOn={waterOn} />
               </g>
             )
           })}
@@ -191,7 +220,7 @@ export function SiteMap({ map, areaNames, flaggedMeters, costs, alerts, controll
               <text
                 key={z.id}
                 x={z.label_at[0]}
-                y={z.label_at[1]}
+                y={waterOn && z.status !== 'off' ? z.label_at[1] - (z.label_size ?? 21) * 0.5 : z.label_at[1]}
                 fontSize={z.label_size}
                 textAnchor="middle"
                 dominantBaseline="central"
@@ -202,6 +231,11 @@ export function SiteMap({ map, areaNames, flaggedMeters, costs, alerts, controll
               >
                 {z.status === 'off' ? `${z.label} off` : z.label}
                 {z.confirmed === false ? '?' : ''}
+                {waterOn && z.status !== 'off' && (
+                  <tspan x={z.label_at[0]} dy="1.1em" fontWeight={600}>
+                    {waterText(z)}
+                  </tspan>
+                )}
               </text>
             ))}
           </g>
@@ -353,6 +387,20 @@ export function SiteMap({ map, areaNames, flaggedMeters, costs, alerts, controll
             Dashed outline: zone turned off
           </span>
         )}
+        {waterOn && (
+          <span className="inline-flex flex-wrap items-center gap-2">
+            Park water, Jan 1 to Nov 13, 2026:
+            {['under 100k', '100k to 250k', '250k to 400k', '400k to 500k', 'over 500k'].map((t, i) => (
+              <span key={t} className="inline-flex items-center gap-1">
+                <svg width="16" height="12" aria-hidden="true">
+                  <rect width="16" height="12" rx="2" fill={`var(--w${i + 1})`} stroke="var(--ink-2)" strokeWidth="1" />
+                </svg>
+                {t}
+              </span>
+            ))}
+            <span>(k is thousand gallons; entrance zones are yearly estimates, printed but not shaded)</span>
+          </span>
+        )}
         {zonesOn && zones.some((z) => z.confirmed === false) && (
           <span className="inline-flex items-center gap-2">
             <svg width="22" height="14" aria-hidden="true">
@@ -384,7 +432,8 @@ function LegendSwatch({ kind, label }: { kind: 'shrub' | 'turf' | 'street'; labe
   )
 }
 
-function ZoneShapes({ z }: { z: NonNullable<SiteData['map']['zones']>[number] }) {
+function ZoneShapes({ z, water, waterOn }: { z: NonNullable<SiteData['map']['zones']>[number]; water?: ZoneWaterRow; waterOn?: boolean }) {
+  const shaded = waterOn && water?.basis === 'measured' && water.gallons !== null && z.status !== 'off'
   return (
     <>
       {z.parts.map((part, i) => (
@@ -392,8 +441,8 @@ function ZoneShapes({ z }: { z: NonNullable<SiteData['map']['zones']>[number] })
           key={i}
           className="zone-shape"
           points={toPoints(part)}
-          fill={z.status === 'off' ? 'none' : `url(#zone-hatch-${z.controller})`}
-          fillOpacity={0.55}
+          fill={shaded ? waterShade(water!.gallons!) : z.status === 'off' || waterOn ? 'none' : `url(#zone-hatch-${z.controller})`}
+          fillOpacity={shaded ? 0.95 : 0.55}
           stroke={zoneColor(z.controller)}
           strokeWidth={z.confirmed === false ? 5 : 4}
           strokeDasharray={z.status === 'off' ? '10 8' : z.confirmed === false ? '1 9' : undefined}

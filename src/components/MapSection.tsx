@@ -38,7 +38,7 @@ export function MapSection({ data }: { data: SiteData }) {
             : 'No current problems are flagged.'}
         </p>
         <div className="mt-4 rounded-xl bg-surface p-3 ring-1 ring-[var(--ring)] md:p-5">
-          <SiteMap map={data.map} areaNames={areaNames} flaggedMeters={flaggedMeters} costs={mapCosts} alerts={alerts} controllerInfo={data.controllers} />
+          <SiteMap map={data.map} areaNames={areaNames} flaggedMeters={flaggedMeters} costs={mapCosts} alerts={alerts} controllerInfo={data.controllers} zoneWater={data.zoneWater} />
         </div>
         {costYears && (
           <details className="mt-3 text-sm">
@@ -84,6 +84,7 @@ export function MapSection({ data }: { data: SiteData }) {
           </p>
           {data.map.zones_source && <p className="mt-2 max-w-prose">Watering zones and controllers: {data.map.zones_source}</p>}
         </details>
+        {data.zoneWater && <ZoneWaterList data={data} />}
         {(data.map.zones ?? []).length > 0 && (
           <details className="mt-3 text-sm">
             <summary className="cursor-pointer font-semibold">Watering zones as a table</summary>
@@ -124,5 +125,70 @@ export function MapSection({ data }: { data: SiteData }) {
           </details>
         )}
       </section>
+  )
+}
+
+
+/** Every zone's water, biggest first: measured park stations as bars, entrance estimates with their range, controller B as not measured. */
+function ZoneWaterList({ data }: { data: SiteData }) {
+  const zw = data.zoneWater!
+  const stations = data.controllers.flatMap((c) => c.stations)
+  const waters = (ids: string[]) => [...new Set(ids.map((id) => stations.find((s) => s.station === id)?.waters ?? id))].join('; ')
+  const measured = zw.rows.filter((r) => r.basis === 'measured').sort((a, b) => b.gallons! - a.gallons!)
+  const total = measured.reduce((t, r) => t + r.gallons!, 0)
+  const max = measured[0]?.gallons ?? 1
+  const other = zw.rows.filter((r) => r.basis !== 'measured')
+  const period = measured[0]?.period
+  return (
+    <details className="mt-3 text-sm" open>
+      <summary className="cursor-pointer font-semibold">Water used by each zone</summary>
+      {measured.length > 0 && (
+        <>
+          <p className="mt-2 max-w-prose text-ink-2">
+            Park zones, {period}: {fmt.int(total)} gallons, measured by the park controller's flow sensor and split by each
+            station's run time and flow. Biggest first.
+          </p>
+          <ol className="mt-2 space-y-1.5">
+            {measured.map((r) => (
+              <li key={r.stations.join()} className="grid grid-cols-[3.5rem_1fr] items-center gap-x-3 sm:grid-cols-[3.5rem_14rem_1fr]">
+                <span className="font-semibold">{r.stations.join(', ')}</span>
+                <span className="col-start-2 text-ink-2 sm:col-start-auto">
+                  {waters(r.stations)}, meter {meterNumber(r.meter)}
+                </span>
+                <span className="col-start-2 flex items-center gap-2 sm:col-start-auto">
+                  <span className="h-3 rounded-sm" style={{ width: `${Math.max(2, (r.gallons! / max) * 70)}%`, background: 'var(--bar)' }} aria-hidden="true" />
+                  <span className="whitespace-nowrap tabular-nums">
+                    {fmt.int(r.gallons!)} gal ({Math.round((r.gallons! / total) * 100)}%)
+                  </span>
+                </span>
+                {r.note && <span className="col-start-2 text-xs text-ink-2 sm:col-span-2">{r.note}</span>}
+              </li>
+            ))}
+          </ol>
+        </>
+      )}
+      {other.length > 0 && (
+        <>
+          <p className="mt-4 max-w-prose text-ink-2">Entrance and controller B zones. These are not measured station by station, so they are not on the same scale as the park.</p>
+          <ul className="mt-2 space-y-2">
+            {other.map((r) => (
+              <li key={r.stations.join()}>
+                <span className="font-semibold">{r.stations.join(', ')}</span>: {waters(r.stations)}, meter {meterNumber(r.meter)}.{' '}
+                {r.basis === 'not measured' ? (
+                  <span className="italic">Not measured.</span>
+                ) : (
+                  <span>
+                    About {fmt.int(r.gallons!)} gallons a year
+                    {r.low !== null && r.high !== null ? ` (${fmt.int(r.low)} to ${fmt.int(r.high)})` : ''}, estimated, {r.period}.
+                  </span>
+                )}{' '}
+                <span className="text-ink-2">{r.note}</span>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+      <p className="mt-3 max-w-prose text-xs text-ink-2">How this was worked out: {zw.method}</p>
+    </details>
   )
 }

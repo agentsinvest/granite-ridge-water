@@ -19,6 +19,12 @@
   --zone-a: #1f63c4;
   --zone-b: #7a3cc0;
   --zone-c: #007a7a;
+  /* Water used per zone, light to heavy (same in both themes; every shade also carries a printed number). */
+  --w1: #dbe9fb;
+  --w2: #9fc3f2;
+  --w3: #5b97e3;
+  --w4: #2a63c0;
+  --w5: #123d86;
   --focus: #2a78d6;
   --bar: #2a78d6;
   --ring: rgba(11, 11, 11, 0.1);

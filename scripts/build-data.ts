@@ -83,6 +83,7 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
     controllers: [],
     controllerUsage: {},
     zoneShares: null,
+    zoneWater: null,
     openTodos: [],
   }
   for (const abs of walk(dataDir).sort()) {
@@ -290,6 +291,16 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
       out.quickWins = plan
     } else if (rel === 'config/site.md') {
       out.config.site = check(S.siteConfigSchema, fm, file, text)
+    } else if (rel === 'zone-water.md') {
+      const f = check(S.zoneWaterFrontmatterSchema, fm, file, text)
+      const table = firstTable(p, ['Stations', 'Meter', 'Gallons'], file)
+      const r = rows(table, S.zoneWaterRowSchema, file)
+      r.forEach((x, i) => {
+        if (x.Basis !== 'not measured' && x.Gallons === null) fail(file, table.rows[i].line, 'a measured or estimated row needs Gallons')
+        if (x.Basis === 'not measured' && x.Gallons !== null) fail(file, table.rows[i].line, 'a not measured row has no Gallons')
+        if (x.Low !== null && x.High !== null && x.Gallons !== null && !(x.Low <= x.Gallons && x.Gallons <= x.High)) fail(file, table.rows[i].line, 'Gallons must be between Low and High')
+      })
+      out.zoneWater = { method: f.method, confidence: f.confidence, rows: r.map((x) => ({ stations: x.Stations.split(', '), meter: x.Meter, period: x.Period, gallons: x.Gallons, low: x.Low, high: x.High, basis: x.Basis, confidence: x.Confidence, note: x.Note })) }
     } else if (rel === 'zone-shares.md') {
       const f = check(S.zoneSharesFrontmatterSchema, fm, file, text)
       const table = firstTable(p, ['Stations', 'Meter'], file)
@@ -322,6 +333,11 @@ export function buildData(dataDir = join(root, 'data')): SiteData {
   for (const b of out.bills) if (!meterIds.has(b.meter)) fail(`data/${b.id}.md`, null, `unknown meter "${b.meter}"`)
   for (const id of Object.keys(out.hourly)) if (!meterIds.has(id)) fail(`data/hourly/${id}`, null, `unknown meter "${id}"`)
   const stationMeter = new Map(out.controllers.flatMap((c) => c.stations.map((s) => [s.station, s.meter] as const)))
+  for (const r of out.zoneWater?.rows ?? [])
+    for (const s of r.stations) {
+      if (!stationMeter.has(s)) fail('data/zone-water.md', null, `station ${s} is not in data/controllers/`)
+      else if (stationMeter.get(s) !== r.meter) fail('data/zone-water.md', null, `station ${s} is on ${stationMeter.get(s)}, not ${r.meter}`)
+    }
   for (const r of out.zoneShares?.rows ?? [])
     for (const s of r.stations) {
       if (!stationMeter.has(s)) fail('data/zone-shares.md', null, `station ${s} is not in data/controllers/`)
