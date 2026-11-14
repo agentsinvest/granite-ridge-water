@@ -83,6 +83,7 @@ Case B uses 86,354 sq ft of turf (Waterfluence) and 70 percent efficiency; Case 
 * The Park "Controller Settings Detail Report" (all pages): start times, run times, days, and the Auto settings (precipitation rate, root depth, efficiency, allowed depletion) for programs A to F.
 * A written summer 2027 schedule for the park lawn that targets about 9 inches in June and 8 in July and August (Case B), not the 13 to 17 of 2026, with all twelve lawn stations on weather adjustment.
 * Repair of entry drip A6, and what was done on mainline 2 and C15.
+* A WeatherTRAK water budget for the site. The Budgets and Usage screen (2026-11-13) says "No budgets are active for this site." Its measured usage, 7,259 CCF (about 5.43 million gallons) from January 1 to about November 13, 2026, is the Park and Entrance flow sensors added together; every month matches `controller-usage` and the Runtime History within CCF rounding. Setting a monthly budget at the 2027 target lets the system flag a month that runs over while it can still be fixed. Its "aligned with billing period" rows equal the calendar rows, so no City bills have been entered there.
 
 ## How to model it in the app
 
