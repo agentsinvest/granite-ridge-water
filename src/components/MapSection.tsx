@@ -96,19 +96,25 @@ export function MapSection({ data }: { data: SiteData }) {
                     <th scope="col" className="px-4 py-2 font-semibold">What it waters</th>
                     <th scope="col" className="px-4 py-2 font-semibold">Controller</th>
                     <th scope="col" className="px-4 py-2 font-semibold">Meter</th>
-                    <th scope="col" className="px-4 py-2 font-semibold">Status</th>
+                    <th scope="col" className="px-4 py-2 font-semibold">Status and notes</th>
                   </tr>
                 </thead>
                 <tbody>
                   {(data.map.zones ?? []).map((z) => {
                     const c = (data.map.controllers ?? []).find((x) => x.id === z.controller)
+                    const stationMeters = [...new Set(data.controllers.flatMap((x) => x.stations).filter((st) => z.stations.includes(st.station)).map((st) => st.meter).filter((m): m is string => !!m))].sort()
+                    const meters = stationMeters.length > 0 ? stationMeters : c?.meters ?? []
                     return (
                       <tr key={z.id} className="border-b border-line last:border-0 align-top">
                         <th scope="row" className="px-4 py-2 font-semibold">{z.label}</th>
                         <td className="px-4 py-2">{z.name}</td>
                         <td className="px-4 py-2">{c?.name ?? z.controller}</td>
-                        <td className="px-4 py-2">{c ? c.meters.map(meterNumber).join(' and ') : <Missing what="Meter" />}</td>
-                        <td className="px-4 py-2">{z.status === 'off' ? 'Turned off' : 'On'}</td>
+                        <td className="px-4 py-2">{meters.length > 0 ? meters.map(meterNumber).join(' and ') : <Missing what="Meter" />}</td>
+                        <td className="px-4 py-2">
+                          {z.status === 'off' ? 'Turned off' : 'On'}
+                          {z.confirmed === false && <span className="block font-semibold">Not confirmed</span>}
+                          {z.note && <span className="block text-ink-2">{z.note}</span>}
+                        </td>
                       </tr>
                     )
                   })}

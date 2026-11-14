@@ -126,7 +126,7 @@ export function SiteMap({ map, areaNames, flaggedMeters, costs, alerts, controll
         {zonesOn &&
           zones.map((z) => {
             const c = controllers.find((x) => x.id === z.controller)
-            const label = `Zone ${z.label}: ${z.name}. ${c?.name ?? `Controller ${z.controller}`}${c ? `, ${meterList(c.meters)}` : ''}.${z.status === 'off' ? ' Turned off.' : ''}`
+            const label = `Zone ${z.label}: ${z.name}. ${c?.name ?? `Controller ${z.controller}`}${c ? `, ${meterList(c.meters)}` : ''}.${z.status === 'off' ? ' Turned off.' : ''}${z.confirmed === false ? ' Not confirmed.' : ''}`
             const a: Active = { kind: 'zone', id: z.id, at: z.label_at }
             return costs ? (
               <g
@@ -192,14 +192,16 @@ export function SiteMap({ map, areaNames, flaggedMeters, costs, alerts, controll
                 key={z.id}
                 x={z.label_at[0]}
                 y={z.label_at[1]}
+                fontSize={z.label_size}
                 textAnchor="middle"
                 dominantBaseline="central"
                 fill="var(--ink)"
                 stroke="var(--surface)"
-                strokeWidth={6}
+                strokeWidth={z.label_size && z.label_size < 18 ? 4 : 6}
                 paintOrder="stroke"
               >
                 {z.status === 'off' ? `${z.label} off` : z.label}
+                {z.confirmed === false ? '?' : ''}
               </text>
             ))}
           </g>
@@ -351,6 +353,14 @@ export function SiteMap({ map, areaNames, flaggedMeters, costs, alerts, controll
             Dashed outline: zone turned off
           </span>
         )}
+        {zonesOn && zones.some((z) => z.confirmed === false) && (
+          <span className="inline-flex items-center gap-2">
+            <svg width="22" height="14" aria-hidden="true">
+              <rect x="2" y="2" width="18" height="10" rx="2" fill="none" stroke="var(--ink-2)" strokeWidth="2" strokeDasharray="1 3" strokeLinecap="round" />
+            </svg>
+            Dotted outline and ?: not confirmed yet
+          </span>
+        )}
         <span>North is up. Schematic, not to scale.</span>
       </figcaption>
     </figure>
@@ -385,8 +395,9 @@ function ZoneShapes({ z }: { z: NonNullable<SiteData['map']['zones']>[number] })
           fill={z.status === 'off' ? 'none' : `url(#zone-hatch-${z.controller})`}
           fillOpacity={0.55}
           stroke={zoneColor(z.controller)}
-          strokeWidth={4}
-          strokeDasharray={z.status === 'off' ? '10 8' : undefined}
+          strokeWidth={z.confirmed === false ? 5 : 4}
+          strokeDasharray={z.status === 'off' ? '10 8' : z.confirmed === false ? '1 9' : undefined}
+          strokeLinecap={z.confirmed === false && z.status !== 'off' ? 'round' : undefined}
           strokeLinejoin="round"
         />
       ))}

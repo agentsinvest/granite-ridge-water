@@ -120,7 +120,7 @@ Chart "Measured Usage per Day: Granite Ridge Park", 2026-02-28 to 2026-03-29 (Si
 
 **3g. Rotors, issues.** Larger turf areas use Hunter and Rain Bird rotors. Some are not nozzled for matched precipitation rate. Example, valve C7: all heads are half circles but nozzle sizes are 8, 15, 8, 6, 10, 10, and 10. Some nozzle retainer screws are turned in too far, diffusing the pattern. Some rotors overspray onto hardscape.
 
-Page 10 is an aerial photo titled "Park Sprinklers": colored dots for every rotor head on valves C1 to C12 with the nozzle size printed next to each dot ("Colored dots represent rotor heads on different valves. White numbers represent nozzle sizes."). Head-by-head sizes are not transcribed here because which dot belongs to which valve is read only by color; the C7 example above is the one the report spells out. Repairs 1 to 4 are marked on it.
+Page 10 (image saved as `eco-verde-park-sprinklers.webp`, from a screenshot Jennifer shared on 2026-11-14; valve C2 does not appear on it) is an aerial photo titled "Park Sprinklers": colored dots for every rotor head on valves C1 to C12 with the nozzle size printed next to each dot ("Colored dots represent rotor heads on different valves. White numbers represent nozzle sizes."). Head-by-head sizes are not transcribed here because which dot belongs to which valve is read only by color; the C7 example above is the one the report spells out. Repairs 1 to 4 are marked on it.
 
 **3h. Rotors, solutions.** Eco Verde will train the landscape contractor to nozzle for matched precipitation, adjust retainer screws, and adjust rotors to cut overspray. (The report says "Heritage Pointe" in this paragraph; it appears to be a copy error from another report.)
 

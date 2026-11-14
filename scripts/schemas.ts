@@ -137,6 +137,12 @@ export const mapSchema = z.object({
         label: z.string(),
         name: z.string(),
         status: z.enum(['on', 'off']),
+        /** false when the zone's place or controller is a working guess (drawn dotted, label ends in "?"). */
+        confirmed: z.boolean().default(true),
+        /** Why it is not confirmed, or where the shape comes from. Shown in the zone table. */
+        note: z.string().optional(),
+        /** Label font size in map pixels, for small zones. Default 21. */
+        label_size: z.number().optional(),
         label_at: point,
         parts: z.array(z.array(point).min(3)).min(1),
       }),
