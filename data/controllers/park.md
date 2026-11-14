@@ -17,6 +17,8 @@ installed:
 source: "WeatherTRAK Learn Flow Report and Estimated Usage Report of 2026-11-13 (station flow rates, programs, station modes; sources/controllers/weathertrak-learn-flow-park-2026-11-13.md and sources/controllers/weathertrak-estimated-usage-park-2026.md); Eco Verde irrigation assessment, 2026, page 5 (settings of 2026-03-29) and sections 3a, 3g, 3j, and 4 (sources/controllers/eco-verde-assessment-2026.md); station-to-meter split from docs/analysis/2026-10-07-controller-run-times-vs-waterfluence.md (medium confidence); zone names from data/map.md"
 confidence: medium
 findings:
+  - text: "High-flow alarm limits are set at 1.2 times each station's learned flow (for example C1 81.3 GPM on 67.8 learned, C13 24.6 on 20.5, C15 13.7 on 11.4). Learned and assigned flows match the 2026-11-12 tests. Stations C8, C9 and C12 were still queued to learn again on 2026-11-13; the last scheduled learn ran 2026-05-27. If a relearn runs while mainline 2 is shut, as on October 26, those stations would learn about 0.1 GPM and every normal watering would then raise a high-flow alarm. The operating status snapshot (master valve status, mainline break, no-flow and leak limits) and the low-flow limits were blank on the screen and are still unknown."
+    source: "WeatherTRAK Manage Flow Learning screen, Park controller, 2026-11-13 (screenshot from Jennifer, 2026-11-14)"
   - text: "Leaking master valve at the east side of the park (MV2, repair 1)."
     source: "Eco Verde assessment, section 4"
   - text: "Worn rotor seals spraying water at the base in the park lawn (repairs 2, 3, and 4). Which stations is not printed."
