@@ -11,7 +11,7 @@ Complete markdown copies of every document Jennifer has shared, so the originals
 |---|---|
 | `pl/<YYYY>.md` | HOA year-end financial reports (balance sheet and statement of revenues and expenses), every line |
 | `waterfluence/` | Waterfluence exports (read-period usage, hourly AMI per meter) and a description of the dashboard chart |
-| `controllers/` | Irrigation controller reports: the Eco Verde 2026 irrigation assessment (with its zone and valve map, address redacted) the HydroPoint WeatherTRAK alert and usage reports of 2025-04-04, and the WeatherTRAK daily Measured Usage History reports with alert lists (Entrance 2023 to 2026, Park 2024 to 2026; staff names redacted) |
+| `controllers/` | Irrigation controller reports: the Eco Verde 2026 irrigation assessment (with its zone and valve map, address redacted) the HydroPoint WeatherTRAK alert and usage reports of 2025-04-04, the WeatherTRAK daily Measured Usage History reports with alert lists (Entrance 2023 to 2026, Park 2024 to 2026; staff names redacted), and the WeatherTRAK reports of 2026-11-13 (controller inventory, Park estimated usage and daily runtime per station for 2026, learn-flow tests for both controllers) |
 | `maps/` | Annotated common-area map and its legend |
 | `landscape/` | The landscape maintenance contract (Schnepf Landscape Co., dated 2024-07-17), with review notes on what it covers for irrigation |
 | `workbook/` | Jennifer's workbooks: the water model (assumptions, monthly baseline by meter, bill history by meter by year) and the Zone Plan Model (quick wins plan, weather normals, rate notes) |

@@ -9,12 +9,12 @@ has_flow_sensor: true
 installed:
   from: null
   to: null
-  in_use_by: 2024-10-01
-  note: "The earliest WeatherTRAK report on file starts October 1, 2024. Its station flows were last learned in August and October 2024."
-  source: "WeatherTRAK Park report starting 2024-10-01 (sources/controllers/weathertrak-usage-park-2024-2025.md); Eco Verde assessment page 5 (sources/controllers/eco-verde-assessment-2026.md)"
+  in_use_by: 2024-08-14
+  note: "WeatherTRAK prints two activation dates for this controller on reports run the same day: 2023-06-28 (Estimated Usage Report) and 2024-02-27 (Controller Inventory Report). The earliest flow test on file is 2024-08-14."
+  source: "WeatherTRAK Controller Inventory Report and Estimated Usage Report of 2026-11-13, Learn Flow Report of 2026-11-13 (sources/controllers/weathertrak-inventory-2026-11-13.md, sources/controllers/weathertrak-estimated-usage-park-2026.md, sources/controllers/weathertrak-learn-flow-park-2026-11-13.md)"
   confidence: low
   todo: "Ask the landscaper or the board when this controller was installed."
-source: "Eco Verde irrigation assessment, 2026, page 5 (station flow rates, settings of 2026-03-29) and sections 3a, 3g, 3j, and 4 (sources/controllers/eco-verde-assessment-2026.md); station-to-meter split from docs/analysis/2026-10-07-controller-run-times-vs-waterfluence.md (medium confidence); zone names from data/map.md"
+source: "WeatherTRAK Learn Flow Report and Estimated Usage Report of 2026-11-13 (station flow rates, programs, station modes; sources/controllers/weathertrak-learn-flow-park-2026-11-13.md and sources/controllers/weathertrak-estimated-usage-park-2026.md); Eco Verde irrigation assessment, 2026, page 5 (settings of 2026-03-29) and sections 3a, 3g, 3j, and 4 (sources/controllers/eco-verde-assessment-2026.md); station-to-meter split from docs/analysis/2026-10-07-controller-run-times-vs-waterfluence.md (medium confidence); zone names from data/map.md"
 confidence: medium
 findings:
   - text: "Leaking master valve at the east side of the park (MV2, repair 1)."
@@ -23,13 +23,21 @@ findings:
     source: "Eco Verde assessment, section 4"
   - text: "Some rotors are not nozzled to put down water at the same rate, some retainer screws are turned in too far, and some rotors spray onto pavement."
     source: "Eco Verde assessment, section 3g"
-  - text: "Every station runs on run times the landscaper sets, scaled for weather (User ET mode). The controller lists every station as a spray head, though the lawn uses rotors and 13 to 15 are drip; that matters only in automatic mode."
-    source: "Eco Verde assessment, sections 3a and page 5"
+  - text: "In March 2026 every station ran on run times the landscaper sets, scaled for weather (User ET mode). By November 13, 2026 that had changed: the six full-circle lawn stations (C3 to C6 and C10, C11) run fixed run times with no weather adjustment (User no ET), and the other nine stations run in automatic weather mode. The six fixed stations used 2.57 million of the 4.92 million gallons the controller estimates for January 1 to November 13, 2026."
+    source: "Eco Verde assessment, section 3a; WeatherTRAK Estimated Usage Report and Controller Inventory Report of 2026-11-13 (sources/controllers/weathertrak-estimated-usage-park-2026.md, sources/controllers/weathertrak-inventory-2026-11-13.md)"
+  - text: "The plant types are set wrong for automatic mode: the three drip stations (C13 to C15), which water desert plants and trees, are set as warm-season turf, so the controller calculates turf-level water for them. The lawn is Bermuda in summer and rye in winter, but the fixed stations are set as cool-season turf and the automatic ones as warm-season turf."
+    source: "WeatherTRAK Estimated Usage Report of 2026-11-13 (sources/controllers/weathertrak-estimated-usage-park-2026.md)"
+  - text: "Programs and mainlines, November 2026: program A is C3 to C6, B is C10 and C11, C is the drips C14 and C15, D is drip C13, E is C1, C2 and C7, and F is C8, C9 and C12. Mainline 1 carries C1 to C7, C14 and C15; mainline 2 carries C8 to C13. That is exactly the meter-1 and meter-2 split already used here, which supports it."
+    source: "WeatherTRAK Estimated Usage Report of 2026-11-13 (sources/controllers/weathertrak-estimated-usage-park-2026.md)"
+  - text: "In flow tests on October 26 and on the morning of November 12, 2026, stations C8, C9 and C12 (all on mainline 2) got no water (0.1 GPM). By 1 PM on November 12 all three tested normal again. Something on mainline 2 was shut or not opening during those tests, likely the master valve MV2 that Eco Verde found leaking. The measured daily water during the overseed matched the scheduled run times, so the scheduled watering itself seems to have reached those stations."
+    source: "WeatherTRAK Learn Flow Report and Runtime History Report of 2026-11-13 (sources/controllers/weathertrak-learn-flow-park-2026-11-13.md, sources/controllers/weathertrak-runtime-history-park-2026.md)"
+  - text: "Measured water in 2026 ran 2 to 7 percent above run time times station flow every month (5.13 million measured against 4.92 million estimated, January 1 to November 13), and days with no station running read 0 to 2 gallons. There is no large leak after the flow sensor; the high use is the watering schedule."
+    source: "WeatherTRAK Runtime History Report and Estimated Usage Report of 2026-11-13 (sources/controllers/weathertrak-runtime-history-park-2026.md, sources/controllers/weathertrak-estimated-usage-park-2026.md)"
   - text: "The wireless rain sensor should be moved to catch more rain."
     source: "Eco Verde assessment, section 4"
   - text: "The flow sensor agrees with the City meters: over 23 billing periods from October 2024 to September 2026 it measured 0.95 to 1.13 times what meters 1 and 2 recorded together (about 1.04 on average; the two meters are read within 3 days of each other), so nearly all water through those two meters passes the sensor."
     source: "data/controller-usage/C/2024-2025.md and data/controller-usage/C/2025-2026.md; data/billing-periods/meter-1.md and data/billing-periods/meter-2.md"
-  - text: "Drip station C13 (south and southwest desert drip) ran low flow on 200 nights from October 2024 to May 2026, about half its expected flow. Drip station C15 (north side) ran at about double its normal flow from late August 2026."
+  - text: "Drip station C13 (south and southwest desert drip) ran low flow on 200 nights from October 2024 to May 2026, about half its expected flow. Drip station C15 (north side) ran at about double its normal flow from late August 2026; it was cut to 4 minutes a night from September 4 and tested normal again from October 9 (11.4 GPM on November 12), so it looks repaired."
     source: "WeatherTRAK Park reports, 2024-10 to 2026-09 (sources/controllers/weathertrak-usage-park-2024-2025.md and sources/controllers/weathertrak-usage-park-2025-2026.md)"
   - text: "The Mainline Break alarm went off 19 times in summer 2025 and 2026, mostly Sunday nights, when drip station C14 runs together with a lawn station. It looks like overlapping stations, not a broken pipe."
     source: "WeatherTRAK Park reports, 2024-10 to 2026-09 (sources/controllers/weathertrak-usage-park-2024-2025.md and sources/controllers/weathertrak-usage-park-2025-2026.md)"
@@ -37,23 +45,23 @@ findings:
     source: "WeatherTRAK Park reports, 2024-10 to 2026-09 (sources/controllers/weathertrak-usage-park-2024-2025.md and sources/controllers/weathertrak-usage-park-2025-2026.md)"
   - text: "Mainline 1 carries stations 1, 2, 4, and 14; mainline 2 (master valve MV2) carries stations 8 and 9."
     source: "WeatherTRAK Park reports, 2024-10 to 2026-09 (sources/controllers/weathertrak-usage-park-2024-2025.md and sources/controllers/weathertrak-usage-park-2025-2026.md) (alert descriptions)"
-todo: "Need the other 8 pages of the park settings report: programs, days, start times, run times, weather adjustment by month, overseed program, and the program that runs every night at about 10 PM. Confirm which stations are on meter 1 and which on meter 2."
+todo: "Need the Controller Settings Detail report for the park: start times, run times and days for programs A to F, the Auto-mode settings (precipitation rate, root depth, efficiency), and why the six full-circle stations were moved to fixed run times with no weather adjustment. Ask what was shut on mainline 2 during the flow tests of October 26 and November 12, 2026, and whether master valve MV2 was repaired."
 ---
 
 | Station | Meter | Waters | Type | GPM | Program | Run min | Cycles | Days | Findings | Source |
 |---|---|---|---|---|---|---|---|---|---|---|
-| C1 | meter-1 | Park lawn, northeast along the sidewalk | rotor | 61 | | | | | | Eco Verde p. 5 |
-| C2 | meter-1 | Park lawn, southeast along the curb | rotor | 58 | | | | | | Eco Verde p. 5 |
-| C3 | meter-1 | Park lawn, southeast middle (south) | rotor | 41 | | | | | | Eco Verde p. 5 |
-| C4 | meter-1 | Park lawn, southeast middle (center) | rotor | 71 | | | | | | Eco Verde p. 5 |
-| C5 | meter-1 | Park lawn, northeast middle (center) | rotor | 74 | | | | | | Eco Verde p. 5 |
-| C6 | meter-1 | Park lawn, northeast middle (north) | rotor | 67 | | | | | | Eco Verde p. 5 |
-| C7 | meter-1 | Park lawn, north sidewalk (center) | rotor | 63 | | | | | Rotor nozzles do not match: all half circles, but sizes 8, 15, 8, 6, 10, 10, and 10, so some spots get much more water than others. | Eco Verde p. 5 and 3g |
-| C8 | meter-2 | Park lawn, west of the playground | rotor | 61 | | | | | | Eco Verde p. 5 |
-| C9 | meter-2 | Park lawn, along the curb by the ramada | rotor | 57 | | | | | | Eco Verde p. 5 |
-| C10 | meter-2 | Park lawn, northwest center | rotor | 54 | | | | | | Eco Verde p. 5 |
-| C11 | meter-2 | Park lawn, southwest center | rotor | 59 | | | | | | Eco Verde p. 5 |
-| C12 | meter-2 | Park lawn, southwest along the curb | rotor | 50 | | | | | | Eco Verde p. 5 |
-| C13 | meter-2 | South and southwest desert drip | drip | 41 | | | | | Drip emitters sit at the base of mature trees instead of at the canopy edge. | Eco Verde p. 5 and 3j |
-| C14 | meter-1 | Park east and south edges, and the southeast corner drip | drip | 28 | | | | | Drip emitters sit at the base of mature trees. Repair 8 is in this zone and was not addressed because it is in a protected area. | Eco Verde p. 5, 3j, and section 4 |
-| C15 | meter-1 | Drip on the north side of the park | drip | 11 | | | | | Drip emitters sit at the base of mature trees. | Eco Verde p. 5 and 3j |
+| C1 | meter-1 | Park lawn, northeast along the sidewalk | rotor | 68 | E (Auto) |  |  |  | Learned flow up from 61 GPM (2024) to 68 on 2026-11-12. | Eco Verde p. 5; WeatherTRAK learn flow 2026-11-12 and estimated usage report 2026-11-13 |
+| C2 | meter-1 | Park lawn, southeast along the curb | rotor | 64 | E (Auto) |  |  |  |  | Eco Verde p. 5; WeatherTRAK learn flow 2026-11-12 and estimated usage report 2026-11-13 |
+| C3 | meter-1 | Park lawn, southeast middle (south) | rotor | 35 | A (User no ET) |  |  |  | Flow dropped from 41 GPM (2024 and May 2026) to 35 on 2026-11-12. | Eco Verde p. 5; WeatherTRAK learn flow 2026-11-12 and estimated usage report 2026-11-13 |
+| C4 | meter-1 | Park lawn, southeast middle (center) | rotor | 73 | A (User no ET) |  |  |  |  | Eco Verde p. 5; WeatherTRAK learn flow 2026-11-12 and estimated usage report 2026-11-13 |
+| C5 | meter-1 | Park lawn, northeast middle (center) | rotor | 74 | A (User no ET) |  |  |  |  | Eco Verde p. 5; WeatherTRAK learn flow 2026-11-12 and estimated usage report 2026-11-13 |
+| C6 | meter-1 | Park lawn, northeast middle (north) | rotor | 72 | A (User no ET) |  |  |  |  | Eco Verde p. 5; WeatherTRAK learn flow 2026-11-12 and estimated usage report 2026-11-13 |
+| C7 | meter-1 | Park lawn, north sidewalk (center) | rotor | 65 | E (Auto) |  |  |  | Rotor nozzles do not match: all half circles, but sizes 8, 15, 8, 6, 10, 10, and 10, so some spots get much more water than others. | Eco Verde p. 5 and 3g; WeatherTRAK learn flow 2026-11-12 and estimated usage report 2026-11-13 |
+| C8 | meter-2 | Park lawn, west of the playground | rotor | 59 | F (Auto) |  |  |  |  | Eco Verde p. 5; WeatherTRAK learn flow 2026-11-12 and estimated usage report 2026-11-13 |
+| C9 | meter-2 | Park lawn, along the curb by the ramada | rotor | 56 | F (Auto) |  |  |  |  | Eco Verde p. 5; WeatherTRAK learn flow 2026-11-12 and estimated usage report 2026-11-13 |
+| C10 | meter-2 | Park lawn, northwest center | rotor | 55 | B (User no ET) |  |  |  |  | Eco Verde p. 5; WeatherTRAK learn flow 2026-11-12 and estimated usage report 2026-11-13 |
+| C11 | meter-2 | Park lawn, southwest center | rotor | 61 | B (User no ET) |  |  |  |  | Eco Verde p. 5; WeatherTRAK learn flow 2026-11-12 and estimated usage report 2026-11-13 |
+| C12 | meter-2 | Park lawn, southwest along the curb | rotor | 53 | F (Auto) |  |  |  |  | Eco Verde p. 5; WeatherTRAK learn flow 2026-11-12 and estimated usage report 2026-11-13 |
+| C13 | meter-2 | South and southwest desert drip | drip | 20 | D (Auto) |  |  |  | Learned flow halved from 42 GPM (2024) to 20 on 2026-05-20, which also reset its low-flow alarm. Drip emitters sit at the base of mature trees instead of at the canopy edge. | Eco Verde p. 5 and 3j; WeatherTRAK learn flow 2026-11-12 and estimated usage report 2026-11-13 |
+| C14 | meter-1 | Park east and south edges, and the southeast corner drip | drip | 31 | C (Auto) |  |  |  | Drip emitters sit at the base of mature trees. Repair 8 is in this zone and was not addressed because it is in a protected area. | Eco Verde p. 5, 3j, and section 4; WeatherTRAK learn flow 2026-11-12 and estimated usage report 2026-11-13 |
+| C15 | meter-1 | Drip on the north side of the park | drip | 11 | C (Auto) |  |  |  | Drip emitters sit at the base of mature trees. | Eco Verde p. 5 and 3j; WeatherTRAK learn flow 2026-11-12 and estimated usage report 2026-11-13 |

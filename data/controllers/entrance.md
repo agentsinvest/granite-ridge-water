@@ -10,8 +10,8 @@ installed:
   from: null
   to: null
   in_use_by: 2023-10-01
-  note: "The earliest WeatherTRAK report on file starts October 1, 2023."
-  source: "WeatherTRAK Entrance report starting 2023-10-01 (sources/controllers/weathertrak-usage-entrance-2023-2024.md)"
+  note: "WeatherTRAK lists its activation date as 2023-09-23. The earliest WeatherTRAK report on file starts October 1, 2023."
+  source: "WeatherTRAK Controller Inventory Report of 2026-11-13 (sources/controllers/weathertrak-inventory-2026-11-13.md); WeatherTRAK Entrance report starting 2023-10-01 (sources/controllers/weathertrak-usage-entrance-2023-2024.md)"
   confidence: low
   todo: "Ask the landscaper or the board when this controller was installed."
 source: "Eco Verde irrigation assessment, 2026, page 4 (controller settings of 2026-03-29) and section 3a (sources/controllers/eco-verde-assessment-2026.md); HydroPoint reports of 2025-04-04 (sources/controllers/hydropoint-reports-2025-04-04.md); zone names from data/map.md"
@@ -27,14 +27,14 @@ findings:
     source: "WeatherTRAK Entrance reports, 2023-10 to 2026-09 (sources/controllers/weathertrak-usage-entrance-2023-2024.md, sources/controllers/weathertrak-usage-entrance-2024-2025.md, and sources/controllers/weathertrak-usage-entrance-2025-2026.md)"
   - text: "Water flowed with no station on during 7 days from 2024 to 2026, the largest 7,520 gallons on May 9, 2024."
     source: "WeatherTRAK Entrance reports, 2023-10 to 2026-09 (sources/controllers/weathertrak-usage-entrance-2023-2024.md, sources/controllers/weathertrak-usage-entrance-2024-2025.md, and sources/controllers/weathertrak-usage-entrance-2025-2026.md)"
-todo: "Confirm whether the whole controller or only stations 1 to 3 were turned off in September 2026, and the artificial turf install date. Station flow rates (GPM) are not in the report: the Eco Verde PDF has only page 4 of the 7-page entrance settings report. Ask Eco Verde or the landscaper for pages 1 to 3 and 5 to 7."
+todo: "Confirm whether the whole controller or only stations 1 to 3 were turned off in September 2026, and the artificial turf install date. Station flow rates are from the WeatherTRAK learn-flow tests (sources/controllers/weathertrak-learn-flow-entrance-2026-11-13.md). Ask the landscaper to repair entry drip station 6, which got no water in the November 12, 2026 flow test."
 ---
 
 | Station | Meter | Waters | Type | GPM | Program | Run min | Cycles | Days | Findings | Source |
 |---|---|---|---|---|---|---|---|---|---|---|
-| A1 | meter-3 | Entry lawn, east side (now artificial turf) | spray | | A (lawn) | 4 | 2 | Sun, Tue, Thu, Fri | Sprayheads put water down faster than the soil takes it, and run at 45 psi on nozzles made for 30 psi, so they mist. | Eco Verde p. 4 and 3d |
-| A2 | meter-3 | Entry lawn, west side (now artificial turf) | spray | | A (lawn) | 5 | 2 | Sun, Tue, Thu, Fri | Same sprayhead issues as A1. | Eco Verde p. 4 and 3d |
-| A3 | meter-3 | Entry lawn, west side (now artificial turf) | spray | | A (lawn) | 5 | 2 | Sun, Tue, Thu, Fri | Same sprayhead issues as A1. | Eco Verde p. 4 and 3d |
-| A4 | meter-3 | Drip along McKellips, west of the northwest homes | drip | | B (drip) | 50 | 1 | Sun, Thu | Drip emitters sit at the base of mature trees instead of at the canopy edge. | Eco Verde p. 4 and 3j |
-| A5 | meter-3 | West wash drip | drip | | Off | | | | Turned off at the controller. Repair 7 is in this area and was not addressed because it is not being watered. | Eco Verde p. 4 and section 4 |
-| A6 | meter-3 | Entry drip | drip | | B (drip) | 50 | 1 | Sun, Thu | Drip emitters sit at the base of mature trees instead of at the canopy edge. | Eco Verde p. 4 and 3j |
+| A1 | meter-3 | Entry lawn, east side (now artificial turf) | spray | 10.2 | Off |  |  |  | Off since the artificial turf (named "OFF- coverted" and counted Off on the 2026-11-13 inventory). Flow last tested 2026-03-22. Sprayheads put water down faster than the soil takes it, and run at 45 psi on nozzles made for 30 psi, so they mist. | Eco Verde p. 4 and 3d; WeatherTRAK learn flow 2025-11 to 2026-11 |
+| A2 | meter-3 | Entry lawn, west side (now artificial turf) | spray | 22.1 | Off |  |  |  | Off since the artificial turf (named "OFF- coverted" and counted Off on the 2026-11-13 inventory). Flow last tested 2026-03-22. Same sprayhead issues as A1. | Eco Verde p. 4 and 3d; WeatherTRAK learn flow 2025-11 to 2026-11 |
+| A3 | meter-3 | Entry lawn, west side (now artificial turf) | spray | 16.5 | Off |  |  |  | Off since the artificial turf (named "OFF- coverted" and counted Off on the 2026-11-13 inventory). Flow last tested 2026-03-22. Same sprayhead issues as A1. | Eco Verde p. 4 and 3d; WeatherTRAK learn flow 2025-11 to 2026-11 |
+| A4 | meter-3 | Drip along McKellips, west of the northwest homes | drip | 27.9 | B (drip) | 50 | 1 | Sun, Thu | Drip emitters sit at the base of mature trees instead of at the canopy edge. | Eco Verde p. 4 and 3j; WeatherTRAK learn flow 2025-11 to 2026-11 |
+| A5 | meter-3 | West wash drip | drip | 26.9 | Off |  |  |  | The valve still works: 26.9 GPM when tested on 2026-11-12. Turned off at the controller. Repair 7 is in this area and was not addressed because it is not being watered. | Eco Verde p. 4 and section 4; WeatherTRAK learn flow 2025-11 to 2026-11 |
+| A6 | meter-3 | Entry drip | drip | 0.1 | B (drip) | 50 | 1 | Sun, Thu | Got no water in the flow test of 2026-11-12 (0.1 GPM; 15.1 in March 2026, 17.7 in November 2025). The entry drip is still not being watered. Drip emitters sit at the base of mature trees instead of at the canopy edge. | Eco Verde p. 4 and 3j; WeatherTRAK learn flow 2025-11 to 2026-11 |
